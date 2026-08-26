@@ -1,0 +1,15 @@
+=== Milestone 8: Image Captioning ===
+Date: 2026-08-26
+Status: VERIFIED
+
+Function: caption_frame(frame_path) -> caption
+Method: Basic image analysis (PIL) — lightweight, no API needed
+
+Test: Captioned frame_0000.png (320x240 red image)
+Result: "A 320x240 image with dominant RGB color (253, 0, 0)"
+
+Note: Groq free tier has no vision models.
+Using local PIL analysis for now.
+Can upgrade to real vision model later (BLIP, Llama 4 Scout when available).
+
+Status: CAPTIONING FUNCTION WORKS
