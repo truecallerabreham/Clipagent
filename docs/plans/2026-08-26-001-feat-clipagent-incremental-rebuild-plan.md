@@ -166,7 +166,11 @@ The Kubrick course repo contains a fully functional Video-RAG system but is stru
 
 ## Screenshot Policy
 
-Each milestone is classified as either requiring a screenshot or not:
+**Tool:** Python `PIL.ImageGrab` (Pillow) — confirmed working on this Windows system. No external tools needed.
+
+**Capture method:** Run a Python script that takes a full-screen screenshot and saves it to `docs/screenshots/`.
+
+**Each milestone is classified as either requiring a screenshot or not:**
 
 - **SCREENSHOT** — Milestone produces visible output that demonstrates progress (terminal output, file creation, UI state, API response). Save to `docs/screenshots/M{N}-{description}.png`
 - **NO SCREENSHOT** — Milestone is structural/boilerplate only (init files, directory creation, config changes with no visible output)
