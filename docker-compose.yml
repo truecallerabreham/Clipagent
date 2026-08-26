@@ -1,0 +1,15 @@
+services:
+  mcp:
+    build:
+      context: ./clipagent-mcp
+      dockerfile: Dockerfile
+    ports:
+      - "9090:9090"
+    volumes:
+      - shared_media:/app/media
+      - ./.env:/app/.env:ro
+    env_file:
+      - .env
+
+volumes:
+  shared_media:
