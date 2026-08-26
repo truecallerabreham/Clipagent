@@ -1,0 +1,14 @@
+=== Milestone 7: Frame Extraction ===
+Date: 2026-08-26
+Status: VERIFIED
+
+Function: extract_frames(video_path, output_dir, interval) -> frame_paths
+Default: 1 frame per second
+
+Test: Extracted frames from test_video.mp4 (3 seconds, 320x240)
+Result: 3 frames extracted
+  frame_0000.png (778 bytes)
+  frame_0001.png (778 bytes)
+  frame_0002.png (778 bytes)
+
+Status: FRAME EXTRACTION WORKS
