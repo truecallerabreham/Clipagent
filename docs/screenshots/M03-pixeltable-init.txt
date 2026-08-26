@@ -1,0 +1,22 @@
+=== Milestone 3: Pixeltable Configured ===
+Date: 2026-08-26
+Status: VERIFIED
+
+Pixeltable version: 0.7.2
+Database: postgresql+psycopg://postgres:@127.0.0.1:57878/pixeltable
+
+Table creation test:
+  Created table 'videos'.
+  Created table 'transcripts'.
+  Created table 'frames'.
+  Created table 'captions'.
+  Created table 'embeddings'.
+
+Columns verified:
+  videos: video_id (String), video_path (String), filename (String), duration (Float), status (String)
+  transcripts: video_id (String), text (String), start_time (Float), end_time (Float)
+  frames: video_id (String), frame_number (Int), timestamp (Float), frame_path (String)
+  captions: video_id (String), frame_number (Int), caption (String)
+  embeddings: video_id (String), frame_number (Int), embedding (Array)
+
+Status: ALL TABLES CREATED SUCCESSFULLY
