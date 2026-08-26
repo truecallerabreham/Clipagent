@@ -1,0 +1,17 @@
+=== Milestone 5: Audio Extraction ===
+Date: 2026-08-26
+Status: VERIFIED
+
+Function: extract_audio(video_path, output_dir) -> audio_path | None
+
+Test 1: No-audio video
+  Input: test_video.mp4 (no audio track)
+  Output: None
+  Status: Handled correctly
+
+Test 2: Video with audio
+  Input: test_video_with_audio.mp4 (440Hz beep, 3 seconds)
+  Output: test_video_with_audio.wav (531042 bytes)
+  Status: Audio extracted successfully
+
+Status: AUDIO EXTRACTION WORKS
