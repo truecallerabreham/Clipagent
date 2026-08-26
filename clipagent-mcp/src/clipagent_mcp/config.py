@@ -3,7 +3,7 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    model_config = {"env_prefix": "CLIPAGENT_", "env_file": ".env"}
+    model_config = {"env_file": ".env"}
 
     # Paths
     media_path: Path = Path("media")

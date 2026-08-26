@@ -1,0 +1,12 @@
+=== Milestone 6: Audio Transcription (Groq) ===
+Date: 2026-08-26
+Status: VERIFIED
+
+Function: transcribe_audio(audio_path) -> text
+API: Groq Whisper (whisper-large-v3)
+Key loaded: gsk_5nJDLj...
+
+Test: Transcribed test_video_with_audio.wav (beep sound)
+Result: " ." (expected — no speech, just a beep)
+
+Status: TRANSCRIPTION FUNCTION WORKS
