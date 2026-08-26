@@ -164,6 +164,24 @@ The Kubrick course repo contains a fully functional Video-RAG system but is stru
 
 ---
 
+## Screenshot Policy
+
+Each milestone is classified as either requiring a screenshot or not:
+
+- **SCREENSHOT** — Milestone produces visible output that demonstrates progress (terminal output, file creation, UI state, API response). Save to `docs/screenshots/M{N}-{description}.png`
+- **NO SCREENSHOT** — Milestone is structural/boilerplate only (init files, directory creation, config changes with no visible output)
+
+| Layer | Milestones needing screenshots |
+|-------|-------------------------------|
+| Layer 1 (Pipeline) | M1 (imports), M3 (Pixeltable init), M4 (upload), M5 (audio), M6 (transcription), M7 (frames), M8 (captions), M11 (schema), M13 (full pipeline), M15 (docs) |
+| Layer 2 (MCP) | M17 (server start), M19 (process_video), M22 (text search), M24 (image search), M26 (Q&A), M28 (full MCP test) |
+| Layer 3 (Agent) | M30 (tool-use loop), M34 (Groq integration), M38 (agent end-to-end) |
+| Layer 4 (API) | M39 (FastAPI + Swagger), M43 (full API test) |
+| Layer 5 (UI) | M44 (React dev server), M53 (frontend↔API), M56 (full user flow) |
+| Layer 6 (Polish) | M57 (Opik traces), M60 (Docker Compose), M62 (final integration) |
+
+---
+
 ## Implementation Units
 
 ### U1. Layer 1 — Video Processing Pipeline (Milestones 1-15)
@@ -190,23 +208,23 @@ The Kubrick course repo contains a fully functional Video-RAG system but is stru
 
 **Micro-milestones (15 steps):**
 
-| # | Milestone | What's demoable |
-|---|-----------|-----------------|
-| 1 | Initialize Python project (pyproject.toml, directory structure) | `uv sync` succeeds, project imports |
-| 2 | Add Docker config (Dockerfile, docker-compose) | `docker build` succeeds for MCP service |
-| 3 | Install + configure Pixeltable | `import pixeltable` works, DB initializes |
-| 4 | Create video upload function | Upload a video file, confirm stored on disk |
-| 5 | Create audio extraction (ffmpeg) | Video in → audio file out |
-| 6 | Create audio transcription (Groq Whisper) | Audio in → text transcript out |
-| 7 | Create frame sampling (Pixeltable FrameIterator) | Video in → key frames extracted |
-| 8 | Create frame captioning (gpt-4o-mini) | Frame in → text description out |
-| 9 | Create CLIP embedding for frames | Frame in → vector out |
-| 10 | Create text embedding for captions | Caption in → vector out |
-| 11 | Create Pixeltable table schema | Tables created with correct columns |
-| 12 | Create pipeline orchestration | One function runs all steps end-to-end |
-| 13 | Pipeline test with sample video | Upload video → see full output in Pixeltable |
-| 14 | Error handling | Graceful failures on bad input (corrupt file, missing audio) |
-| 15 | Pipeline documentation | README with usage examples |
+| # | Milestone | What's demoable | Screenshot |
+|---|-----------|-----------------|------------|
+| 1 | Initialize Python project (pyproject.toml, directory structure) | `uv sync` succeeds, project imports | YES |
+| 2 | Add Docker config (Dockerfile, docker-compose) | `docker build` succeeds for MCP service | NO |
+| 3 | Install + configure Pixeltable | `import pixeltable` works, DB initializes | YES |
+| 4 | Create video upload function | Upload a video file, confirm stored on disk | YES |
+| 5 | Create audio extraction (ffmpeg) | Video in → audio file out | YES |
+| 6 | Create audio transcription (Groq Whisper) | Audio in → text transcript out | YES |
+| 7 | Create frame sampling (Pixeltable FrameIterator) | Video in → key frames extracted | YES |
+| 8 | Create frame captioning (gpt-4o-mini) | Frame in → text description out | YES |
+| 9 | Create CLIP embedding for frames | Frame in → vector out | NO |
+| 10 | Create text embedding for captions | Caption in → vector out | NO |
+| 11 | Create Pixeltable table schema | Tables created with correct columns | YES |
+| 12 | Create pipeline orchestration | One function runs all steps end-to-end | NO |
+| 13 | Pipeline test with sample video | Upload video → see full output in Pixeltable | YES |
+| 14 | Error handling | Graceful failures on bad input (corrupt file, missing audio) | NO |
+| 15 | Pipeline documentation | README with usage examples | YES |
 
 **Patterns to follow:**
 - Source: `kubrick-mcp/src/kubrick_mcp/video/ingestion/video_processor.py` — VideoProcessor class
@@ -250,21 +268,21 @@ The Kubrick course repo contains a fully functional Video-RAG system but is stru
 
 **Micro-milestones (13 steps):**
 
-| # | Milestone | What's demoable |
-|---|-----------|-----------------|
-| 16 | FastMCP install | `import fastmcp` works |
-| 17 | Server skeleton | Server starts, responds to MCP ping |
-| 18 | `process_video` tool schema | Tool appears in MCP Inspector |
-| 19 | `process_video` handler | Call tool → video processes |
-| 20 | Video metadata resource | List processed videos from registry |
-| 21 | `get_clip_from_text` schema | Tool appears in Inspector |
-| 22 | `get_clip_from_text` handler | Text in → clip out |
-| 23 | `get_clip_from_image` schema | Tool appears in Inspector |
-| 24 | `get_clip_from_image` handler | Image in → clip out |
-| 25 | `ask_about_video` schema | Tool appears in Inspector |
-| 26 | `ask_about_video` handler | Question in → answer with timestamps out |
-| 27 | Opik prompt versioning | Prompts stored and versioned in Opik |
-| 28 | MCP Inspector full test | All 4 tools work from Inspector |
+| # | Milestone | What's demoable | Screenshot |
+|---|-----------|-----------------|------------|
+| 16 | FastMCP install | `import fastmcp` works | NO |
+| 17 | Server skeleton | Server starts, responds to MCP ping | YES |
+| 18 | `process_video` tool schema | Tool appears in MCP Inspector | NO |
+| 19 | `process_video` handler | Call tool → video processes | YES |
+| 20 | Video metadata resource | List processed videos from registry | NO |
+| 21 | `get_clip_from_text` schema | Tool appears in Inspector | NO |
+| 22 | `get_clip_from_text` handler | Text in → clip out | YES |
+| 23 | `get_clip_from_image` schema | Tool appears in Inspector | NO |
+| 24 | `get_clip_from_image` handler | Image in → clip out | YES |
+| 25 | `ask_about_video` schema | Tool appears in Inspector | NO |
+| 26 | `ask_about_video` handler | Question in → answer with timestamps out | YES |
+| 27 | Opik prompt versioning | Prompts stored and versioned in Opik | NO |
+| 28 | MCP Inspector full test | All 4 tools work from Inspector | YES |
 
 **Patterns to follow:**
 - Source: `kubrick-mcp/src/kubrick_mcp/server.py` — FastMCP server setup
@@ -312,18 +330,18 @@ The Kubrick course repo contains a fully functional Video-RAG system but is stru
 
 **Micro-milestones (10 steps):**
 
-| # | Milestone | What's demoable |
-|---|-----------|-----------------|
-| 29 | BaseAgent class skeleton | Instantiate, see basic loop structure |
-| 30 | Tool-use loop (observe→decide→act) | Agent picks a tool based on input |
-| 31 | MCP client class | Connects to MCP server at port 9090 |
-| 32 | Tool discovery | Agent lists available MCP tools |
-| 33 | GroqTool converter | MCP tools become Groq-compatible format |
-| 34 | Groq LLM integration | Agent generates responses via Groq |
-| 35 | Conversation history | Multi-turn conversation works |
-| 36 | Pixeltable memory table | Memory table created with schema |
-| 37 | Memory persistence | Conversation survives restart |
-| 38 | Agent end-to-end test | Ask about video → get answer with timestamps |
+| # | Milestone | What's demoable | Screenshot |
+|---|-----------|-----------------|------------|
+| 29 | BaseAgent class skeleton | Instantiate, see basic loop structure | NO |
+| 30 | Tool-use loop (observe→decide→act) | Agent picks a tool based on input | YES |
+| 31 | MCP client class | Connects to MCP server at port 9090 | NO |
+| 32 | Tool discovery | Agent lists available MCP tools | NO |
+| 33 | GroqTool converter | MCP tools become Groq-compatible format | NO |
+| 34 | Groq LLM integration | Agent generates responses via Groq | YES |
+| 35 | Conversation history | Multi-turn conversation works | NO |
+| 36 | Pixeltable memory table | Memory table created with schema | NO |
+| 37 | Memory persistence | Conversation survives restart | NO |
+| 38 | Agent end-to-end test | Ask about video → get answer with timestamps | YES |
 
 **Patterns to follow:**
 - Source: `kubrick-api/src/kubrick_api/agent/base_agent.py` — abstract agent pattern
@@ -368,13 +386,13 @@ The Kubrick course repo contains a fully functional Video-RAG system but is stru
 
 **Micro-milestones (5 steps):**
 
-| # | Milestone | What's demoable |
-|---|-----------|-----------------|
-| 39 | FastAPI app init | Server starts, Swagger at `/docs` |
-| 40 | `/chat` endpoint | Send message → get agent response |
-| 41 | `/videos` endpoint | List processed videos as JSON |
-| 42 | `/upload` endpoint | Upload video via multipart form |
-| 43 | API test with curl | All endpoints respond correctly |
+| # | Milestone | What's demoable | Screenshot |
+|---|-----------|-----------------|------------|
+| 39 | FastAPI app init | Server starts, Swagger at `/docs` | YES |
+| 40 | `/chat` endpoint | Send message → get agent response | NO |
+| 41 | `/videos` endpoint | List processed videos as JSON | NO |
+| 42 | `/upload` endpoint | Upload video via multipart form | NO |
+| 43 | API test with curl | All endpoints respond correctly | YES |
 
 **Patterns to follow:**
 - Source: `kubrick-api/src/kubrick_api/api.py` — FastAPI endpoints, background tasks, task status tracking
@@ -418,21 +436,21 @@ The Kubrick course repo contains a fully functional Video-RAG system but is stru
 
 **Micro-milestones (13 steps):**
 
-| # | Milestone | What's demoable |
-|---|-----------|-----------------|
-| 44 | React project init | Dev server starts at localhost:5173 |
-| 45 | App layout | Basic page structure renders (header, sidebar, main) |
-| 46 | Video upload (drag-and-drop) | Drag video file → upload starts |
-| 47 | Upload progress bar | Progress indicator shows during upload |
-| 48 | Chat message component | Messages render in chat bubbles |
-| 49 | Chat input component | Type and send messages |
-| 50 | Video player | Play uploaded video in browser |
-| 51 | Clip preview + download | See and save extracted clips |
-| 52 | Video library sidebar | List of processed videos in sidebar |
-| 53 | Frontend↔API connection | Chat works end-to-end through API |
-| 54 | HAL 9000 theme | Dark UI, red accents, monospace fonts |
-| 55 | Responsive layout | Works on different screen sizes |
-| 56 | Full user flow test | Upload → process → search → clip in browser |
+| # | Milestone | What's demoable | Screenshot |
+|---|-----------|-----------------|------------|
+| 44 | React project init | Dev server starts at localhost:5173 | YES |
+| 45 | App layout | Basic page structure renders (header, sidebar, main) | NO |
+| 46 | Video upload (drag-and-drop) | Drag video file → upload starts | NO |
+| 47 | Upload progress bar | Progress indicator shows during upload | NO |
+| 48 | Chat message component | Messages render in chat bubbles | NO |
+| 49 | Chat input component | Type and send messages | NO |
+| 50 | Video player | Play uploaded video in browser | NO |
+| 51 | Clip preview + download | See and save extracted clips | NO |
+| 52 | Video library sidebar | List of processed videos in sidebar | NO |
+| 53 | Frontend↔API connection | Chat works end-to-end through API | YES |
+| 54 | HAL 9000 theme | Dark UI, red accents, monospace fonts | YES |
+| 55 | Responsive layout | Works on different screen sizes | NO |
+| 56 | Full user flow test | Upload → process → search → clip in browser | YES |
 
 **Patterns to follow:**
 - Source: `kubrick-ui/src/` — React components, hooks, pages
@@ -480,15 +498,15 @@ The Kubrick course repo contains a fully functional Video-RAG system but is stru
 
 **Micro-milestones (7 steps):**
 
-| # | Milestone | What's demoable |
-|---|-----------|-----------------|
-| 57 | Opik SDK integration | Traces appear in Opik dashboard |
-| 58 | Custom trace spans | Each MCP tool call is traced |
-| 59 | Error logging | Errors captured and displayed in logs |
-| 60 | Docker Compose full stack | `docker compose up` runs all 3 services |
-| 61 | Setup documentation | Another developer can run from README |
-| 62 | Final integration test | Full system works from clean state |
-| 63 | Demo recording prep | Clean state ready for screen recording |
+| # | Milestone | What's demoable | Screenshot |
+|---|-----------|-----------------|------------|
+| 57 | Opik SDK integration | Traces appear in Opik dashboard | YES |
+| 58 | Custom trace spans | Each MCP tool call is traced | NO |
+| 59 | Error logging | Errors captured and displayed in logs | NO |
+| 60 | Docker Compose full stack | `docker compose up` runs all 3 services | YES |
+| 61 | Setup documentation | Another developer can run from README | NO |
+| 62 | Final integration test | Full system works from clean state | YES |
+| 63 | Demo recording prep | Clean state ready for screen recording | NO |
 
 **Patterns to follow:**
 - Source: `kubrick-api/src/kubrick_api/opik_utils.py` — Opik tracing helpers
