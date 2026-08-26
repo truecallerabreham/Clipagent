@@ -1,5 +1,5 @@
 ---
-title: "feat: clipagent — Incremental Product Rebuild from Kubrick Course"
+title: "feat: clipagent — Incremental Product Rebuild from clipagent Course"
 type: feat
 status: active
 date: 2026-08-26
@@ -10,13 +10,13 @@ origin: docs/brainstorms/2026-08-26-clipagent-rebuild-requirements.md
 
 ## Summary
 
-Rebuild the multimodal-agents-course (Kubrick) as a standalone product called **clipagent**. Same codebase, same tech stack, restructured into 6 architectural layers with 63 micro-milestones. Each milestone produces a verifiable, demoable state for social/portfolio recording. The plan clones the source repo, rebrands it, and builds incrementally from the video processing pipeline up through observability.
+Rebuild the multimodal-agents-course (clipagent) as a standalone product called **clipagent**. Same codebase, same tech stack, restructured into 6 architectural layers with 63 micro-milestones. Each milestone produces a verifiable, demoable state for social/portfolio recording. The plan clones the source repo, rebrands it, and builds incrementally from the video processing pipeline up through observability.
 
 ---
 
 ## Problem Frame
 
-The Kubrick course repo contains a fully functional Video-RAG system but is structured for learning (notebooks, tutorial comments, modular separation). The goal is to repackage this as a product called clipagent, built incrementally so each milestone produces something recordable. This is an exploratory product bet — the video search/clip extraction space has established players but no user pain was validated.
+The clipagent course repo contains a fully functional Video-RAG system but is structured for learning (notebooks, tutorial comments, modular separation). The goal is to repackage this as a product called clipagent, built incrementally so each milestone produces something recordable. This is an exploratory product bet — the video search/clip extraction space has established players but no user pain was validated.
 
 (see origin: `docs/brainstorms/2026-08-26-clipagent-rebuild-requirements.md`)
 
@@ -75,7 +75,7 @@ The Kubrick course repo contains a fully functional Video-RAG system but is stru
 
 ### Relevant Code and Patterns
 
-- **Source repo:** `https://github.com/the-ai-merge/multimodal-agents-course` — 3-service architecture (kubrick-mcp, kubrick-api, kubrick-ui)
+- **Source repo:** `https://github.com/the-ai-merge/multimodal-agents-course` — 3-service architecture (clipagent-mcp, clipagent-api, clipagent-ui)
 - **MCP server pattern:** FastMCP with 4 tools, 1 resource, 3 prompts; streamable-http transport on port 9090
 - **Agent pattern:** Abstract BaseAgent → GroqAgent; tool-use loop with routing → tool selection → execution → response
 - **API pattern:** FastAPI with /chat, /process-video, /upload-video, /reset-memory, /task-status, /media endpoints on port 8080
@@ -97,7 +97,7 @@ The Kubrick course repo contains a fully functional Video-RAG system but is stru
 
 ## Key Technical Decisions
 
-- **Clone + rebrand over rewrite:** Clone the source repo, rename all `kubrick` references to `clipagent`, keep all code intact. Minimizes risk and maximizes speed.
+- **Clone + rebrand over rewrite:** Clone the source repo, rename all `clipagent` references to `clipagent`, keep all code intact. Minimizes risk and maximizes speed.
 - **Groq model config abstraction:** Source uses deprecated models. Create a config layer that maps model roles (routing, tool-use, general) to model IDs, so models can be swapped without code changes. Default to current stable models.
 - **Architecture-first build order:** Pipeline → MCP → Agent → API → UI → Observability. Each layer depends on the previous. This is the natural dependency chain.
 - **63 micro-milestones with verification:** Each milestone is a single step with a clear demo output. The plan organizes these into 6 phases (one per layer).
@@ -110,7 +110,7 @@ The Kubrick course repo contains a fully functional Video-RAG system but is stru
 ### Resolved During Planning
 
 - **Groq model selection:** Source uses deprecated llama-4-scout/maverick. Resolution: Use config abstraction with current stable models (openai/gpt-oss-120b for tool-use, qwen/qwen3.6-27b for general). Swap is config-only.
-- **Project structure:** Source has kubrick-mcp/, kubrick-api/, kubrick-ui/. Resolution: Rename to clipagent-mcp/, clipagent-api/, clipagent-ui/ to match product identity.
+- **Project structure:** Source has clipagent-mcp/, clipagent-api/, clipagent-ui/. Resolution: Rename to clipagent-mcp/, clipagent-api/, clipagent-ui/ to match product identity.
 - **Docker Compose ports:** MCP on 9090, API on 8080, UI on 3000. Keep same ports for compatibility.
 
 ### Deferred to Implementation
@@ -175,16 +175,16 @@ The Kubrick course repo contains a fully functional Video-RAG system but is stru
 **Dependencies:** None (first layer)
 
 **Files:**
-- Create: `clipagent-mcp/` (cloned from `kubrick-mcp/`)
-- Create: `clipagent-api/` (cloned from `kubrick-api/`)
-- Create: `clipagent-ui/` (cloned from `kubrick-ui/`)
-- Modify: All `pyproject.toml` files (rename kubrick → clipagent)
-- Modify: All Python source files (rename kubrick_mcp → clipagent_mcp, kubrick_api → clipagent_api)
+- Create: `clipagent-mcp/` (cloned from `clipagent-mcp/`)
+- Create: `clipagent-api/` (cloned from `clipagent-api/`)
+- Create: `clipagent-ui/` (cloned from `clipagent-ui/`)
+- Modify: All `pyproject.toml` files (rename clipagent → clipagent)
+- Modify: All Python source files (rename clipagent_mcp → clipagent_mcp, clipagent_api → clipagent_api)
 - Create: `README.md`, `docker-compose.yml`, `Makefile`, `.env.example`
 
 **Approach:**
 1. Clone the source repo into the clipagent workspace
-2. Rename all `kubrick` references to `clipagent` (package names, imports, Docker service names, config keys)
+2. Rename all `clipagent` references to `clipagent` (package names, imports, Docker service names, config keys)
 3. Strip educational scaffolding (notebooks, tutorial comments, learning-oriented docs)
 4. Build the video processing pipeline step by step, verifying each micro-milestone
 
@@ -209,9 +209,9 @@ The Kubrick course repo contains a fully functional Video-RAG system but is stru
 | 15 | Pipeline documentation | README with usage examples |
 
 **Patterns to follow:**
-- Source: `kubrick-mcp/src/kubrick_mcp/video/ingestion/video_processor.py` — VideoProcessor class
-- Source: `kubrick-mcp/src/kubrick_mcp/video/ingestion/constants.py` — embedding model configs
-- Source: `kubrick-mcp/src/kubrick_mcp/config.py` — pydantic-settings pattern
+- Source: `clipagent-mcp/src/clipagent_mcp/video/ingestion/video_processor.py` — VideoProcessor class
+- Source: `clipagent-mcp/src/clipagent_mcp/video/ingestion/constants.py` — embedding model configs
+- Source: `clipagent-mcp/src/clipagent_mcp/config.py` — pydantic-settings pattern
 
 **Test scenarios:**
 - Happy path: Upload a 30-second MP4 → audio extracted, transcription returned, 5-10 frames sampled, each captioned, embeddings created, all stored in Pixeltable
@@ -267,10 +267,10 @@ The Kubrick course repo contains a fully functional Video-RAG system but is stru
 | 28 | MCP Inspector full test | All 4 tools work from Inspector |
 
 **Patterns to follow:**
-- Source: `kubrick-mcp/src/kubrick_mcp/server.py` — FastMCP server setup
-- Source: `kubrick-mcp/src/kubrick_mcp/tools.py` — tool implementations
-- Source: `kubrick-mcp/src/kubrick_mcp/resources.py` — resource pattern
-- Source: `kubrick-mcp/src/kubrick_mcp/prompts.py` — Opik versioning pattern
+- Source: `clipagent-mcp/src/clipagent_mcp/server.py` — FastMCP server setup
+- Source: `clipagent-mcp/src/clipagent_mcp/tools.py` — tool implementations
+- Source: `clipagent-mcp/src/clipagent_mcp/resources.py` — resource pattern
+- Source: `clipagent-mcp/src/clipagent_mcp/prompts.py` — Opik versioning pattern
 
 **Test scenarios:**
 - Happy path: Start server → MCP Inspector shows 4 tools, 1 resource, 3 prompts
@@ -326,10 +326,10 @@ The Kubrick course repo contains a fully functional Video-RAG system but is stru
 | 38 | Agent end-to-end test | Ask about video → get answer with timestamps |
 
 **Patterns to follow:**
-- Source: `kubrick-api/src/kubrick_api/agent/base_agent.py` — abstract agent pattern
-- Source: `kubrick-api/src/kubrick_api/agent/groq/groq_agent.py` — routing/tool-use/general modes
-- Source: `kubrick-api/src/kubrick_api/agent/groq/groq_tool.py` — MCP→Groq translation
-- Source: `kubrick-api/src/kubrick_api/agent/memory.py` — Pixeltable memory
+- Source: `clipagent-api/src/clipagent_api/agent/base_agent.py` — abstract agent pattern
+- Source: `clipagent-api/src/clipagent_api/agent/groq/groq_agent.py` — routing/tool-use/general modes
+- Source: `clipagent-api/src/clipagent_api/agent/groq/groq_tool.py` — MCP→Groq translation
+- Source: `clipagent-api/src/clipagent_api/agent/memory.py` — Pixeltable memory
 
 **Test scenarios:**
 - Happy path: Agent receives "What color is the car?" → routes to tool-use → calls ask_about_video → returns answer
@@ -377,7 +377,7 @@ The Kubrick course repo contains a fully functional Video-RAG system but is stru
 | 43 | API test with curl | All endpoints respond correctly |
 
 **Patterns to follow:**
-- Source: `kubrick-api/src/kubrick_api/api.py` — FastAPI endpoints, background tasks, task status tracking
+- Source: `clipagent-api/src/clipagent_api/api.py` — FastAPI endpoints, background tasks, task status tracking
 
 **Test scenarios:**
 - Happy path: POST /chat with {"message": "What color is the car?"} → agent response with answer
@@ -435,7 +435,7 @@ The Kubrick course repo contains a fully functional Video-RAG system but is stru
 | 56 | Full user flow test | Upload → process → search → clip in browser |
 
 **Patterns to follow:**
-- Source: `kubrick-ui/src/` — React components, hooks, pages
+- Source: `clipagent-ui/src/` — React components, hooks, pages
 - HAL 9000 theme: `#ff1a1a` red on `#0a0a0a` black, Share Tech Mono font, CRT scanline overlay
 
 **Test scenarios:**
@@ -491,7 +491,7 @@ The Kubrick course repo contains a fully functional Video-RAG system but is stru
 | 63 | Demo recording prep | Clean state ready for screen recording |
 
 **Patterns to follow:**
-- Source: `kubrick-api/src/kubrick_api/opik_utils.py` — Opik tracing helpers
+- Source: `clipagent-api/src/clipagent_api/opik_utils.py` — Opik tracing helpers
 - Source: `docker-compose.yml` — 3-service orchestration with shared volumes
 
 **Test scenarios:**

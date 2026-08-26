@@ -7,13 +7,13 @@ topic: clipagent-rebuild
 
 ## Summary
 
-Rebuild the multimodal-agents-course (Kubrick) as a standalone product called **clipagent** — a video search and clip extraction tool. Same codebase, same tech stack, restructured as 63 architecture-layer micro-milestones where each step produces a visible, demoable state for social/portfolio recording.
+Rebuild the multimodal-agents-course (clipagent) as a standalone product called **clipagent** — a video search and clip extraction tool. Same codebase, same tech stack, restructured as 63 architecture-layer micro-milestones where each step produces a visible, demoable state for social/portfolio recording.
 
 ---
 
 ## Problem Frame
 
-The Kubrick course repo contains a fully functional Video-RAG system (video processing, MCP server, agent, API, UI, observability) but is structured for learning — notebooks, step-by-step comments, modular separation. The goal is to repackage this as a product called clipagent, built incrementally so each milestone produces something recordable (screenshot, screen recording, demo video) for social media and portfolio content.
+The clipagent course repo contains a fully functional Video-RAG system (video processing, MCP server, agent, API, UI, observability) but is structured for learning — notebooks, step-by-step comments, modular separation. The goal is to repackage this as a product called clipagent, built incrementally so each milestone produces something recordable (screenshot, screen recording, demo video) for social media and portfolio content.
 
 The video search/clip extraction space has established players (Descript, Opus Clip, Recall.ai) but no user pain was validated in this brainstorm — this is an exploratory product bet driven by portfolio impact.
 
@@ -48,7 +48,7 @@ The video search/clip extraction space has established players (Descript, Opus C
 
 **Project structure & identity**
 
-- R1. Project named "clipagent" with its own repo, README, and identity — not a fork or derivative labeling of Kubrick
+- R1. Project named "clipagent" with its own repo, README, and identity — not a fork or derivative labeling of clipagent
 - R2. 63 micro-milestones organized into 6 architectural layers, each producing a verifiable, demoable state
 - R3. Each micro-milestone has a clear "what was added" and "what's demoable now" description
 
@@ -103,7 +103,7 @@ The video search/clip extraction space has established players (Descript, Opus C
 ## Success Criteria
 
 - Every one of the 63 milestones can be independently verified (run, screenshot, or record)
-- The final product is functionally identical to the source Kubrick repo but under the clipagent identity
+- The final product is functionally identical to the source clipagent repo but under the clipagent identity
 - Each milestone commit produces a working state — no broken intermediate states
 - The full 63-milestone journey can be recorded as a series of demo videos for social/portfolio
 
@@ -135,7 +135,7 @@ The video search/clip extraction space has established players (Descript, Opus C
 
 ## Key Decisions
 
-- **Same code, new identity**: The entire Kubrick codebase is kept intact. clipagent is a rebrand + restructure, not a rewrite.
+- **Same code, new identity**: The entire clipagent codebase is kept intact. clipagent is a rebrand + restructure, not a rewrite.
 - **Architecture-first build order**: Pipeline → MCP → Agent → API → UI → Observability. Each layer depends on the previous.
 - **63 micro-milestones**: Every single step is its own milestone with a clear demo output.
 - **Demo-first, user-second**: Primary goal is portfolio/social content. Product-market fit is not yet validated.
@@ -145,7 +145,7 @@ The video search/clip extraction space has established players (Descript, Opus C
 
 ## Dependencies / Assumptions
 
-- The source Kubrick repo code is functional and complete
+- The source clipagent repo code is functional and complete
 - Groq API access is available for LLM inference
 - OpenAI API access is available for CLIP embeddings, captioning, and transcription
 - Opik account is available for observability

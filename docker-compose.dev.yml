@@ -1,0 +1,68 @@
+services:
+  clipagent-mcp:
+    container_name: clipagent-mcp
+    build:
+      context: ./clipagent-mcp
+    ports:
+      - "9090:9090"
+    env_file:
+      - ./clipagent-mcp/.env
+    command: sleep infinity
+    networks:
+      - agent-network
+    environment:
+      - HF_HOME=/root/.cache/huggingface
+    volumes:
+      - ./.vscode:/app/.vscode
+      - shared_media:/app/shared_media
+      - ~/.cache:/root/.cache
+      - ~/.cache/huggingface:/root/.cache/huggingface
+    
+    deploy:
+      resources:
+        limits:
+          cpus: '4' 
+          memory: 4G   
+        reservations:
+          cpus: '4'    
+          memory: 4G   
+
+  clipagent-api:
+    container_name: clipagent-api
+    build:
+      context: ./clipagent-api
+    command: sleep infinity
+    ports:
+      - "8080:8080"
+    environment:
+      - DISABLE_NEST_ASYNCIO=True
+    env_file:
+      - ./clipagent-api/.env
+    networks:
+      - agent-network
+    depends_on:
+      - clipagent-mcp
+    volumes:
+      - shared_media:/app/shared_media
+      - ./.vscode:/app/.vscode
+  clipagent-ui:
+    container_name: clipagent-ui
+    build:
+      context: ./clipagent-ui
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - clipagent-api
+      - clipagent-mcp
+    networks:
+      - agent-network
+    volumes:
+      - shared_media:/app/shared_media
+
+networks:
+  agent-network:
+    name: agent-network
+
+volumes:
+  shared_media:
