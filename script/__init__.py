@@ -1,0 +1,1 @@
+"""Clipagent script package."""
