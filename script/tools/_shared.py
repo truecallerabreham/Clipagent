@@ -33,19 +33,12 @@ configure_runtime_environment()
 BUNDLE_DIR = get_bundle_root()
 CURRENT_DIR = get_runtime_root()
 
-_task_workspace = (
-    os.environ.get("CLIPAGENT_TASK_WORKSPACE", "").strip()
-    or os.environ.get("CRAYOTTER_TASK_WORKSPACE", "").strip()
-)
+_task_workspace = os.environ.get("CLIPAGENT_TASK_WORKSPACE", "").strip()
 WORKSPACE = Path(_task_workspace).resolve(strict=False) if _task_workspace else CURRENT_DIR / "temp"
 
-_user_workspace = (
-    os.environ.get("CLIPAGENT_USER_WORKSPACE", "").strip()
-    or os.environ.get("CRAYOTTER_USER_WORKSPACE", "").strip()
-)
+_user_workspace = os.environ.get("CLIPAGENT_USER_WORKSPACE", "").strip()
 USER_WORKSPACE = Path(_user_workspace).resolve(strict=False) if _user_workspace else CURRENT_DIR / "user_temp"
 os.environ.setdefault("CLIPAGENT_USER_WORKSPACE", str(USER_WORKSPACE.resolve(strict=False)))
-os.environ.setdefault("CRAYOTTER_USER_WORKSPACE", str(USER_WORKSPACE.resolve(strict=False)))
 
 MEMORY_EXPERIENCE_DIR = CURRENT_DIR / "memory_experience"
 

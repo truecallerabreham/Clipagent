@@ -26,10 +26,7 @@ def get_bundle_root() -> Path:
 
 
 def get_executable_dir() -> Path:
-    override_dir = (
-        os.environ.get(EXECUTABLE_DIR_ENV_VAR, "").strip()
-        or os.environ.get("CRAYOTTER_EXECUTABLE_DIR", "").strip()
-    )
+    override_dir = os.environ.get(EXECUTABLE_DIR_ENV_VAR, "").strip()
     if override_dir:
         return Path(override_dir).expanduser().resolve()
     if is_frozen():
@@ -49,10 +46,7 @@ def _can_write(path: Path) -> bool:
 
 
 def get_runtime_root() -> Path:
-    env_root = (
-        os.environ.get("CLIPAGENT_RUNTIME_ROOT", "").strip()
-        or os.environ.get("CRAYOTTER_RUNTIME_ROOT", "").strip()
-    )
+    env_root = os.environ.get("CLIPAGENT_RUNTIME_ROOT", "").strip()
     if env_root:
         root = Path(env_root).expanduser().resolve()
         root.mkdir(parents=True, exist_ok=True)
@@ -252,9 +246,7 @@ def configure_runtime_environment() -> None:
     runtime_root = get_runtime_root()
 
     os.environ.setdefault("CLIPAGENT_BUNDLE_ROOT", str(bundle_root))
-    os.environ.setdefault("CRAYOTTER_BUNDLE_ROOT", str(bundle_root))
     os.environ.setdefault("CLIPAGENT_RUNTIME_ROOT", str(runtime_root))
-    os.environ.setdefault("CRAYOTTER_RUNTIME_ROOT", str(runtime_root))
     load_runtime_env_file(override=False)
 
     _prepend_path(_binary_search_roots())
@@ -269,7 +261,6 @@ def configure_runtime_environment() -> None:
         os.environ.setdefault("FFMPEG_BIN", str(ffmpeg_path))
     if yt_dlp_path is not None:
         os.environ.setdefault("CLIPAGENT_YTDLP_BIN", str(yt_dlp_path))
-        os.environ.setdefault("CRAYOTTER_YTDLP_BIN", str(yt_dlp_path))
 
     _seed_runtime_tree("memory_experience")
 

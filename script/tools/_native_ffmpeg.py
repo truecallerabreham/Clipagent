@@ -23,7 +23,6 @@ class VideoProbe:
 def native_ffmpeg_enabled() -> bool:
     return (
         os.environ.get("CLIPAGENT_NATIVE_FFMPEG_PIPELINE", "").strip().lower()
-        or os.environ.get("CRAYOTTER_NATIVE_FFMPEG_PIPELINE", "0").strip().lower()
     ) in {"1", "true", "yes", "on"}
 
 
@@ -130,13 +129,9 @@ def probe_video(path: Path) -> VideoProbe:
 def _encoder_args(*, bitrate: str | None = None) -> list[str]:
     preset = (
         os.environ.get("CLIPAGENT_FFMPEG_PRESET", "").strip()
-        or os.environ.get("CRAYOTTER_FFMPEG_PRESET", "veryfast").strip()
         or "veryfast"
     )
-    threads = _positive_int_env(
-        "CLIPAGENT_FFMPEG_THREADS",
-        _positive_int_env("CRAYOTTER_FFMPEG_THREADS", 8),
-    )
+    threads = _positive_int_env("CLIPAGENT_FFMPEG_THREADS", 8)
     args = [
         "-c:v",
         "libx264",
@@ -150,7 +145,6 @@ def _encoder_args(*, bitrate: str | None = None) -> list[str]:
     else:
         crf = (
             os.environ.get("CLIPAGENT_FFMPEG_CRF", "").strip()
-            or os.environ.get("CRAYOTTER_FFMPEG_CRF", "20").strip()
             or "20"
         )
         args.extend(["-crf", crf])
@@ -159,10 +153,7 @@ def _encoder_args(*, bitrate: str | None = None) -> list[str]:
 
 
 def _base_command() -> list[str]:
-    filter_threads = _positive_int_env(
-        "CLIPAGENT_FFMPEG_FILTER_THREADS",
-        _positive_int_env("CRAYOTTER_FFMPEG_FILTER_THREADS", 4),
-    )
+    filter_threads = _positive_int_env("CLIPAGENT_FFMPEG_FILTER_THREADS", 4)
     return [
         _binary("FFMPEG_BIN", "ffmpeg"),
         "-y",

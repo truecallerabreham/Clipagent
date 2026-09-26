@@ -22,7 +22,7 @@ dist/
 build/
 app/bin/
 packaging/generated/
-Crayotter-Windows-x64.zip
+Clipagent-Windows-x64.zip
 
 phase3_rl/generated/
 phase3_rl/runs/
