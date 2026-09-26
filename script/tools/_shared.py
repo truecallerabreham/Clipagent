@@ -209,7 +209,7 @@ def _resolve_video_path(video_path: str) -> Path | None:
 
     direct = Path(raw)
 
-    # 若是 BV 号路径推断，尝试寻找同名别名文件
+    # If it is a Bilibili BV identifier, try finding an alias file with the same stem
     stem = direct.stem
     if stem.upper().startswith("BV"):
         for root in (WORKSPACE, USER_WORKSPACE):

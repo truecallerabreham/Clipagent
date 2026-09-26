@@ -33,12 +33,12 @@ class InspectVideoDurationTests(unittest.TestCase):
         outside_file.write_text("dummy", encoding="utf-8")
 
         result = inspect_video_duration(str(outside_file))
-        self.assertIn("检测失败: 文件不存在或不在WORKSPACE", result)
+        self.assertIn("Inspection failed: File does not exist or is outside WORKSPACE", result)
 
     def test_nonexistent_file_rejected(self) -> None:
         ghost_file = self.workspace / "ghost.mp4"
         result = inspect_video_duration(str(ghost_file))
-        self.assertIn("检测失败: 文件不存在或不在WORKSPACE", result)
+        self.assertIn("Inspection failed: File does not exist or is outside WORKSPACE", result)
 
     @patch("script.tools.inspect_video_duration._get_video_meta")
     def test_valid_video_in_workspace_returns_json_metadata(self, mock_get_meta) -> None:
@@ -92,7 +92,7 @@ class InspectVideoDurationTests(unittest.TestCase):
         test_video.write_bytes(b"\x00" * 16)
 
         result = inspect_video_duration(str(test_video))
-        self.assertTrue(result.startswith("时长检测出错: Corrupted video container"))
+        self.assertTrue(result.startswith("Duration inspection error: Corrupted video container"))
 
     def test_safe_output_video_path(self) -> None:
         safe_path = shared._safe_output_video_path("my/weird*name??clip.mov")

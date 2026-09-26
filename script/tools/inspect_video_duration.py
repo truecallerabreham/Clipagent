@@ -5,24 +5,24 @@ from ._shared import *
 
 @tool
 def inspect_video_duration(video_path: str) -> str:
-    """检测视频时长、分辨率、帧率等基本信息。
-    在剪辑后、合并后、导出前应主动调用此工具进行时长校验。
+    """Inspect basic video metadata such as duration, resolution, and frame rate.
+    Should be called after cutting, merging, or before export to verify video duration.
 
     Args:
-        video_path: 要检测的视频文件路径，例如 "/workspace/merged.mp4"。
-            支持工作目录内的任意 .mp4 文件（源视频或中间产物均可）。
+        video_path: Path to the video file to inspect, e.g. "/workspace/merged.mp4".
+            Supports any .mp4 file within the workspace (source video or intermediate artifact).
     """
     try:
         resolved_input = _resolve_workspace_input_path(video_path, must_exist=True)
         if resolved_input is None:
-            return f"检测失败: 文件不存在或不在WORKSPACE: {video_path}"
+            return f"Inspection failed: File does not exist or is outside WORKSPACE: {video_path}"
         meta = _get_video_meta(str(resolved_input))
         logger.info(
-            "📏 时长检测: %s -> %.2fs (%s)",
+            "📏 Duration inspection: %s -> %.2fs (%s)",
             str(resolved_input),
             meta["duration_seconds"],
             meta["resolution"],
         )
         return json.dumps({"status": "success", "path": str(resolved_input), **meta}, ensure_ascii=False)
     except Exception as e:
-        return f"时长检测出错: {e}"
+        return f"Duration inspection error: {e}"

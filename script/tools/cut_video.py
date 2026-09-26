@@ -11,21 +11,21 @@ def cut_video(
     end_time: float,
     output_name: str = "",
 ) -> str:
-    """从视频中裁剪指定时间段的片段。
-    如果需要从同一视频裁剪多个片段，推荐使用 batch_cut_video 替代多次调用此工具。
+    """Cut a specific time segment from a video file.
+    If multiple clips need to be cut from the same video, use batch_cut_video instead.
 
     Args:
-        input_path: 输入视频文件的完整路径，例如 "/workspace/source.mp4"
-        start_time: 裁剪开始时间（秒），例如 10.5（表示第 10.5 秒）
-        end_time: 裁剪结束时间（秒），例如 45.0（表示第 45 秒）。
-            必须大于 start_time，且不超过视频总时长。
-        output_name: 输出文件名（不含扩展名），为空则自动生成 clip_{start}_{end}.mp4。
-            例如 "intro_highlight"
+        input_path: Full path to the input video file, e.g. "/workspace/source.mp4".
+        start_time: Cut start time in seconds, e.g. 10.5 (representing 10.5s).
+        end_time: Cut end time in seconds, e.g. 45.0 (representing 45.0s).
+            Must be greater than start_time and within total video duration.
+        output_name: Output filename without extension. If empty, automatically generates
+            clip_{start}_{end}.mp4, e.g. "intro_highlight".
     """
     try:
         resolved_input = _resolve_workspace_input_path(input_path, must_exist=True)
         if resolved_input is None:
-            return f"剪辑出错: 输入视频不在WORKSPACE或不存在: {input_path}"
+            return f"Cut error: Input video is outside WORKSPACE or does not exist: {input_path}"
 
         if not output_name:
             output_name = f"clip_{start_time:.0f}_{end_time:.0f}"
@@ -61,4 +61,4 @@ def cut_video(
             "duration": round(end_time - start_time, 1),
         }, ensure_ascii=False)
     except Exception as e:
-        return f"剪辑出错: {e}"
+        return f"Cut error: {e}"

@@ -33,12 +33,12 @@ class CutVideoTests(unittest.TestCase):
         outside_file.write_text("data", encoding="utf-8")
 
         result = cut_video(str(outside_file), start_time=0.0, end_time=5.0)
-        self.assertIn("剪辑出错: 输入视频不在WORKSPACE或不存在", result)
+        self.assertIn("Cut error: Input video is outside WORKSPACE or does not exist", result)
 
     def test_nonexistent_file_rejected(self) -> None:
         missing_file = self.workspace / "missing_video.mp4"
         result = cut_video(str(missing_file), start_time=1.0, end_time=4.0)
-        self.assertIn("剪辑出错: 输入视频不在WORKSPACE或不存在", result)
+        self.assertIn("Cut error: Input video is outside WORKSPACE or does not exist", result)
 
     @patch("script.tools.cut_video.cut_video_native")
     def test_cut_video_native_execution_and_default_naming(self, mock_cut_native) -> None:
@@ -87,7 +87,7 @@ class CutVideoTests(unittest.TestCase):
         source.write_bytes(b"\x00" * 32)
 
         result = cut_video(str(source), start_time=20.0, end_time=10.0)
-        self.assertTrue(result.startswith("剪辑出错: invalid cut range"))
+        self.assertTrue(result.startswith("Cut error: invalid cut range"))
 
     def test_moviepy_engine_fallback_when_available(self) -> None:
         source = self.workspace / "moviepy_source.mp4"

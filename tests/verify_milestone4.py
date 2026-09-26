@@ -45,7 +45,7 @@ def main() -> None:
     result_outside = cut_video(str(unauthorized_path), start_time=0.0, end_time=5.0)
     print(f"Input path: {unauthorized_path}")
     print(f"Engine response:\n   {result_outside}")
-    assert "剪辑出错: 输入视频不在WORKSPACE或不存在" in result_outside, "Security check failed!"
+    assert "Cut error: Input video is outside WORKSPACE or does not exist" in result_outside, "Security check failed!"
     print("✅ Result: Access properly blocked. Workspace is protected.")
 
     # -------------------------------------------------------------
@@ -63,7 +63,7 @@ def main() -> None:
         mock_native.side_effect = ValueError("invalid cut range 10.000-3.000s for 60.000s video")
         result_invalid_range = cut_video(str(dummy_source), start_time=10.0, end_time=3.0)
         print(f"Engine response:\n   {result_invalid_range}")
-        assert "剪辑出错: invalid cut range" in result_invalid_range
+        assert "Cut error: invalid cut range" in result_invalid_range
         print("✅ Result: Invalid timestamp sequence rejected cleanly without process crash.")
 
     # -------------------------------------------------------------
