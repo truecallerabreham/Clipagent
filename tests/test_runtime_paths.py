@@ -14,6 +14,9 @@ from app import runtime_paths
 
 
 class RuntimePathsTests(unittest.TestCase):
+    def test_app_name_is_clipagent(self) -> None:
+        self.assertEqual(runtime_paths.APP_NAME, "Clipagent")
+
     def test_bundle_root_resolves_to_project_directory(self) -> None:
         root = runtime_paths.get_bundle_root()
         self.assertTrue(root.exists(), "Bundle root must exist.")
@@ -45,8 +48,8 @@ class RuntimePathsTests(unittest.TestCase):
 
     def test_configure_runtime_environment_runs_cleanly(self) -> None:
         runtime_paths.configure_runtime_environment()
-        self.assertIn("CRAYOTTER_BUNDLE_ROOT", os.environ)
-        self.assertIn("CRAYOTTER_RUNTIME_ROOT", os.environ)
+        self.assertIn("CLIPAGENT_BUNDLE_ROOT", os.environ)
+        self.assertIn("CLIPAGENT_RUNTIME_ROOT", os.environ)
 
 
 if __name__ == "__main__":

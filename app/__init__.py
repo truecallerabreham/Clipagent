@@ -1,1 +1,1 @@
-"""Crayotter application package."""
+"""Clipagent application package."""
