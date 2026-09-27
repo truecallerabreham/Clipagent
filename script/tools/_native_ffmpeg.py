@@ -129,9 +129,38 @@ def _parse_rate(value: object) -> float:
 #   JSON stream payload -> VideoProbe(width, height, fps, duration, has_audio)
 # ==============================================================================
 def probe_video(path: Path) -> VideoProbe:
-    """Probe video dimensions, frame rate, duration, and audio presence via ffprobe."""
+    """Probe video dimensions, frame rate, duration, and audio presence via ffprobe or cv2."""
+    try:
+        ffprobe_bin = _binary("FFPROBE_BIN", "ffprobe")
+    except RuntimeError:
+        ffprobe_bin = None
+
+    if not ffprobe_bin:
+        # Graceful fallback to OpenCV in-memory probe when ffprobe is absent
+        try:
+            import cv2
+            if cv2 is not None:
+                cap = cv2.VideoCapture(str(path))
+                fps = cap.get(cv2.CAP_PROP_FPS) or 30.0
+                frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+                duration = frame_count / fps if fps > 0 else 0.0
+                width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+                height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+                cap.release()
+                if width > 0 and height > 0 and duration > 0:
+                    return VideoProbe(
+                        width=width,
+                        height=height,
+                        fps=round(fps, 2),
+                        duration=round(duration, 3),
+                        has_audio=True,
+                    )
+        except Exception:
+            pass
+        raise RuntimeError("ffprobe executable was not found on PATH")
+
     command = [
-        _binary("FFPROBE_BIN", "ffprobe"),
+        ffprobe_bin,
         "-v",
         "error",
         "-show_entries",
