@@ -147,13 +147,27 @@ def probe_video(path: Path) -> VideoProbe:
                 width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
                 height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
                 cap.release()
+                # Detect audio stream presence via ffmpeg inspection if available
+                has_audio = False
+                try:
+                    ffmpeg_bin = _binary("FFMPEG_BIN", "ffmpeg")
+                    probe_proc = subprocess.run(
+                        [ffmpeg_bin, "-i", str(path)],
+                        capture_output=True,
+                        text=True,
+                        timeout=15,
+                    )
+                    has_audio = "Audio:" in (probe_proc.stderr or probe_proc.stdout)
+                except Exception:
+                    pass
+
                 if width > 0 and height > 0 and duration > 0:
                     return VideoProbe(
                         width=width,
                         height=height,
                         fps=round(fps, 2),
                         duration=round(duration, 3),
-                        has_audio=True,
+                        has_audio=has_audio,
                     )
         except Exception:
             pass
