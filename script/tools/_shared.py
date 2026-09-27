@@ -208,7 +208,7 @@ def _resolve_workspace_input_path(raw_path: str, must_exist: bool = True) -> Pat
       - Absolute paths pointing directly into the workspace
       - Relative paths anchored to WORKSPACE, USER_WORKSPACE, or CURRENT_DIR
     """
-    raw = (raw_path or "").strip()
+    raw = (raw_path or "").strip().strip("\"'")
     if not raw:
         return None
 
@@ -240,8 +240,20 @@ def _resolve_workspace_input_path(raw_path: str, must_exist: bool = True) -> Pat
             candidates.append(root / source)
             candidates.append(root / source.name)
 
+    # Expand candidate list with common Windows extension variations (e.g. video.mp4.mp4)
+    search_candidates: list[Path] = []
+    for cand in candidates:
+        search_candidates.append(cand)
+        name_lower = cand.name.lower()
+        if name_lower.endswith(".mp4"):
+            search_candidates.append(cand.with_name(cand.name + ".mp4"))
+        elif not cand.suffix:
+            search_candidates.append(cand.with_suffix(".mp4"))
+        if name_lower.endswith(".mp4.mp4"):
+            search_candidates.append(cand.with_name(cand.name[:-4]))
+
     seen: set[str] = set()
-    for candidate in candidates:
+    for candidate in search_candidates:
         try:
             resolved = candidate.resolve(strict=False)
         except Exception:
