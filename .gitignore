@@ -21,6 +21,7 @@ runtime_logs/
 dist/
 build/
 app/bin/
+script/dep/
 packaging/generated/
 Clipagent-Windows-x64.zip
 
