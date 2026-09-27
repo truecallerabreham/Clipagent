@@ -10,9 +10,19 @@ from typing import Any, Sequence
 
 from ._shared import _hidden_subprocess_kwargs
 
-
+# ==============================================================================
+# SECTION 1: VIDEO METADATA STRUCTURE
+# ==============================================================================
+# Major Aim:
+#   Define a typed, immutable data carrier for parsed video properties
+#   (width, height, frames-per-second, duration, and audio presence).
+#
+# Visual Example Flow:
+#   ffprobe output JSON -> VideoProbe(width=1920, height=1080, fps=30.0, ...)
+# ==============================================================================
 @dataclass(frozen=True, slots=True)
 class VideoProbe:
+    """Immutable data record holding essential video and audio container properties."""
     width: int
     height: int
     fps: float
@@ -20,13 +30,29 @@ class VideoProbe:
     has_audio: bool
 
 
+# ==============================================================================
+# SECTION 2: RUNTIME CONFIGURATION & BINARY RESOLUTION
+# ==============================================================================
+# Major Aim:
+#   Detect whether the native FFmpeg engine is enabled by environment variable,
+#   and locate the executable binaries (ffmpeg, ffprobe) across PATH or overrides.
+#
+# Visual Example Flow:
+#   _binary("FFMPEG_BIN", "ffmpeg")
+#         |
+#         +--> 1. Check os.environ["FFMPEG_BIN"]
+#         +--> 2. Check shutil.which("ffmpeg")
+#         \--> 3. Found -> Return absolute path string, or raise RuntimeError
+# ==============================================================================
 def native_ffmpeg_enabled() -> bool:
+    """Check if the high-performance native FFmpeg pipeline is explicitly activated."""
     return (
         os.environ.get("CLIPAGENT_NATIVE_FFMPEG_PIPELINE", "").strip().lower()
     ) in {"1", "true", "yes", "on"}
 
 
 def _positive_int_env(name: str, default: int) -> int:
+    """Parse an environment variable as a positive integer with a safe fallback."""
     try:
         return max(1, int(os.environ.get(name, str(default))))
     except (TypeError, ValueError):
@@ -34,6 +60,7 @@ def _positive_int_env(name: str, default: int) -> int:
 
 
 def _binary(env_name: str, executable: str) -> str:
+    """Resolve an executable binary path from environment overrides or system PATH."""
     configured = os.environ.get(env_name, "").strip()
     if configured:
         return configured
@@ -43,7 +70,18 @@ def _binary(env_name: str, executable: str) -> str:
     raise RuntimeError(f"{executable} executable was not found on PATH")
 
 
+# ==============================================================================
+# SECTION 3: SILENT PROCESS EXECUTION & RATE PARSING
+# ==============================================================================
+# Major Aim:
+#   Execute FFmpeg commands silently in the background (no popup cmd windows)
+#   and safely convert fraction framerates (e.g. "30000/1001") into float FPS.
+#
+# Visual Example Flow:
+#   "30000/1001" -> _parse_rate() -> 29.97002997...
+# ==============================================================================
 def _run(command: Sequence[str], *, timeout: int = 1800) -> None:
+    """Execute an FFmpeg command silently, raising RuntimeError on non-zero exit."""
     kwargs: dict[str, Any] = {
         "capture_output": True,
         "text": True,
@@ -64,6 +102,7 @@ def _run(command: Sequence[str], *, timeout: int = 1800) -> None:
 
 
 def _parse_rate(value: object) -> float:
+    """Convert an FFmpeg fraction frame-rate string like '30/1' or '30000/1001' to float."""
     text = str(value or "0/1")
     numerator, _, denominator = text.partition("/")
     try:
@@ -73,7 +112,24 @@ def _parse_rate(value: object) -> float:
         return 0.0
 
 
+# ==============================================================================
+# SECTION 4: NATIVE FFPROBE INSPECTION
+# ==============================================================================
+# Major Aim:
+#   Inspect a video file using ffprobe to extract stream dimensions, duration,
+#   framerate, and audio track presence without decoding the full video file.
+#
+# Visual Example Flow:
+#   video.mp4
+#       |
+#       V
+#   ffprobe -show_entries format=duration:stream=... -of json
+#       |
+#       V
+#   JSON stream payload -> VideoProbe(width, height, fps, duration, has_audio)
+# ==============================================================================
 def probe_video(path: Path) -> VideoProbe:
+    """Probe video dimensions, frame rate, duration, and audio presence via ffprobe."""
     command = [
         _binary("FFPROBE_BIN", "ffprobe"),
         "-v",
@@ -126,7 +182,15 @@ def probe_video(path: Path) -> VideoProbe:
     )
 
 
+# ==============================================================================
+# SECTION 5: ENCODER CONFIGURATION & BASE COMMANDS
+# ==============================================================================
+# Major Aim:
+#   Build standardized, optimized FFmpeg CLI arguments for video encoding
+#   (H.264 video codec, yuv420p pixel format, multi-threading, preset speed).
+# ==============================================================================
 def _encoder_args(*, bitrate: str | None = None) -> list[str]:
+    """Generate H.264 video encoding parameters with dynamic threading and presets."""
     preset = (
         os.environ.get("CLIPAGENT_FFMPEG_PRESET", "").strip()
         or "veryfast"
@@ -153,6 +217,7 @@ def _encoder_args(*, bitrate: str | None = None) -> list[str]:
 
 
 def _base_command() -> list[str]:
+    """Construct common FFmpeg invocation arguments (overwrite, quiet banners, thread limits)."""
     filter_threads = _positive_int_env("CLIPAGENT_FFMPEG_FILTER_THREADS", 4)
     return [
         _binary("FFMPEG_BIN", "ffmpeg"),
@@ -167,6 +232,22 @@ def _base_command() -> list[str]:
     ]
 
 
+# ==============================================================================
+# SECTION 6: NATIVE VIDEO CUTTING
+# ==============================================================================
+# Major Aim:
+#   Perform precision video cutting directly via FFmpeg subprocess, avoiding
+#   slow Python frame copying and memory leaks.
+#
+# Visual Example Flow:
+#   source.mp4 [start=10.0s, end=25.0s]
+#         |
+#         V
+#   ffmpeg -ss 10.000000 -t 15.000000 -i source.mp4 ... -c:v libx264 cut.mp4
+#         |
+#         V
+#   Output: cut.mp4 (duration = 15.0s)
+# ==============================================================================
 def cut_video_native(
     input_path: Path,
     output_path: Path,
@@ -174,6 +255,7 @@ def cut_video_native(
     start_time: float,
     end_time: float,
 ) -> float:
+    """Trim a video file between start_time and end_time using native FFmpeg."""
     probe = probe_video(input_path)
     start = float(start_time)
     end = float(end_time)
@@ -195,6 +277,22 @@ def cut_video_native(
     return end - start
 
 
+# ==============================================================================
+# SECTION 7: NATIVE VIDEO EXPORT & ASPECT RATIO CONVERSION
+# ==============================================================================
+# Major Aim:
+#   Scale, crop, and re-encode a video to match target dimensions (e.g. 1080x1920)
+#   while maintaining the correct aspect ratio and adding +faststart for web playback.
+#
+# Visual Example Flow:
+#   1920x1080 (Landscape) -> target: 1080x1920 (Portrait)
+#         |
+#         V
+#   FFmpeg filter: scale (increase) -> crop (1080:1920) -> format=yuv420p
+#         |
+#         V
+#   Exported portrait video file with target bitrate
+# ==============================================================================
 def export_video_native(
     input_path: Path,
     output_path: Path,
@@ -202,6 +300,7 @@ def export_video_native(
     target_size: tuple[int, int],
     bitrate: str = "8000k",
 ) -> float:
+    """Scale, crop, and re-encode a video to target dimensions using native FFmpeg."""
     probe = probe_video(input_path)
     target_w, target_h = (int(target_size[0]), int(target_size[1]))
     if target_w <= 0 or target_h <= 0:
@@ -227,6 +326,23 @@ def export_video_native(
     return probe.duration
 
 
+# ==============================================================================
+# SECTION 8: NATIVE MULTI-CLIP MERGE & AUDIO RESAMPLE
+# ==============================================================================
+# Major Aim:
+#   Concatenate multiple video clips into a single continuous video with uniform
+#   dimensions, synchronized framerate, and synthetic audio padding for silent clips.
+#
+# Visual Example Flow:
+#   [Clip1 (with audio), Clip2 (silent), Clip3 (with audio)]
+#              |
+#              V  Filter Complex:
+#   v0, v1, v2 scaled & cropped to match anchor orientation -> concat
+#   a0, anullsrc (silence generator for clip 2), a2 resampled -> concat
+#              |
+#              V
+#   Single seamless output video file!
+# ==============================================================================
 def merge_videos_native(
     input_paths: Sequence[Path],
     output_path: Path,
@@ -234,6 +350,7 @@ def merge_videos_native(
     target_duration: float | None,
     tolerance: float,
 ) -> tuple[float, int, tuple[int, int]]:
+    """Concatenate multiple video files with audio normalization and aspect ratio alignment."""
     if not input_paths:
         raise ValueError("no videos were supplied")
 

@@ -9,11 +9,14 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import unquote, urlparse
 
+# Optional OpenCV import for fast local frame inspection without subprocess overhead
 try:
     import cv2
 except ImportError:
     cv2 = None
 
+# Optional LangChain core import: provides @tool decorator for LLM agent integration
+# If langchain_core is not installed, provide a no-op fallback decorator.
 try:
     from langchain_core.tools import tool
 except ImportError:
@@ -28,22 +31,47 @@ except ImportError:
 
 from app.runtime_paths import configure_runtime_environment, get_bundle_root, get_runtime_root
 
+# ==============================================================================
+# SECTION 1: RUNTIME BOOTSTRAP & DIRECTORY INITIALIZATION
+# ==============================================================================
+# Major Aim:
+#   Initialize the application environment and anchor core workspace directories
+#   so all agent tools have isolated, safe areas to store temporary files and logs.
+#
+# Visual Example Flow:
+#   configure_runtime_environment()
+#         |
+#         +--> BUNDLE_DIR  = Read-only code and bundled binaries
+#         +--> CURRENT_DIR = Writable runtime root
+#         +--> WORKSPACE   = Temporary task video files (temp/)
+#         +--> USER_WORKSPACE = User uploaded videos (user_temp/)
+#         \--> LOGS_DIR    = Persistent execution logs (logs/)
+# ==============================================================================
 configure_runtime_environment()
 
 BUNDLE_DIR = get_bundle_root()
 CURRENT_DIR = get_runtime_root()
 
+# Task Workspace: where agent tools write intermediate video cuts and renders
 _task_workspace = os.environ.get("CLIPAGENT_TASK_WORKSPACE", "").strip()
 WORKSPACE = Path(_task_workspace).resolve(strict=False) if _task_workspace else CURRENT_DIR / "temp"
 
+# User Workspace: where user-provided source media files are staged
 _user_workspace = os.environ.get("CLIPAGENT_USER_WORKSPACE", "").strip()
 USER_WORKSPACE = Path(_user_workspace).resolve(strict=False) if _user_workspace else CURRENT_DIR / "user_temp"
 os.environ.setdefault("CLIPAGENT_USER_WORKSPACE", str(USER_WORKSPACE.resolve(strict=False)))
 
+# Experience Directory: stores historical workflow heuristics and agent memory
 MEMORY_EXPERIENCE_DIR = CURRENT_DIR / "memory_experience"
 
 
 def _select_logs_dir() -> Path:
+    """Select a writable directory for application logs, falling back if needed.
+    
+    Major Aim:
+      Ensure logging never crashes the app by testing candidate directories
+      with an empirical write probe before selecting one.
+    """
     primary = CURRENT_DIR / "logs"
     fallback = CURRENT_DIR / "runtime_logs"
 
@@ -63,6 +91,7 @@ def _select_logs_dir() -> Path:
 
 LOGS_DIR = _select_logs_dir()
 
+# Ensure all essential directories exist before any tool executes
 WORKSPACE.mkdir(parents=True, exist_ok=True)
 USER_WORKSPACE.mkdir(parents=True, exist_ok=True)
 MEMORY_EXPERIENCE_DIR.mkdir(parents=True, exist_ok=True)
@@ -71,7 +100,26 @@ LOGS_DIR.mkdir(parents=True, exist_ok=True)
 logger = logging.getLogger("clipagent")
 
 
+# ==============================================================================
+# SECTION 2: WINDOWS SILENT SUBPROCESS CONTROLLER
+# ==============================================================================
+# Major Aim:
+#   Prevent flashing black command prompt (cmd.exe) windows from popping up on
+#   the user's desktop whenever background processes (FFmpeg, FFprobe, Python) run.
+#
+# Visual Example Flow:
+#   subprocess.run(["ffmpeg", ...])
+#              |
+#              V  (Without these flags: Black cmd box flashes on screen)
+#   _hidden_subprocess_kwargs()
+#              |
+#              +--> creationflags = CREATE_NO_WINDOW (0x08000000)
+#              \--> startupinfo: dwFlags |= STARTF_USESHOWWINDOW, wShowWindow = SW_HIDE
+#              |
+#              V  (With these flags: Completely silent background execution)
+# ==============================================================================
 def _hidden_subprocess_kwargs() -> dict[str, Any]:
+    """Build Windows-specific startup flags to suppress visible console windows."""
     if os.name != "nt":
         return {}
     startupinfo = subprocess.STARTUPINFO()
@@ -84,6 +132,7 @@ def _hidden_subprocess_kwargs() -> dict[str, Any]:
 
 
 def _merge_hidden_subprocess_kwargs(kwargs: dict[str, Any]) -> dict[str, Any]:
+    """Combine user-supplied subprocess kwargs with the silent console flags."""
     hidden = _hidden_subprocess_kwargs()
     if not hidden:
         return dict(kwargs)
@@ -96,22 +145,43 @@ def _merge_hidden_subprocess_kwargs(kwargs: dict[str, Any]) -> dict[str, Any]:
 
 
 def _is_unittest_mock(callable_obj: Any) -> bool:
+    """Detect whether a subprocess function has been replaced with a test mock."""
     return str(getattr(callable_obj, "__module__", "")) == "unittest.mock"
 
 
 def run_subprocess(*popenargs: Any, **kwargs: Any) -> subprocess.CompletedProcess:
+    """Run a subprocess to completion while hiding its console window on Windows."""
     if _is_unittest_mock(subprocess.run):
         return subprocess.run(*popenargs, **kwargs)
     return subprocess.run(*popenargs, **_merge_hidden_subprocess_kwargs(kwargs))
 
 
 def popen_subprocess(*popenargs: Any, **kwargs: Any) -> subprocess.Popen:
+    """Launch an asynchronous subprocess while hiding its console window on Windows."""
     if _is_unittest_mock(subprocess.Popen):
         return subprocess.Popen(*popenargs, **kwargs)
     return subprocess.Popen(*popenargs, **_merge_hidden_subprocess_kwargs(kwargs))
 
 
+# ==============================================================================
+# SECTION 3: WORKSPACE SECURITY PERIMETER GUARD
+# ==============================================================================
+# Major Aim:
+#   Prevent arbitrary file read/write attacks (path traversal) by verifying that
+#   every file handled by agent tools strictly resides within authorized directories.
+#
+# Visual Example Flow:
+#   User input: "../../Windows/System32/calc.exe"
+#         |
+#         V
+#   _is_within_workspace(path)
+#         |
+#         +--> Resolved: C:\Windows\System32\calc.exe
+#         +--> Check: Is it under WORKSPACE or USER_WORKSPACE?
+#         \--> NO -> Rejection (Returns False / Blocks Execution)
+# ==============================================================================
 def _is_within_workspace(path: Path) -> bool:
+    """Verify that a target path resides inside either WORKSPACE or USER_WORKSPACE."""
     allowed_roots = (
         WORKSPACE.resolve(strict=False),
         USER_WORKSPACE.resolve(strict=False),
@@ -131,10 +201,18 @@ def _is_within_workspace(path: Path) -> bool:
 
 
 def _resolve_workspace_input_path(raw_path: str, must_exist: bool = True) -> Path | None:
+    """Resolve an ambiguous user path into a verified workspace-confined Path object.
+    
+    Handles:
+      - file:// URLs (with Windows drive letter correction)
+      - Absolute paths pointing directly into the workspace
+      - Relative paths anchored to WORKSPACE, USER_WORKSPACE, or CURRENT_DIR
+    """
     raw = (raw_path or "").strip()
     if not raw:
         return None
 
+    # Handle file:// URI scheme
     if raw.startswith("file://"):
         parsed = urlparse(raw)
         raw = unquote(parsed.path or "")
@@ -181,17 +259,37 @@ def _resolve_workspace_input_path(raw_path: str, must_exist: bool = True) -> Pat
     return None
 
 
+# ==============================================================================
+# SECTION 4: SAFE PATH SANITIZATION & VIDEO RESOLUTION
+# ==============================================================================
+# Major Aim:
+#   Clean and sanitize output file stems to prevent directory traversal or
+#   illegal filesystem characters, guaranteeing output lands inside WORKSPACE.
+#
+# Visual Example Flow:
+#   User output string: "my clip! (draft 1) <final>.mp4"
+#         |
+#         V
+#   _safe_output_video_path()
+#         |
+#         +--> Strips path traversal & directory separators
+#         +--> Replaces non-alphanumeric chars with "_"
+#         \--> Result: WORKSPACE / "my_clip_draft_1_final.mp4"
+# ==============================================================================
 def _safe_output_video_path(output_name: str, default_stem: str = "output") -> Path:
+    """Generate a clean, sanitized output path strictly confined to WORKSPACE."""
     stem_raw = (output_name or default_stem).strip()
     stem = Path(stem_raw).name
     stem = Path(stem).stem or default_stem
-    stem = re.sub(r"[^0-9A-Za-z_\-\u4e00-\u9fff]+", "_", stem).strip("_")
+    # Only allow English alphanumerics, underscores, and hyphens (zero Chinese characters)
+    stem = re.sub(r"[^0-9A-Za-z_\-]+", "_", stem).strip("_")
     if not stem:
         stem = default_stem
     return (WORKSPACE / f"{stem}.mp4").resolve()
 
 
 def _resolve_video_path(video_path: str) -> Path | None:
+    """Locate a video file within authorized workspaces or alias patterns."""
     resolved = _resolve_workspace_input_path(video_path, must_exist=True)
     if resolved is not None:
         return resolved
@@ -201,9 +299,8 @@ def _resolve_video_path(video_path: str) -> Path | None:
         return None
 
     direct = Path(raw)
-
-    # If it is a Bilibili BV identifier, try finding an alias file with the same stem
     stem = direct.stem
+    # If the user passed a reference code (e.g. BV123), check if an mp4 with that stem exists
     if stem.upper().startswith("BV"):
         for root in (WORKSPACE, USER_WORKSPACE):
             alias = root / f"{stem}.mp4"
@@ -212,7 +309,15 @@ def _resolve_video_path(video_path: str) -> Path | None:
     return None
 
 
+# ==============================================================================
+# SECTION 5: VIDEO METADATA EXTRACTION FALLBACK
+# ==============================================================================
+# Major Aim:
+#   Extract key video metrics (duration, resolution, fps) with a dual engine:
+#   fast OpenCV in-process probe if available, or native FFprobe subprocess.
+# ==============================================================================
 def _get_video_meta(video_path: str) -> dict[str, Any]:
+    """Retrieve video duration, resolution, and frame rate using OpenCV or FFprobe."""
     if cv2 is not None:
         cap = cv2.VideoCapture(video_path)
         fps = cap.get(cv2.CAP_PROP_FPS)
