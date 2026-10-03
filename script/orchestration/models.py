@@ -1,309 +1,259 @@
 from __future__ import annotations
 
 import collections
-import json
-import time
-import uuid
-from dataclasses import asdict, dataclass, field
-from enum import Enum, IntEnum
-from typing import Any, Sequence
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any, Literal
+
+from pydantic import BaseModel, Field, field_validator
 
 # ==============================================================================
 # MILESTONE 12: THE TASK RECIPE (orchestration/models.py)
 # ==============================================================================
 # Major Aim:
-#   Serve as the architectural blueprint layer ("the task recipe") for the AI video
-#   editing agent's factory floor. Defines formal schemas for asynchronous task
-#   lifecycle states, execution priorities, resource budgeting (CPU/IO/GPU/API),
-#   immutable artifact references, and a Directed Acyclic Graph (DAG) task engine
-#   with cycle detection, topological sorting, and dependency resolution.
+#   Serve as the architectural blueprint schema layer ("the task recipe") for the
+#   Clipagent factory floor, maintaining 100% exact architectural fidelity with
+#   the reference architecture. Defines Pydantic models for task specifications (TaskSpec),
+#   execution DAG plans (ExecutionPlan), live task states (TaskState), artifact
+#   pointers (ArtifactRef), resource pool quotas (ResourcePoolConfig), and retry
+#   policies (RetryPolicy), integrated with DAG cycle detection and topological sorting.
 #
 # Visual Example Flow:
-#   Workflow Recipe:
-#     [Task 1: Download Media]
-#           |
-#           v
-#     [Task 2: Standardize Media] ---> [Task 3: Transcribe Speech]
-#           |                                    |
-#           v                                    v
-#     [Task 4: Cut Segments]        [Task 5: Synthesize Subtitles]
-#           \                                    /
-#            \---> [Task 6: Merge & Add Subtitles] ---> [Task 7: Final Export]
+#   ExecutionPlan:
+#     - plan_id: "plan_edit_highlight_01"
+#     - phase: "editing_execution"
+#     - tasks:
+#         [TaskSpec(id="t1", tool_name="download_material_video", ...)]
+#             |
+#             v
+#         [TaskSpec(id="t2", tool_name="standardize_media_clips", depends_on=["t1"])]
+#             |
+#             v
+#         [TaskSpec(id="t3", tool_name="batch_cut_video", depends_on=["t2"])]
+#             |
+#             v
+#         [TaskSpec(id="t4", tool_name="merge_videos", depends_on=["t3"])]
 #
-#   Execution Engine:
-#     1. Cycle Detection: Validates DAG has zero circular loops (e.g. A -> B -> A).
-#     2. Ready Tasks Discovery: Identifies tasks whose dependencies are 100% completed.
-#     3. Resource Budgeting: Tags CPU-heavy (FFmpeg) vs Network-API (Gemini/Qwen) tasks.
-#     4. Priority Ordering: Schedules Critical and High priority tasks ahead of Normal.
+#   Scheduling & Verification:
+#     1. DAG Cycle Validation: Kahn's algorithm verifies zero circular loops (A -> B -> A).
+#     2. Dynamic Ready Tasks: Dispatches tasks whose 'depends_on' are 100% completed.
+#     3. Resource Pooling: Enforces concurrency caps (search, download, ffmpeg, tts, export).
+#     4. State Tracking: Records TaskState (pending -> running -> completed/failed).
 # ==============================================================================
 
 
-class TaskStatus(str, Enum):
-    """Lifecycle execution states of an orchestrated task."""
-    PENDING = "pending"          # Created, waiting for dependencies to evaluate
-    BLOCKED = "blocked"          # Has one or more unresolved prerequisite dependencies
-    READY = "ready"              # All dependencies completed; eligible for worker dispatch
-    RUNNING = "running"          # Actively executing in a worker thread/process
-    COMPLETED = "completed"      # Successfully executed; output artifacts registered
-    FAILED = "failed"            # Raised an exception or exceeded retry threshold
-    CANCELLED = "cancelled"      # Cancelled manually or due to upstream failure
-    SKIPPED = "skipped"          # Bypassed via caching or conditional logic
+def utc_now_iso() -> str:
+    """Generate an ISO 8601 UTC timestamp string."""
+    return datetime.now(timezone.utc).isoformat()
 
 
-class TaskPriority(IntEnum):
-    """Execution priority levels for task queue dispatch ordering."""
-    CRITICAL = 100   # Circuit breakers, emergency stops, pipeline aborts
-    HIGH = 75        # User-blocking requests, final exports, audio synthesis
-    NORMAL = 50      # Standard video cutting, merging, standardization
-    LOW = 25         # Pre-fetching, background thumbnail/GIF generation
-    BACKGROUND = 10  # Cache cleanup, logging, disk housekeeping
+class RetryPolicy(BaseModel):
+    """Execution retry strategy with backoff and error classification."""
+    max_attempts: int = Field(default=1, ge=1, le=5)
+    backoff_seconds: float = Field(default=0.0, ge=0.0, le=60.0)
+    retryable_errors: list[str] = Field(
+        default_factory=lambda: [
+            "timeout",
+            "temporarily unavailable",
+            "connection reset",
+            "connection aborted",
+            "rate limit",
+            "429",
+            "502",
+            "503",
+            "504",
+        ]
+    )
 
 
-class ResourceType(str, Enum):
-    """Hardware or network resource domain consumed by a task."""
-    CPU_HEAVY = "cpu_heavy"      # Multi-threaded FFmpeg encoding, scaling, rendering
-    IO_HEAVY = "io_heavy"        # Large file copying, disk extraction, local IO
-    GPU_HEAVY = "gpu_heavy"      # Local neural inference (Whisper, neural filters)
-    NETWORK_API = "network_api"  # External LLM calls (Gemini/Qwen, YouTube download)
-    LIGHTWEIGHT = "lightweight"  # In-memory JSON parsing, timeline calculation, probing
+class TaskSpec(BaseModel):
+    """Specification of an orchestrated task ('the recipe') for the execution engine."""
+    id: str = Field(min_length=1)
+    phase: str = Field(min_length=1)
+    kind: str = Field(min_length=1)
+    tool_name: str = ""
+    description: str = ""
+    arguments: dict[str, Any] = Field(default_factory=dict)
+    depends_on: list[str] = Field(default_factory=list)
+    resources: dict[str, int] = Field(default_factory=dict)
+    conflict_keys: list[str] = Field(default_factory=list)
+    input_artifacts: list[str] = Field(default_factory=list)
+    output_kinds: list[str] = Field(default_factory=list)
+    estimated_seconds: float = Field(default=0.0, ge=0.0)
+    priority: int = Field(default=0, ge=-100, le=100)
+    optional: bool = False
+    timeout_seconds: float | None = Field(default=None, gt=0.0)
+    retry: RetryPolicy = Field(default_factory=RetryPolicy)
 
-
-@dataclass(slots=True)
-class ResourceRequirement:
-    """Resource budget specification required to run a task safely without crashing system."""
-    resource_type: ResourceType = ResourceType.LIGHTWEIGHT
-    cpu_cores: int = 1
-    memory_mb: int = 256
-    gpu_vram_mb: int = 0
-    concurrency_key: str = "default"  # Shared lock key (e.g. 'ffmpeg_encoder', 'gemini_api')
-
-    def to_dict(self) -> dict[str, Any]:
-        return {
-            "resource_type": self.resource_type.value,
-            "cpu_cores": self.cpu_cores,
-            "memory_mb": self.memory_mb,
-            "gpu_vram_mb": self.gpu_vram_mb,
-            "concurrency_key": self.concurrency_key,
-        }
-
+    @field_validator("depends_on", "conflict_keys", "input_artifacts", "output_kinds")
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> ResourceRequirement:
-        return cls(
-            resource_type=ResourceType(data.get("resource_type", ResourceType.LIGHTWEIGHT.value)),
-            cpu_cores=int(data.get("cpu_cores", 1)),
-            memory_mb=int(data.get("memory_mb", 256)),
-            gpu_vram_mb=int(data.get("gpu_vram_mb", 0)),
-            concurrency_key=str(data.get("concurrency_key", "default")),
-        )
+    def _dedupe_strings(cls, value: list[str]) -> list[str]:
+        return list(dict.fromkeys(str(item).strip() for item in value if str(item).strip()))
 
-
-@dataclass(slots=True)
-class ArtifactRef:
-    """Immutable pointer to a verified data asset produced or consumed by tasks."""
-    artifact_id: str
-    artifact_type: str  # e.g. 'video_file', 'audio_file', 'json_blueprint', 'subtitle_file'
-    path: str | None = None
-    checksum_sha256: str | None = None
-    metadata: dict[str, Any] = field(default_factory=dict)
-
-    def to_dict(self) -> dict[str, Any]:
-        return {
-            "artifact_id": self.artifact_id,
-            "artifact_type": self.artifact_type,
-            "path": self.path,
-            "checksum_sha256": self.checksum_sha256,
-            "metadata": self.metadata,
-        }
-
+    @field_validator("resources")
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> ArtifactRef:
-        return cls(
-            artifact_id=data["artifact_id"],
-            artifact_type=data["artifact_type"],
-            path=data.get("path"),
-            checksum_sha256=data.get("checksum_sha256"),
-            metadata=data.get("metadata", {}),
-        )
+    def _validate_resources(cls, value: dict[str, int]) -> dict[str, int]:
+        normalized: dict[str, int] = {}
+        for name, amount in value.items():
+            key = str(name).strip()
+            parsed = int(amount)
+            if key and parsed > 0:
+                normalized[key] = parsed
+        return normalized
 
 
-@dataclass(slots=True)
-class TaskDefinition:
-    """The task blueprint ('recipe') specifying action, parameters, dependencies, and limits."""
+class ArtifactRef(BaseModel):
+    """Immutable metadata record tracking an intermediate or final media asset."""
+    id: str
+    kind: str
+    path: str = ""
+    producer_task_id: str
+    phase: str
+    metadata: dict[str, Any] = Field(default_factory=dict)
+    checksum: str = ""
+    size_bytes: int = 0
+    created_at: str = Field(default_factory=utc_now_iso)
+    valid: bool = True
+
+    def resolved_path(self) -> Path | None:
+        """Resolve the physical filesystem path if set."""
+        return Path(self.path).resolve(strict=False) if self.path else None
+
+
+TaskStatus = Literal["pending", "running", "completed", "failed", "skipped"]
+
+
+class TaskState(BaseModel):
+    """Live execution state and results tracking for a scheduled task."""
     task_id: str
-    task_name: str
-    action: str  # Registered tool or callable name (e.g. 'cut_video', 'merge_videos')
-    params: dict[str, Any] = field(default_factory=dict)
-    dependencies: list[str] = field(default_factory=list)
-    priority: TaskPriority = TaskPriority.NORMAL
-    resource_req: ResourceRequirement = field(default_factory=ResourceRequirement)
-    max_retries: int = 2
-    timeout_seconds: float = 300.0
-    tags: list[str] = field(default_factory=list)
-
-    def to_dict(self) -> dict[str, Any]:
-        return {
-            "task_id": self.task_id,
-            "task_name": self.task_name,
-            "action": self.action,
-            "params": self.params,
-            "dependencies": self.dependencies,
-            "priority": int(self.priority.value),
-            "resource_req": self.resource_req.to_dict(),
-            "max_retries": self.max_retries,
-            "timeout_seconds": self.timeout_seconds,
-            "tags": self.tags,
-        }
-
-    @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> TaskDefinition:
-        priority_val = data.get("priority", TaskPriority.NORMAL.value)
-        return cls(
-            task_id=data["task_id"],
-            task_name=data.get("task_name", data["task_id"]),
-            action=data["action"],
-            params=data.get("params", {}),
-            dependencies=data.get("dependencies", []),
-            priority=TaskPriority(priority_val),
-            resource_req=ResourceRequirement.from_dict(data.get("resource_req", {})),
-            max_retries=int(data.get("max_retries", 2)),
-            timeout_seconds=float(data.get("timeout_seconds", 300.0)),
-            tags=data.get("tags", []),
-        )
+    task_fingerprint: str = ""
+    dependency_fingerprints: dict[str, str] = Field(default_factory=dict)
+    status: TaskStatus = "pending"
+    attempts: int = 0
+    started_at: str | None = None
+    completed_at: str | None = None
+    error: str = ""
+    result: dict[str, Any] = Field(default_factory=dict)
+    artifact_ids: list[str] = Field(default_factory=list)
+    elapsed_seconds: float = Field(default=0.0, ge=0.0)
 
 
-@dataclass(slots=True)
-class TaskResult:
-    """Immutable audit record detailing the outcome and outputs of an executed task."""
-    task_id: str
-    status: TaskStatus
-    output: Any = None
-    output_artifacts: list[ArtifactRef] = field(default_factory=list)
-    error_message: str | None = None
-    execution_time_seconds: float = 0.0
-    started_at: float | None = None
-    completed_at: float | None = None
-    retry_count: int = 0
-
-    def to_dict(self) -> dict[str, Any]:
-        return {
-            "task_id": self.task_id,
-            "status": self.status.value,
-            "output": self.output,
-            "output_artifacts": [a.to_dict() for a in self.output_artifacts],
-            "error_message": self.error_message,
-            "execution_time_seconds": round(self.execution_time_seconds, 3),
-            "started_at": self.started_at,
-            "completed_at": self.completed_at,
-            "retry_count": self.retry_count,
-        }
-
-    @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> TaskResult:
-        return cls(
-            task_id=data["task_id"],
-            status=TaskStatus(data["status"]),
-            output=data.get("output"),
-            output_artifacts=[ArtifactRef.from_dict(a) for a in data.get("output_artifacts", [])],
-            error_message=data.get("error_message"),
-            execution_time_seconds=float(data.get("execution_time_seconds", 0.0)),
-            started_at=data.get("started_at"),
-            completed_at=data.get("completed_at"),
-            retry_count=int(data.get("retry_count", 0)),
-        )
+class TaskExecutionResult(BaseModel):
+    """Structured return payload produced by an executed task worker."""
+    data: dict[str, Any] = Field(default_factory=dict)
+    artifacts: list[ArtifactRef] = Field(default_factory=list)
 
 
-class TaskGraph:
-    """Directed Acyclic Graph (DAG) managing tasks, dependencies, cycles, and scheduling."""
+class ResourcePoolConfig(BaseModel):
+    """Concurrency pool caps for different operational domains in the scheduler."""
+    search_pool: int = Field(default=4, ge=1)
+    download_pool: int = Field(default=3, ge=1)
+    video_analysis_pool: int = Field(default=3, ge=1)
+    llm_pool: int = Field(default=4, ge=1)
+    ffmpeg_pool: int = Field(default=3, ge=1)
+    tts_pool: int = Field(default=3, ge=1)
+    export_pool: int = Field(default=1, ge=1)
 
-    def __init__(self, name: str = "default_pipeline") -> None:
-        self.name: str = name
-        self._tasks: dict[str, TaskDefinition] = {}
-        self._dependents: dict[str, set[str]] = collections.defaultdict(set)
+    def as_dict(self) -> dict[str, int]:
+        return {name: int(value) for name, value in self.model_dump().items()}
 
-    def add_task(self, task: TaskDefinition) -> None:
-        """Add a task definition into the graph and index its dependency relationships."""
-        if task.task_id in self._tasks:
-            raise ValueError(f"Task with id '{task.task_id}' already exists in TaskGraph.")
-        self._tasks[task.task_id] = task
-        for dep_id in task.dependencies:
-            self._dependents[dep_id].add(task.task_id)
 
-    def get_task(self, task_id: str) -> TaskDefinition | None:
-        """Retrieve a task definition by its unique identifier."""
-        return self._tasks.get(task_id)
+class ExecutionPlan(BaseModel):
+    """A Directed Acyclic Graph (DAG) plan consisting of multiple task specifications."""
+    plan_id: str
+    phase: str
+    goal: str = ""
+    tasks: list[TaskSpec] = Field(default_factory=list)
+    created_at: str = Field(default_factory=utc_now_iso)
+    deadline_at_epoch: float | None = Field(default=None, gt=0.0)
 
-    def get_dependencies(self, task_id: str) -> list[str]:
-        """Return all prerequisite task IDs that task_id depends upon."""
-        task = self._tasks.get(task_id)
-        return list(task.dependencies) if task else []
+    def get_task(self, task_id: str) -> TaskSpec | None:
+        """Find a task in the plan by ID."""
+        for t in self.tasks:
+            if t.id == task_id:
+                return t
+        return None
 
     def get_dependents(self, task_id: str) -> list[str]:
-        """Return all downstream task IDs that depend on task_id."""
-        return sorted(list(self._dependents.get(task_id, set())))
+        """Return task IDs that directly depend on the given task_id."""
+        dependents: list[str] = []
+        for t in self.tasks:
+            if task_id in t.depends_on:
+                dependents.append(t.id)
+        return sorted(dependents)
 
     def validate_dag(self) -> bool:
-        """Verify that all referenced dependencies exist and the graph contains zero circular cycles.
+        """Verify all dependencies exist and check for circular dependency cycles.
 
         Raises:
-            KeyError: If a task references a dependency ID that does not exist in the graph.
-            ValueError: If a circular dependency cycle is detected (e.g. A -> B -> A).
+            KeyError: If a task depends on a task ID that does not exist in the plan.
+            ValueError: If a circular dependency cycle is detected.
         """
-        # Step 1: Verify all dependencies exist in graph
-        for t_id, task in self._tasks.items():
-            for dep_id in task.dependencies:
-                if dep_id not in self._tasks:
+        task_map = {t.id: t for t in self.tasks}
+
+        # Step 1: Verify all dependencies exist
+        for t in self.tasks:
+            for dep_id in t.depends_on:
+                if dep_id not in task_map:
                     raise KeyError(
-                        f"Task '{t_id}' references non-existent dependency '{dep_id}'."
+                        f"Task '{t.id}' references non-existent dependency '{dep_id}'."
                     )
 
-        # Step 2: Kahn's Algorithm for cycle detection and topological sorting
-        in_degree: dict[str, int] = {t_id: len(task.dependencies) for t_id, task in self._tasks.items()}
-        zero_in_queue = collections.deque([t_id for t_id, deg in in_degree.items() if deg == 0])
+        # Step 2: Kahn's algorithm for cycle detection
+        in_degree: dict[str, int] = {t.id: len(t.depends_on) for t in self.tasks}
+        dependents_map: dict[str, list[str]] = collections.defaultdict(list)
+        for t in self.tasks:
+            for dep_id in t.depends_on:
+                dependents_map[dep_id].append(t.id)
 
+        zero_in_queue = collections.deque([t_id for t_id, deg in in_degree.items() if deg == 0])
         visited_count = 0
+
         while zero_in_queue:
             curr_id = zero_in_queue.popleft()
             visited_count += 1
+            for downstream in dependents_map.get(curr_id, []):
+                in_degree[downstream] -= 1
+                if in_degree[downstream] == 0:
+                    zero_in_queue.append(downstream)
 
-            for dependent_id in self._dependents.get(curr_id, set()):
-                in_degree[dependent_id] -= 1
-                if in_degree[dependent_id] == 0:
-                    zero_in_queue.append(dependent_id)
-
-        if visited_count != len(self._tasks):
+        if visited_count != len(self.tasks):
             cycle_tasks = [t_id for t_id, deg in in_degree.items() if deg > 0]
             raise ValueError(
-                f"Circular dependency cycle detected in TaskGraph across tasks: {sorted(cycle_tasks)}"
+                f"Circular dependency cycle detected in ExecutionPlan across tasks: {sorted(cycle_tasks)}"
             )
 
         return True
 
-    def topological_sort(self) -> list[TaskDefinition]:
-        """Return tasks in a valid linear execution order respecting all dependencies and priorities."""
+    def topological_sort(self) -> list[TaskSpec]:
+        """Return tasks in a valid linear execution order respecting dependencies and priority."""
         self.validate_dag()
+        task_map = {t.id: t for t in self.tasks}
+        in_degree: dict[str, int] = {t.id: len(t.depends_on) for t in self.tasks}
 
-        in_degree: dict[str, int] = {t_id: len(task.dependencies) for t_id, task in self._tasks.items()}
-        # Priority ordering: Higher priority tasks are popped first
-        ready_candidates: list[TaskDefinition] = [
-            self._tasks[t_id] for t_id, deg in in_degree.items() if deg == 0
+        ready_candidates: list[TaskSpec] = [
+            task_map[t_id] for t_id, deg in in_degree.items() if deg == 0
         ]
         # Sort ready candidates by priority descending
-        ready_candidates.sort(key=lambda t: t.priority.value, reverse=True)
+        ready_candidates.sort(key=lambda t: t.priority, reverse=True)
 
-        sorted_order: list[TaskDefinition] = []
+        dependents_map: dict[str, list[str]] = collections.defaultdict(list)
+        for t in self.tasks:
+            for dep_id in t.depends_on:
+                dependents_map[dep_id].append(t.id)
+
+        sorted_order: list[TaskSpec] = []
 
         while ready_candidates:
             curr_task = ready_candidates.pop(0)
             sorted_order.append(curr_task)
 
-            # Check downstream dependents
-            for dep_id in self.get_dependents(curr_task.task_id):
-                in_degree[dep_id] -= 1
-                if in_degree[dep_id] == 0:
-                    ready_candidates.append(self._tasks[dep_id])
+            for downstream_id in dependents_map.get(curr_task.id, []):
+                in_degree[downstream_id] -= 1
+                if in_degree[downstream_id] == 0:
+                    ready_candidates.append(task_map[downstream_id])
 
-            # Re-sort ready queue by priority descending
-            ready_candidates.sort(key=lambda t: t.priority.value, reverse=True)
+            ready_candidates.sort(key=lambda t: t.priority, reverse=True)
 
         return sorted_order
 
@@ -311,68 +261,35 @@ class TaskGraph:
         self,
         completed_task_ids: set[str],
         active_or_running_ids: set[str] | None = None,
-    ) -> list[TaskDefinition]:
-        """Identify all tasks whose dependencies are 100% completed and are ready to be dispatched.
-
-        Args:
-            completed_task_ids: Set of task IDs that have already finished with COMPLETED status.
-            active_or_running_ids: Set of task IDs currently executing or already dispatched.
-
-        Returns:
-            List of TaskDefinition objects sorted by priority (highest priority first).
-        """
+    ) -> list[TaskSpec]:
+        """Identify all tasks whose dependencies are completed and are ready for dispatch."""
         active_ids = active_or_running_ids or set()
-        ready_tasks: list[TaskDefinition] = []
+        ready_tasks: list[TaskSpec] = []
 
-        for task_id, task in self._tasks.items():
-            if task_id in completed_task_ids or task_id in active_ids:
+        for task in self.tasks:
+            if task.id in completed_task_ids or task.id in active_ids:
                 continue
 
-            # Check if all dependencies are satisfied
-            all_deps_met = all(dep in completed_task_ids for dep in task.dependencies)
+            all_deps_met = all(dep in completed_task_ids for dep in task.depends_on)
             if all_deps_met:
                 ready_tasks.append(task)
 
         # Sort by priority descending
-        ready_tasks.sort(key=lambda t: t.priority.value, reverse=True)
+        ready_tasks.sort(key=lambda t: t.priority, reverse=True)
         return ready_tasks
 
     def visualize_ascii(self) -> str:
-        """Generate a clean ASCII tree diagram of the task pipeline graph."""
-        lines = [f"=== TaskGraph: {self.name} ({len(self._tasks)} tasks) ==="]
+        """Render a clean ASCII diagram of the execution plan."""
+        lines = [f"=== ExecutionPlan: {self.plan_id} (Phase: {self.phase}, {len(self.tasks)} tasks) ==="]
         try:
-            sorted_tasks = self.topological_sort()
+            ordered_tasks = self.topological_sort()
         except Exception:
-            sorted_tasks = list(self._tasks.values())
+            ordered_tasks = self.tasks
 
-        for idx, t in enumerate(sorted_tasks, start=1):
-            deps_str = f" [needs: {', '.join(t.dependencies)}]" if t.dependencies else " [ROOT]"
-            priority_str = f"P:{t.priority.name}"
-            res_str = f"Res:{t.resource_req.resource_type.value}"
-            lines.append(f"  ({idx:02d}) [{t.task_id}] '{t.task_name}' -> action='{t.action}' | {priority_str} | {res_str}{deps_str}")
+        for idx, t in enumerate(ordered_tasks, start=1):
+            deps_str = f" [needs: {', '.join(t.depends_on)}]" if t.depends_on else " [ROOT]"
+            priority_str = f"P:{t.priority}"
+            tool_str = f"tool='{t.tool_name or t.kind}'"
+            lines.append(f"  ({idx:02d}) [{t.id}] '{t.description or t.kind}' -> {tool_str} | {priority_str}{deps_str}")
 
         return "\n".join(lines)
-
-    def to_dict(self) -> dict[str, Any]:
-        """Serialize TaskGraph to dictionary structure."""
-        return {
-            "name": self.name,
-            "tasks": [t.to_dict() for t in self._tasks.values()],
-        }
-
-    @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> TaskGraph:
-        """Construct TaskGraph from dictionary structure."""
-        graph = cls(name=data.get("name", "pipeline"))
-        for t_data in data.get("tasks", []):
-            graph.add_task(TaskDefinition.from_dict(t_data))
-        return graph
-
-    def to_json(self, indent: int = 2) -> str:
-        """Serialize TaskGraph to JSON string."""
-        return json.dumps(self.to_dict(), indent=indent, ensure_ascii=False)
-
-    @classmethod
-    def from_json(cls, json_str: str) -> TaskGraph:
-        """Construct TaskGraph from JSON string."""
-        return cls.from_dict(json.loads(json_str))
