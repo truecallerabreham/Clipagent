@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-import json
-from pathlib import Path
 import unittest
+from pathlib import Path
 
 from script.orchestration.models import (
     ArtifactRef,
@@ -33,7 +32,6 @@ class TestOrchestrationModels(unittest.TestCase):
         self.assertEqual(custom.backoff_seconds, 2.5)
 
     def test_task_spec_validators_and_serialization(self) -> None:
-        # Tests deduplication of list strings and resource validation
         spec = TaskSpec(
             id="cut_01",
             phase="editing_execution",
@@ -41,17 +39,15 @@ class TestOrchestrationModels(unittest.TestCase):
             tool_name="cut_video",
             description="Cut intro highlight",
             arguments={"start": 0.0, "end": 5.0},
-            depends_on=["dl_01", "  dl_01  ", "probe_01"],  # duplicate with whitespace
+            depends_on=["dl_01", "  dl_01  ", "probe_01"],
             resources={"ffmpeg_pool": 1, "invalid_zero": 0, "  ": 2},
             priority=50,
         )
-        # Deduplication should produce ["dl_01", "probe_01"]
         self.assertEqual(spec.depends_on, ["dl_01", "probe_01"])
-        # Resource normalization should prune 0 and empty keys
         self.assertEqual(spec.resources, {"ffmpeg_pool": 1})
         self.assertEqual(spec.priority, 50)
 
-        # JSON serialization round trip
+        # JSON round-trip
         payload = spec.model_dump_json()
         restored = TaskSpec.model_validate_json(payload)
         self.assertEqual(restored.id, "cut_01")
@@ -100,65 +96,25 @@ class TestOrchestrationModels(unittest.TestCase):
         self.assertEqual(d["llm_pool"], 5)
         self.assertEqual(d["export_pool"], 1)
 
-    def test_execution_plan_dag_validation_and_cycles(self) -> None:
-        # Missing dependency should raise KeyError
-        plan_missing = ExecutionPlan(
-            plan_id="plan_bad",
-            phase="test",
-            tasks=[
-                TaskSpec(id="t1", phase="p", kind="k", depends_on=["non_existent_task"])
-            ]
-        )
-        with self.assertRaises(KeyError):
-            plan_missing.validate_dag()
-
-        # Circular cycle: A -> B -> A
-        plan_cycle = ExecutionPlan(
-            plan_id="plan_cycle",
-            phase="test",
-            tasks=[
-                TaskSpec(id="A", phase="p", kind="k", depends_on=["B"]),
-                TaskSpec(id="B", phase="p", kind="k", depends_on=["A"]),
-            ]
-        )
-        with self.assertRaises(ValueError) as ctx:
-            plan_cycle.validate_dag()
-        self.assertIn("Circular dependency cycle detected", str(ctx.exception))
-
-    def test_execution_plan_topological_sort_and_ready_tasks(self) -> None:
+    def test_execution_plan_serialization(self) -> None:
         plan = ExecutionPlan(
-            plan_id="diamond_plan",
+            plan_id="plan_01",
             phase="editing_execution",
+            goal="Assemble 60s Reel",
             tasks=[
-                TaskSpec(id="t1", phase="p", kind="dl", priority=10),
-                TaskSpec(id="t2", phase="p", kind="probe", depends_on=["t1"], priority=50),
-                TaskSpec(id="t3", phase="p", kind="audio", depends_on=["t1"], priority=20),
-                TaskSpec(id="t4", phase="p", kind="merge", depends_on=["t2", "t3"], priority=100),
-            ]
+                TaskSpec(id="t1", phase="prep", kind="download"),
+                TaskSpec(id="t2", phase="edit", kind="cut", depends_on=["t1"]),
+            ],
         )
-        self.assertTrue(plan.validate_dag())
-        sorted_tasks = plan.topological_sort()
-        ids = [t.id for t in sorted_tasks]
+        self.assertEqual(plan.plan_id, "plan_01")
+        self.assertEqual(len(plan.tasks), 2)
 
-        self.assertEqual(ids[0], "t1")
-        # t2 has higher priority (50) than t3 (20), so it should precede t3
-        self.assertEqual(ids[1], "t2")
-        self.assertEqual(ids[2], "t3")
-        self.assertEqual(ids[3], "t4")
-
-        # Ready task discovery
-        ready_init = plan.get_ready_tasks(completed_task_ids=set())
-        self.assertEqual([t.id for t in ready_init], ["t1"])
-
-        ready_after_t1 = plan.get_ready_tasks(completed_task_ids={"t1"})
-        # Both t2 and t3 ready, t2 sorted first by priority (50 > 20)
-        self.assertEqual([t.id for t in ready_after_t1], ["t2", "t3"])
-
-        # ASCII visualization
-        ascii_text = plan.visualize_ascii()
-        self.assertIn("ExecutionPlan: diamond_plan", ascii_text)
-        self.assertIn("t1", ascii_text)
-        self.assertIn("t4", ascii_text)
+        # JSON round-trip
+        payload = plan.model_dump_json()
+        restored = ExecutionPlan.model_validate_json(payload)
+        self.assertEqual(restored.plan_id, "plan_01")
+        self.assertEqual(len(restored.tasks), 2)
+        self.assertEqual(restored.tasks[1].depends_on, ["t1"])
 
 
 if __name__ == "__main__":

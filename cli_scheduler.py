@@ -80,8 +80,9 @@ def handle_run_pipeline() -> None:
         ],
     )
 
-    print("\nStarting execution of 6-stage video production pipeline...")
-    print(plan.visualize_ascii())
+    print(f"\n--- ExecutionPlan '{plan.plan_id}' ({len(plan.tasks)} tasks) ---")
+    for t in plan.tasks:
+        print(f"  * [{t.id}] kind={t.kind} depends_on={t.depends_on}")
 
     def worker(task: TaskSpec, dependencies: dict[str, TaskState]) -> TaskExecutionResult:
         time.sleep(0.08)
