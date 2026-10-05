@@ -138,3 +138,4 @@ class ResourcePoolConfig(BaseModel):
 
     def as_dict(self) -> dict[str, int]:
         return {name: int(value) for name, value in self.model_dump().items()}
+
