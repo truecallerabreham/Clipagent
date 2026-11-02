@@ -1,0 +1,103 @@
+{
+  "id": "example-idea-to-launch",
+  "look": "whiteboard-saas",
+  "engine": "html",
+  "mode": "full",
+  "size": [
+    1920,
+    1080
+  ],
+  "transparent": false,
+  "fps": 30,
+  "duration": 12.0,
+  "concepts": {},
+  "scene": {
+    "title": "From *idea* to launch",
+    "elements": [
+      {
+        "id": "idea",
+        "primitive": "HandDraw",
+        "props": {
+          "art": "lightbulb",
+          "size": 260,
+          "label": "Idea",
+          "x": 0.2,
+          "y": 0.53
+        }
+      },
+      {
+        "id": "build",
+        "primitive": "HandDraw",
+        "props": {
+          "art": "gear",
+          "size": 260,
+          "label": "Build",
+          "x": 0.5,
+          "y": 0.53
+        }
+      },
+      {
+        "id": "launch",
+        "primitive": "HandDraw",
+        "props": {
+          "art": "rocket",
+          "size": 260,
+          "label": "Launch",
+          "x": 0.8,
+          "y": 0.53
+        }
+      },
+      {
+        "id": "a1",
+        "primitive": "Arrow",
+        "props": {
+          "from": "idea",
+          "to": "build",
+          "bend": -0.25
+        }
+      },
+      {
+        "id": "a2",
+        "primitive": "Arrow",
+        "props": {
+          "from": "build",
+          "to": "launch",
+          "bend": -0.25,
+          "dashed": true
+        }
+      },
+      {
+        "id": "note",
+        "primitive": "SketchText",
+        "props": {
+          "text": "ship in weeks, not months",
+          "size": 50,
+          "color": "accent",
+          "x": 0.5,
+          "y": 0.86,
+          "auto": false
+        }
+      }
+    ]
+  },
+  "beats": [
+    {
+      "at": 9.4,
+      "action": "write",
+      "target": "note"
+    },
+    {
+      "at": 11.0,
+      "action": "underline",
+      "target": "note",
+      "args": {
+        "word": "weeks"
+      }
+    },
+    {
+      "at": 11.0,
+      "action": "pop",
+      "target": "launch"
+    }
+  ]
+}

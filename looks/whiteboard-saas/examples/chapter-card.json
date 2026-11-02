@@ -1,0 +1,27 @@
+{
+  "id": "example-chapter-card",
+  "look": "whiteboard-saas",
+  "engine": "html",
+  "mode": "full",
+  "size": [
+    1920,
+    1080
+  ],
+  "transparent": false,
+  "fps": 30,
+  "duration": 2.0,
+  "concepts": {},
+  "scene": {
+    "elements": [
+      {
+        "id": "card",
+        "primitive": "ChapterCard",
+        "props": {
+          "text": "Pricing that scales",
+          "kicker": "Chapter 2"
+        }
+      }
+    ]
+  },
+  "beats": []
+}

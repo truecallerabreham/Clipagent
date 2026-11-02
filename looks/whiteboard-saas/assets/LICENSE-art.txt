@@ -1,0 +1,2 @@
+assets/hands/hands.js and assets/art/art.js: original vector art drawn for ClipAgent (CC0 1.0, public domain dedication).
+Fonts: Caveat and Poppins, SIL Open Font License 1.1 (see fonts/LICENSE-*.txt), from @fontsource 5.0.8.

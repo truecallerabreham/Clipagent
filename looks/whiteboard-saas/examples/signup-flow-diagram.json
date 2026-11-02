@@ -1,0 +1,84 @@
+{
+  "id": "example-signup-flow-diagram",
+  "look": "whiteboard-saas",
+  "engine": "html",
+  "mode": "full",
+  "size": [
+    1920,
+    1080
+  ],
+  "transparent": false,
+  "fps": 30,
+  "duration": 12.0,
+  "concepts": {},
+  "scene": {
+    "title": "How the *funnel* works",
+    "elements": [
+      {
+        "id": "flow",
+        "primitive": "Diagram",
+        "props": {
+          "y": 0.47,
+          "nodes": [
+            {
+              "id": "visit",
+              "label": "Visitor",
+              "icon": "user"
+            },
+            {
+              "id": "trial",
+              "label": "Free trial",
+              "icon": "laptop"
+            },
+            {
+              "id": "paid",
+              "label": "Paid plan",
+              "icon": "money",
+              "color": "green"
+            }
+          ],
+          "edges": [
+            [
+              "visit",
+              "trial",
+              "signs up"
+            ],
+            [
+              "trial",
+              "paid",
+              "upgrades"
+            ]
+          ]
+        }
+      },
+      {
+        "id": "sticky",
+        "primitive": "HandPlace",
+        "props": {
+          "note": "+38%\nconversion",
+          "size": 250,
+          "x": 0.84,
+          "y": 0.8,
+          "rotate": -4,
+          "auto": false
+        }
+      }
+    ]
+  },
+  "beats": [
+    {
+      "at": 8.6,
+      "action": "highlight",
+      "target": "flow",
+      "args": {
+        "node": "paid",
+        "hold": 2.5
+      }
+    },
+    {
+      "at": 9.4,
+      "action": "place",
+      "target": "sticky"
+    }
+  ]
+}

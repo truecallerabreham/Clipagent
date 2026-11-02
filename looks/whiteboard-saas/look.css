@@ -1,0 +1,193 @@
+/* whiteboard-saas Look: tokens + styles. Design units: the canvas short side is 1080 design px. */
+@font-face { font-family: 'Caveat'; src: url(assets/fonts/caveat-latin-500-normal.woff2) format('woff2'); font-weight: 500; }
+@font-face { font-family: 'Caveat'; src: url(assets/fonts/caveat-latin-600-normal.woff2) format('woff2'); font-weight: 600; }
+@font-face { font-family: 'Caveat'; src: url(assets/fonts/caveat-latin-700-normal.woff2) format('woff2'); font-weight: 700; }
+@font-face { font-family: 'Poppins'; src: url(assets/fonts/poppins-latin-400-normal.woff2) format('woff2'); font-weight: 400; }
+@font-face { font-family: 'Poppins'; src: url(assets/fonts/poppins-latin-500-normal.woff2) format('woff2'); font-weight: 500; }
+@font-face { font-family: 'Poppins'; src: url(assets/fonts/poppins-latin-600-normal.woff2) format('woff2'); font-weight: 600; }
+@font-face { font-family: 'Poppins'; src: url(assets/fonts/poppins-latin-700-normal.woff2) format('woff2'); font-weight: 700; }
+@font-face { font-family: 'Poppins'; src: url(assets/fonts/poppins-latin-800-normal.woff2) format('woff2'); font-weight: 800; }
+
+:root {
+  --bg: #FFFFFF;
+  --ink: #111111;
+  --ink-soft: #3F3F46;
+  --muted: #6B7280;
+  --line: #D4D4D8;
+  --accent: #5E17EB;
+  --accent-tint: #E9DEFF;
+  --pill: #1E1E1E;
+  --hand: 'Caveat', 'Poppins', cursive;
+  --sans: 'Poppins', system-ui, sans-serif;
+}
+html, body { background: #FFFFFF; }
+#ca-stage { font-family: var(--sans); color: var(--ink); }
+
+/* ---------- hands: deterministic soft shadow copies */
+.wb-shadow * { fill: #111111 !important; stroke: #111111 !important; }
+
+/* ---------- drawn art (HandDraw / Icon / Diagram) */
+.wb-art { overflow: visible; display: block; }
+.wb-art * { stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---------- handwriting (SketchText, labels, checklist) */
+.wb-hand {
+  font-family: var(--hand);
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.08;
+  white-space: nowrap;
+}
+.wb-hand .ca-word { padding: 0 0.04em; margin: 0 -0.04em; }
+.wb-line { display: block; }
+.wb-sketch { text-align: center; }
+.wb-sketch svg, .wb-kinetic svg { position: absolute; left: 0; top: 0; overflow: visible; }
+
+/* ---------- KineticText */
+.wb-kinetic {
+  font-family: var(--sans);
+  font-weight: 800;
+  color: var(--ink);
+  text-align: center;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+.wb-kinetic .ca-word { transform-origin: 50% 70%; }
+.wb-kinetic .kw { position: relative; }
+
+/* ---------- ChapterCard */
+.wb-chapter {
+  background: #000000;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.wb-chapter .inner { text-align: center; transform-origin: 50% 50%; }
+.wb-chapter .kicker {
+  font-family: var(--sans);
+  font-weight: 500;
+  font-size: 22px;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: #8B8B95;
+  margin-bottom: 26px;
+  padding-left: 0.42em;
+}
+.wb-chapter .ttl {
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 66px;
+  letter-spacing: 0.3em;
+  padding-left: 0.3em; /* tracking adds space after the last letter: re-center */
+  text-transform: uppercase;
+  line-height: 1.25;
+}
+.wb-chapter .rule { width: 64px; height: 4px; border-radius: 2px; margin: 34px auto 0; }
+
+/* ---------- PillLabel */
+.wb-pill-wrap { display: flex; align-items: center; justify-content: center; }
+.wb-pill {
+  background: var(--pill);
+  color: #FFFFFF;
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 26px;
+  line-height: 1;
+  padding: 15px 26px 14px;
+  border-radius: 999px;
+  white-space: nowrap;
+  box-shadow: 0 10px 24px rgba(17, 17, 17, 0.18);
+  position: relative;
+  z-index: 2;
+}
+.wb-pill .dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 12px; vertical-align: 1px; }
+
+/* ---------- UIMock (clean SaaS UI sketches) */
+.wb-ui { position: relative; font-family: var(--sans); color: var(--ink); }
+.wb-ui .face {
+  position: relative;
+  background: #FFFFFF;
+  border-radius: 22px;
+  padding: 30px 32px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+.wb-ui .shadow {
+  position: absolute; left: 0; top: 0; right: 0; bottom: 0;
+  border-radius: 22px;
+  background: var(--ink);
+  transform: translate(9px, 9px);
+}
+.wb-ui svg.frame { position: absolute; left: 0; top: 0; overflow: visible; z-index: 3; }
+.wb-ui .badge {
+  display: inline-block; align-self: flex-start; background: var(--accent); color: #fff; font-weight: 600; font-size: 17px;
+  padding: 7px 16px; border-radius: 999px; letter-spacing: 0.02em;
+}
+.wb-ui .plan { font-weight: 600; font-size: 26px; color: var(--ink-soft); margin: 14px 0 2px; }
+.wb-ui .title { font-weight: 700; font-size: 32px; line-height: 1.2; }
+.wb-ui .subtitle { font-weight: 500; font-size: 20px; color: var(--muted); margin-top: 6px; }
+.wb-ui .price { font-weight: 800; font-size: 72px; letter-spacing: -0.03em; line-height: 1.05; display: inline-block; }
+.wb-ui .period { font-weight: 500; font-size: 22px; color: var(--muted); margin-left: 6px; }
+.wb-ui .features { margin: 18px 0 4px; padding: 0; list-style: none; }
+.wb-ui .features li { font-weight: 500; font-size: 21px; padding: 7px 0; display: flex; align-items: center; color: var(--ink-soft); }
+.wb-ui .features li .tick {
+  width: 26px; height: 26px; border-radius: 50%; background: var(--accent-tint); margin-right: 14px; flex: none;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.wb-ui .btn {
+  display: block; text-align: center; font-weight: 600; font-size: 22px; color: #fff; background: var(--accent);
+  border: 3px solid var(--ink); border-radius: 14px; padding: 15px 20px; margin-top: 0; position: relative;
+}
+.wb-ui .btn.ghost { background: #fff; color: var(--ink); }
+.wb-ui .skel { height: 14px; border-radius: 7px; background: #E7E7EC; margin: 14px 0; }
+.wb-ui .skel.a { background: var(--accent-tint); }
+.wb-ui .row { display: flex; align-items: center; justify-content: space-between; }
+.wb-ui .slabel { font-weight: 600; font-size: 22px; }
+.wb-ui .svalue { font-weight: 700; font-size: 26px; color: var(--accent); }
+.wb-ui .track { position: relative; height: 12px; border-radius: 6px; background: #E7E7EC; margin: 30px 6px 16px; }
+.wb-ui .track .fillbar { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 6px; background: var(--accent); }
+.wb-ui .track .knob {
+  position: absolute; top: 50%; width: 38px; height: 38px; margin: -19px 0 0 -19px; border-radius: 50%;
+  background: #fff; border: 3.5px solid var(--ink); box-shadow: 0 4px 0 var(--ink);
+}
+.wb-ui .minmax { display: flex; justify-content: space-between; font-size: 17px; font-weight: 500; color: var(--muted); }
+.wb-ui .field { border: 2.5px solid #D4D4D8; border-radius: 12px; padding: 13px 16px; font-size: 20px; font-weight: 500; color: var(--ink); margin-top: 8px; min-height: 52px; white-space: pre; }
+.wb-ui .flabel { font-size: 16px; font-weight: 600; color: var(--muted); margin-top: 16px; text-transform: uppercase; letter-spacing: 0.08em; }
+.wb-ui .browserbar { display: flex; align-items: center; gap: 9px; padding: 0 0 18px; margin: -6px 0 22px; border-bottom: 2.5px solid #ECECF0; }
+.wb-ui .browserbar i { display: block; width: 14px; height: 14px; border-radius: 50%; }
+.wb-ui .browserbar .url { flex: 1; margin-left: 14px; background: #F3F3F6; border-radius: 9px; font-size: 16px; color: var(--muted); padding: 8px 14px; font-weight: 500; }
+.wb-ui .appbody { display: flex; gap: 24px; flex: 1 1 auto; }
+.wb-ui .side { width: 30%; }
+.wb-ui .side .it { font-size: 18px; font-weight: 600; color: var(--ink-soft); padding: 10px 12px; border-radius: 10px; margin-bottom: 6px; white-space: nowrap; }
+.wb-ui .side .it.on { background: var(--accent-tint); color: var(--accent); }
+.wb-ui .main { flex: 1; display: flex; flex-direction: column; align-items: flex-start; }
+.wb-ui .stat { font-weight: 800; font-size: 54px; letter-spacing: -0.02em; line-height: 1.15; }
+.wb-ui .bars { display: flex; align-items: flex-end; gap: 12px; height: 110px; flex: 1 1 auto; margin-top: 18px; align-self: stretch; }
+.wb-ui .bars b { flex: 1; border-radius: 6px 6px 0 0; background: var(--accent-tint); display: block; }
+.wb-ui .bars b.hi { background: var(--accent); }
+.wb-ui .toggle { width: 74px; height: 40px; border-radius: 20px; background: #D4D4D8; position: relative; border: 3px solid var(--ink); }
+.wb-ui .toggle .nub { position: absolute; top: 3px; left: 3px; width: 28px; height: 28px; border-radius: 50%; background: #fff; border: 3px solid var(--ink); }
+
+/* ---------- HandPlace: sticky note asset */
+.wb-note {
+  background: #FDE68A;
+  font-family: var(--hand);
+  font-weight: 700;
+  color: var(--ink);
+  padding: 34px 30px;
+  text-align: center;
+  line-height: 1.05;
+  box-shadow: 0 16px 28px rgba(17, 17, 17, 0.14);
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* ---------- Checklist */
+.wb-check-item { position: relative; white-space: nowrap; }
+.wb-check-title { font-family: var(--hand); font-weight: 700; }
+
+/* ---------- Diagram */
+.wb-diag-label { position: absolute; font-family: var(--hand); font-weight: 700; color: var(--ink); text-align: center; white-space: nowrap; line-height: 1; }

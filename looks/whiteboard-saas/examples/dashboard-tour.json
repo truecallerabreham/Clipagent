@@ -1,0 +1,166 @@
+{
+  "id": "example-dashboard-tour",
+  "look": "whiteboard-saas",
+  "engine": "html",
+  "mode": "full",
+  "size": [
+    1920,
+    1080
+  ],
+  "transparent": false,
+  "fps": 30,
+  "duration": 11.0,
+  "concepts": {},
+  "scene": {
+    "elements": [
+      {
+        "id": "app",
+        "primitive": "UIMock",
+        "props": {
+          "variant": "browser",
+          "width": 1180,
+          "x": 0.42,
+          "y": 0.53,
+          "url": "app.acme.com/revenue",
+          "items": [
+            "Dashboard",
+            "Customers",
+            "Billing",
+            "Settings"
+          ],
+          "active": 0,
+          "title": "Monthly revenue",
+          "stat": "$48,250",
+          "bars": [
+            0.3,
+            0.42,
+            0.38,
+            0.55,
+            0.62,
+            0.58,
+            0.74,
+            0.9
+          ],
+          "height": 0.6
+        }
+      },
+      {
+        "id": "side",
+        "primitive": "PillLabel",
+        "props": {
+          "text": "Navigation",
+          "target": "app.sidebar",
+          "side": "bottom",
+          "gap": 26,
+          "arrows": "both",
+          "auto": false
+        }
+      },
+      {
+        "id": "box",
+        "primitive": "MarchingBox",
+        "props": {
+          "target": "app.chart",
+          "pad": 16,
+          "label": "Live data",
+          "auto": false,
+          "labelSide": "top-right"
+        }
+      },
+      {
+        "id": "chev",
+        "primitive": "Chevrons",
+        "props": {
+          "target": "app.stat",
+          "side": "right",
+          "gap": 36,
+          "auto": false
+        }
+      },
+      {
+        "id": "note",
+        "primitive": "SketchText",
+        "props": {
+          "text": "+12% this\nmonth!",
+          "size": 58,
+          "color": "green",
+          "x": 0.865,
+          "y": 0.66,
+          "auto": false
+        }
+      },
+      {
+        "id": "arr",
+        "primitive": "Arrow",
+        "props": {
+          "from": "note",
+          "to": "app.chart",
+          "bend": -0.22,
+          "dashed": true,
+          "color": "green",
+          "auto": false,
+          "gap": 30
+        }
+      },
+      {
+        "id": "tap",
+        "primitive": "PointerHand",
+        "props": {
+          "target": "app.item2",
+          "auto": false,
+          "size": 1.0
+        }
+      }
+    ]
+  },
+  "beats": [
+    {
+      "at": 1.8,
+      "action": "enter",
+      "target": "side"
+    },
+    {
+      "at": 3.0,
+      "action": "enter",
+      "target": "box"
+    },
+    {
+      "at": 4.4,
+      "action": "enter",
+      "target": "chev"
+    },
+    {
+      "at": 5.4,
+      "action": "write",
+      "target": "note"
+    },
+    {
+      "at": 6.6,
+      "action": "enter",
+      "target": "arr"
+    },
+    {
+      "at": 8.0,
+      "action": "enter",
+      "target": "tap"
+    },
+    {
+      "at": 8.8,
+      "action": "click",
+      "target": "tap"
+    },
+    {
+      "at": 8.85,
+      "action": "click",
+      "target": "app",
+      "args": {
+        "part": "item2"
+      }
+    },
+    {
+      "at": 9.8,
+      "action": "exit",
+      "target": "tap"
+    }
+  ]
+}

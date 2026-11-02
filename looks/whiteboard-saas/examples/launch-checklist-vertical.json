@@ -1,0 +1,88 @@
+{
+  "id": "example-launch-checklist-vertical",
+  "look": "whiteboard-saas",
+  "engine": "html",
+  "mode": "full",
+  "size": [
+    1080,
+    1920
+  ],
+  "transparent": false,
+  "fps": 30,
+  "duration": 12.0,
+  "concepts": {},
+  "scene": {
+    "title": "Launch day checklist",
+    "elements": [
+      {
+        "id": "rocket",
+        "primitive": "Icon",
+        "props": {
+          "art": "rocket",
+          "size": 360
+        }
+      },
+      {
+        "id": "list",
+        "primitive": "Checklist",
+        "props": {
+          "items": [
+            "Landing page live",
+            "Pricing page",
+            "Onboarding emails",
+            "Analytics events"
+          ],
+          "size": 68
+        }
+      },
+      {
+        "id": "take",
+        "primitive": "KineticText",
+        "props": {
+          "text": "Ship *fast*,\nlearn faster.",
+          "size": 96,
+          "auto": false
+        }
+      }
+    ]
+  },
+  "beats": [
+    {
+      "at": 7.2,
+      "action": "check",
+      "target": "list",
+      "args": {
+        "item": 0
+      }
+    },
+    {
+      "at": 7.7,
+      "action": "check",
+      "target": "list",
+      "args": {
+        "item": 1
+      }
+    },
+    {
+      "at": 8.2,
+      "action": "check",
+      "target": "list",
+      "args": {
+        "item": 2
+      }
+    },
+    {
+      "at": 8.7,
+      "action": "check",
+      "target": "list",
+      "args": {
+        "item": 3
+      }
+    },
+    {
+      "at": 9.6,
+      "action": "reveal",
+      "target": "take"
+    }
+  ]
+}

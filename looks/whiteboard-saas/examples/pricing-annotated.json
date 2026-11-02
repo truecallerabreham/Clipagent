@@ -1,0 +1,161 @@
+{
+  "id": "example-pricing-annotated",
+  "look": "whiteboard-saas",
+  "engine": "html",
+  "mode": "full",
+  "size": [
+    1920,
+    1080
+  ],
+  "transparent": false,
+  "fps": 30,
+  "duration": 13.0,
+  "concepts": {},
+  "scene": {
+    "title": "Pick the plan that *scales*",
+    "elements": [
+      {
+        "id": "starter",
+        "primitive": "UIMock",
+        "props": {
+          "variant": "pricing",
+          "plan": "Starter",
+          "price": "$0",
+          "period": "/month",
+          "features": [
+            "1 project",
+            "Community support",
+            "Basic analytics"
+          ],
+          "button": "Get started",
+          "ghost": true,
+          "x": 0.25,
+          "y": 0.565,
+          "width": 420,
+          "height": 0.47
+        }
+      },
+      {
+        "id": "pro",
+        "primitive": "UIMock",
+        "props": {
+          "variant": "pricing",
+          "badge": "Most popular",
+          "plan": "Pro",
+          "price": "$29",
+          "period": "/month",
+          "features": [
+            "Unlimited projects",
+            "Priority support",
+            "Advanced analytics"
+          ],
+          "button": "Start free trial",
+          "x": 0.52,
+          "y": 0.565,
+          "width": 420,
+          "height": 0.47
+        }
+      },
+      {
+        "id": "note",
+        "primitive": "SketchText",
+        "props": {
+          "text": "best value!",
+          "size": 64,
+          "color": "accent",
+          "x": 0.82,
+          "y": 0.36,
+          "auto": false
+        }
+      },
+      {
+        "id": "arrow",
+        "primitive": "Arrow",
+        "props": {
+          "from": "note",
+          "to": "pro",
+          "bend": 0.3,
+          "dashed": true,
+          "color": "accent",
+          "auto": false
+        }
+      },
+      {
+        "id": "box",
+        "primitive": "MarchingBox",
+        "props": {
+          "target": "pro",
+          "pad": 22,
+          "radius": 30,
+          "auto": false
+        }
+      },
+      {
+        "id": "chev",
+        "primitive": "Chevrons",
+        "props": {
+          "target": "pro.button",
+          "side": "right",
+          "gap": 84,
+          "auto": false
+        }
+      },
+      {
+        "id": "cursor",
+        "primitive": "PointerHand",
+        "props": {
+          "target": "pro.button",
+          "auto": false
+        }
+      }
+    ]
+  },
+  "beats": [
+    {
+      "at": 5.6,
+      "action": "enter",
+      "target": "box"
+    },
+    {
+      "at": 5.9,
+      "action": "select",
+      "target": "pro"
+    },
+    {
+      "at": 6.6,
+      "action": "write",
+      "target": "note"
+    },
+    {
+      "at": 7.6,
+      "action": "enter",
+      "target": "arrow",
+      "args": {
+        "dur": 0.8
+      }
+    },
+    {
+      "at": 8.8,
+      "action": "enter",
+      "target": "chev"
+    },
+    {
+      "at": 10.0,
+      "action": "enter",
+      "target": "cursor"
+    },
+    {
+      "at": 10.8,
+      "action": "click",
+      "target": "cursor"
+    },
+    {
+      "at": 10.85,
+      "action": "click",
+      "target": "pro",
+      "args": {
+        "part": "button"
+      }
+    }
+  ]
+}

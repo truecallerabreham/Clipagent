@@ -1,0 +1,61 @@
+{
+  "id": "example-takeaway-kinetic",
+  "look": "whiteboard-saas",
+  "engine": "html",
+  "mode": "full",
+  "size": [
+    1920,
+    1080
+  ],
+  "transparent": false,
+  "fps": 30,
+  "duration": 7.0,
+  "concepts": {},
+  "scene": {
+    "elements": [
+      {
+        "id": "line",
+        "primitive": "KineticText",
+        "props": {
+          "text": "Pricing is a *product* decision, not a finance one.",
+          "size": 96,
+          "highlight": "marker",
+          "y": 0.46
+        }
+      },
+      {
+        "id": "note",
+        "primitive": "HandPlace",
+        "props": {
+          "note": "Test it\nweekly!",
+          "size": 230,
+          "x": 0.83,
+          "y": 0.79,
+          "rotate": 4,
+          "noteColor": "#C4B5FD",
+          "auto": false
+        }
+      }
+    ]
+  },
+  "beats": [
+    {
+      "at": 0.4,
+      "action": "reveal",
+      "target": "line",
+      "args": {
+        "dur": 2.4
+      }
+    },
+    {
+      "at": 4.0,
+      "action": "emphasize",
+      "target": "line"
+    },
+    {
+      "at": 4.4,
+      "action": "place",
+      "target": "note"
+    }
+  ]
+}
