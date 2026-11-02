@@ -337,33 +337,43 @@ def cmd_doctor(args):
 
 
 def cmd_install_recorder(args):
+    """Download the prebuilt recorder for this OS from GitHub Releases into ~/ClipAgent/bin."""
     sysname = {"Linux": "linux", "Darwin": "mac", "Windows": "win"}[platform.system()]
-    arch = "arm64" if platform.machine().lower() in ("arm64", "aarch64") else "x64"
-    ext = {"linux": "AppImage", "mac": "zip", "win": "zip"}[sysname]
-    name = f"ClipAgent-Recorder-{sysname}-{arch}.{ext}"
-    dest_dir = S.HOME / "bin"
-    dest_dir.mkdir(parents=True, exist_ok=True)
+    name = {"linux": "ClipAgent-Recorder-linux-x86_64.AppImage",
+            "mac": "ClipAgent-Recorder-mac-universal.dmg",
+            "win": "ClipAgent-Recorder-win-x64.zip"}[sysname]
+    dest = S.HOME / "bin"
+    dest.mkdir(parents=True, exist_ok=True)
     url = f"{RELEASES}/{name}"
     print(f"downloading {url}")
-    tmp = dest_dir / name
+    tmp = dest / name
     urllib.request.urlretrieve(url, tmp)
-    target = dest_dir / ("clipagent-recorder.exe" if sysname == "win" else "clipagent-recorder")
-    if ext == "AppImage":
+    if sysname == "linux":
+        target = dest / "clipagent-recorder"
         tmp.chmod(0o755)
         tmp.replace(target)
+        if not any(Path(p).exists() for p in ("/usr/lib/x86_64-linux-gnu/libfuse.so.2", "/lib/x86_64-linux-gnu/libfuse.so.2")):
+            print("note: AppImages need libfuse2 (sudo apt install libfuse2), or set APPIMAGE_EXTRACT_AND_RUN=1")
+    elif sysname == "mac":
+        mnt = Path(subprocess.run(["hdiutil", "attach", "-nobrowse", "-readonly", str(tmp)], capture_output=True,
+                                  text=True, check=True).stdout.strip().split("\t")[-1])
+        app = next(mnt.glob("*.app"))
+        shutil.rmtree(dest / app.name, ignore_errors=True)
+        shutil.copytree(app, dest / app.name, symlinks=True)
+        subprocess.run(["hdiutil", "detach", str(mnt)], capture_output=True)
+        tmp.unlink()
+        target = dest / "clipagent-recorder"
+        exe = next((dest / app.name / "Contents" / "MacOS").iterdir())
+        target.write_text(f'#!/bin/sh\nexec "{exe}" "$@"\n')
+        target.chmod(0o755)
     else:
         import zipfile
         with zipfile.ZipFile(tmp) as z:
-            z.extractall(dest_dir / "recorder-app")
+            z.extractall(dest / "recorder-app")
         tmp.unlink()
-        if sysname == "mac":
-            app = next((dest_dir / "recorder-app").rglob("*.app"))
-            target.write_text(f'#!/bin/sh\nexec "{app}/Contents/MacOS/{app.stem}" "$@"\n')
-            target.chmod(0o755)
-        else:
-            exe = next((dest_dir / "recorder-app").rglob("*.exe"))
-            target = dest_dir / "clipagent-recorder.cmd"
-            target.write_text(f'@"{exe}" %*\n')
+        exe = next(p for p in (dest / "recorder-app").rglob("*.exe") if "uninstall" not in p.name.lower())
+        target = dest / "clipagent-recorder.cmd"
+        target.write_text(f'@"{exe}" %*\n')
     print(f"installed: {target}")
 
 

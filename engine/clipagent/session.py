@@ -145,7 +145,7 @@ def recorder_command() -> list[str]:
     env = os.environ.get("CLIPAGENT_RECORDER")
     if env:
         return env.split()
-    installed = HOME / "bin" / ("clipagent-recorder.exe" if sys.platform == "win32" else "clipagent-recorder")
+    installed = HOME / "bin" / ("clipagent-recorder.cmd" if sys.platform == "win32" else "clipagent-recorder")
     if installed.exists():
         return [str(installed)]
     found = shutil.which("clipagent-recorder")
