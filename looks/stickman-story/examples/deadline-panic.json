@@ -1,0 +1,59 @@
+{
+  "id": "example-deadline-panic",
+  "look": "stickman-story",
+  "engine": "html",
+  "mode": "full",
+  "size": [1920, 1080],
+  "transparent": false,
+  "fps": 30,
+  "duration": 20.0,
+  "concepts": {},
+  "scene": {
+    "elements": [
+      { "id": "crunch", "primitive": "Scene", "props": {
+          "caption": "The demo was due at 5.",
+          "props": [{ "kind": "monitor", "screen": "code" }, { "kind": "clock", "time": "3:40" }],
+          "mood": "focused", "arms": "type" } },
+      { "id": "door", "primitive": "Scene", "props": {
+          "caption": "Then my manager opened the door.",
+          "props": [{ "kind": "door" }],
+          "side": "left", "mood": "neutral", "arms": "rest", "look": "left" } },
+      { "id": "idea", "primitive": "Scene", "props": {
+          "caption": "\"What if we just *cut* the login screen?\"",
+          "layout": "center", "mood": "thinking", "arms": "rest" } },
+      { "id": "shrug", "primitive": "Scene", "props": {
+          "caption": "Honestly? Nobody missed it.",
+          "layout": "center", "mood": "smile", "arms": "rest" } }
+    ]
+  },
+  "beats": [
+    { "at": 0.8, "action": "clock", "target": "crunch", "args": { "to": "4:55", "dur": 3.2 } },
+    { "at": 1.6, "action": "look", "target": "crunch", "args": { "dir": "clock" } },
+    { "at": 1.8, "action": "mood", "target": "crunch", "args": { "mood": "stressed" } },
+    { "at": 2.0, "action": "symbol", "target": "crunch", "args": { "kind": "sweat" } },
+    { "at": 2.6, "action": "look", "target": "crunch", "args": { "dir": "screen" } },
+    { "at": 3.4, "action": "screen", "target": "crunch", "args": { "state": "error" } },
+    { "at": 3.5, "action": "symbol", "target": "crunch", "args": { "kind": "stress" } },
+
+    { "at": 5.0, "action": "cut", "target": "door" },
+    { "at": 5.5, "action": "door", "target": "door", "args": { "open": true } },
+    { "at": 6.0, "action": "mood", "target": "door", "args": { "mood": "surprised" } },
+    { "at": 6.0, "action": "symbol", "target": "door", "args": { "kind": "exclaim" } },
+    { "at": 6.4, "action": "tilt", "target": "door", "args": { "angle": -6 } },
+
+    { "at": 10.0, "action": "cut", "target": "idea" },
+    { "at": 10.3, "action": "think", "target": "idea" },
+    { "at": 10.6, "action": "bubble", "target": "idea", "args": { "icon": "lightbulb" } },
+    { "at": 12.2, "action": "mood", "target": "idea", "args": { "mood": "happy" } },
+    { "at": 12.3, "action": "look", "target": "idea", "args": { "dir": "camera" } },
+    { "at": 12.4, "action": "nod", "target": "idea" },
+
+    { "at": 15.0, "action": "cut", "target": "shrug" },
+    { "at": 15.4, "action": "shrug", "target": "shrug" },
+    { "at": 15.5, "action": "symbol", "target": "shrug", "args": { "kind": "question" } },
+    { "at": 15.6, "action": "brows", "target": "shrug", "args": { "state": "raised" } },
+    { "at": 16.6, "action": "talk", "target": "shrug", "args": { "dur": 1.5 } },
+    { "at": 18.0, "action": "victory", "target": "shrug", "args": { "sparkles": false } },
+    { "at": 18.1, "action": "clear", "target": "shrug", "args": { "kind": "question" } }
+  ]
+}

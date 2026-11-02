@@ -1,0 +1,47 @@
+{
+  "id": "example-late-night-bug",
+  "look": "stickman-story",
+  "engine": "html",
+  "mode": "full",
+  "size": [1920, 1080],
+  "transparent": false,
+  "fps": 30,
+  "duration": 15.0,
+  "concepts": {},
+  "scene": {
+    "elements": [
+      { "id": "s1", "primitive": "Scene", "props": {
+          "caption": "It's 11 pm and the bug is *still* there.",
+          "props": ["laptop", { "kind": "clock", "time": "10:52" }],
+          "mood": "stressed", "arms": "type" } },
+      { "id": "s2", "primitive": "Scene", "props": {
+          "caption": "So I wrote down every step, one by one.",
+          "props": [{ "kind": "checklist", "title": "Debug plan", "items": ["Reproduce it", "Add a test", "Fix the cause"] }],
+          "mood": "focused", "arms": "rest" } },
+      { "id": "s3", "primitive": "Scene", "props": {
+          "caption": "Twenty minutes later: *green*.",
+          "props": [{ "kind": "laptop", "screen": "success" }],
+          "mood": "happy", "arms": "rest" } }
+    ]
+  },
+  "beats": [
+    { "at": 0.6, "action": "symbol", "target": "s1", "args": { "kind": "sweat" } },
+    { "at": 1.6, "action": "clock", "target": "s1", "args": { "to": "11:00", "dur": 2.0 } },
+    { "at": 2.4, "action": "look", "target": "s1", "args": { "dir": "clock" } },
+    { "at": 3.0, "action": "symbol", "target": "s1", "args": { "kind": "stress" } },
+    { "at": 3.6, "action": "look", "target": "s1", "args": { "dir": "screen" } },
+
+    { "at": 5.0, "action": "cut", "target": "s2" },
+    { "at": 5.4, "action": "point", "target": "s2", "args": { "at": "checklist" } },
+    { "at": 6.2, "action": "check", "target": "s2", "args": { "item": 0 } },
+    { "at": 7.2, "action": "check", "target": "s2", "args": { "item": 1 } },
+    { "at": 7.6, "action": "nod", "target": "s2" },
+    { "at": 8.3, "action": "check", "target": "s2", "args": { "item": 2 } },
+    { "at": 8.6, "action": "mood", "target": "s2", "args": { "mood": "confident" } },
+    { "at": 8.8, "action": "look", "target": "s2", "args": { "dir": "camera" } },
+
+    { "at": 10.0, "action": "cut", "target": "s3" },
+    { "at": 10.6, "action": "victory", "target": "s3" },
+    { "at": 11.0, "action": "talk", "target": "s3", "args": { "dur": 1.4 } }
+  ]
+}

@@ -1,0 +1,93 @@
+{
+  "id": "stickman-story",
+  "name": "Stickman Story",
+  "description": "Minimalist monochrome stickman storytelling: one on-model line-art character (5 px black ink on pure white) with expressive face, typing/scrolling/pointing/victory limb loops, 1-2 line-art props and comic symbols per 4-6 s shot, hard cuts on sentence boundaries; plus a clean macOS-window UI walkthrough over black with click ripples, 1.8x pan-and-zoom and radial-blur tab switches.",
+  "best_for": [
+    "storytelling and relatable scenarios (\"it's 11 pm and the bug is still there\")",
+    "productivity, habits, workflows and before/after stories",
+    "developer life: debugging, deadlines, shipping, code review",
+    "emotional beats: stress, relief, victory, surprise",
+    "simple product or UI walkthroughs (clicks, zooms on stats, tab switches)",
+    "beginner-friendly explainers and social shorts"
+  ],
+  "dark": false,
+  "accent": "#111111",
+  "canvas": { "background": "#FFFFFF" },
+  "palette": {
+    "background": "#FFFFFF",
+    "ink": "#000000",
+    "text": "#111111",
+    "text_dim": "#555555",
+    "paper": "#FFFFFF",
+    "walkthrough_bg": "#000000",
+    "window_bar": "#ECECEE",
+    "window_border": "#D4D4D8"
+  },
+  "tokens": {
+    "ink": "#000000",
+    "text": "#111111",
+    "white": "#FFFFFF",
+    "ripple": "#9CA3AF",
+    "alert": "#000000",
+    "ok": "#000000"
+  },
+  "fonts": {
+    "hand": { "family": "Patrick Hand", "file": "assets/fonts/patrick-hand-latin-400-normal.woff2", "license": "OFL-1.1" },
+    "sans": { "family": "Inter", "files": "assets/fonts/inter-latin-*-normal.woff2", "license": "OFL-1.1" }
+  },
+  "concept_palette": ["#111111", "#3F3F46", "#52525B", "#71717A"],
+  "semantic": {},
+  "screen_treatment": {
+    "background": ["#000000", "#0a0a0a"],
+    "frame": "macos",
+    "radius": 16,
+    "inset": 0.06,
+    "zoom_scale": [1.5, 1.8],
+    "click_effect": "ripple",
+    "annotation_color": "#FFFFFF",
+    "transition": "radial_blur",
+    "transition_colors": ["#FFFFFF", "#111111", "#9CA3AF"],
+    "shortcut_badge": { "bg": "#FFFFFF", "fg": "#111111" }
+  },
+  "captions": { "enabled": true, "color": "#FFFFFF", "highlight": "#FFE066", "words_per_line": 4, "font": "Patrick Hand" },
+  "chapter_card": { "bg": "#FFFFFF", "fg": "#111111", "tracking": 0.12, "duration": 2.0, "font": "Patrick Hand" },
+  "sfx": {
+    "transition": "whoosh",
+    "click": "tick",
+    "chapter": "whoosh",
+    "shortcut": "tick",
+    "overlay": "pop",
+    "cut": "tick",
+    "symbol": "pop",
+    "bubble": "pop",
+    "check": "ding",
+    "victory": "ding",
+    "press": "tick",
+    "type": "type",
+    "tab": "whoosh",
+    "zoom": "whoosh",
+    "door": "whoosh",
+    "Scene.cut": "tick",
+    "Scene.symbol": "pop",
+    "Scene.bubble": "pop",
+    "Scene.check": "ding",
+    "Scene.victory": "ding",
+    "Scene.press": "tick",
+    "Scene.type": "type",
+    "Walkthrough.click": "tick",
+    "Walkthrough.tab": "whoosh",
+    "Walkthrough.zoom": "whoosh"
+  },
+  "music": "bright-pluck",
+  "layout": "stickman-story",
+  "design_short_side": 1080,
+  "design_short_side_portrait": 1080,
+  "scene_shortcuts": {},
+  "runtime": {
+    "scripts": ["assets/icons/lucide-subset.js"],
+    "preload_fonts": [
+      "400 40px 'Patrick Hand'",
+      "400 20px 'Inter'", "500 20px 'Inter'", "600 20px 'Inter'", "700 20px 'Inter'", "800 20px 'Inter'"
+    ]
+  }
+}

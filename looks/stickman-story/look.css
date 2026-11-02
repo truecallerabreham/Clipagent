@@ -1,0 +1,136 @@
+/* stickman-story Look: tokens + styles. Design units: the canvas short side is 1080 design px. */
+@font-face { font-family: 'Patrick Hand'; src: url(assets/fonts/patrick-hand-latin-400-normal.woff2) format('woff2'); font-weight: 400; }
+@font-face { font-family: 'Inter'; src: url(assets/fonts/inter-latin-400-normal.woff2) format('woff2'); font-weight: 400; }
+@font-face { font-family: 'Inter'; src: url(assets/fonts/inter-latin-500-normal.woff2) format('woff2'); font-weight: 500; }
+@font-face { font-family: 'Inter'; src: url(assets/fonts/inter-latin-600-normal.woff2) format('woff2'); font-weight: 600; }
+@font-face { font-family: 'Inter'; src: url(assets/fonts/inter-latin-700-normal.woff2) format('woff2'); font-weight: 700; }
+@font-face { font-family: 'Inter'; src: url(assets/fonts/inter-latin-800-normal.woff2) format('woff2'); font-weight: 800; }
+
+:root {
+  --paper: #FFFFFF;
+  --ink: #000000;
+  --text: #111111;
+  --text-dim: #555555;
+  --hand: 'Patrick Hand', 'Comic Sans MS', cursive;
+  --sans: 'Inter', system-ui, sans-serif;
+  --win-bar: #ECECEE;
+  --win-border: #D4D4D8;
+}
+#ca-stage { font-family: var(--hand); color: var(--text); }
+
+/* ---------- shots fill the canvas */
+.ca-scene, .ca-walkthrough { overflow: hidden; }
+.ss-svg { position: absolute; left: 0; top: 0; overflow: visible; }
+
+/* ---------- scene caption: handwritten, top center */
+.ss-caption, .ss-wcaption {
+  position: absolute;
+  left: 50%;
+  top: 56px;
+  width: 1500px;
+  margin-left: -750px;
+  text-align: center;
+  font-family: var(--hand);
+  font-size: 66px;
+  line-height: 1.12;
+  color: var(--text);
+  letter-spacing: 0.005em;
+}
+.ss-caption.portrait, .ss-wcaption.portrait {
+  top: 150px;
+  width: 940px;
+  margin-left: -470px;
+  font-size: 76px;
+  line-height: 1.1;
+}
+.ss-caption .em, .ss-wcaption .em {
+  text-decoration: underline;
+  text-decoration-thickness: 5px;
+  text-underline-offset: 10px;
+}
+.ss-wcaption { color: #FFFFFF; font-size: 58px; }
+.ss-wcaption.portrait { font-size: 68px; }
+
+/* ---------- walkthrough: macOS window over black */
+.ss-win {
+  position: absolute;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #FFFFFF;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14), 0 30px 90px rgba(0, 0, 0, 0.6);
+}
+.ss-bar {
+  height: 92px;
+  background: var(--win-bar);
+  border-bottom: 1px solid var(--win-border);
+  position: relative;
+  font-family: var(--sans);
+}
+.ss-lights { position: absolute; left: 20px; top: 17px; display: flex; gap: 9px; }
+.ss-lights i { display: block; width: 14px; height: 14px; border-radius: 50%; box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.18); }
+.ss-tabs { position: absolute; left: 100px; right: 16px; top: 8px; height: 34px; display: flex; gap: 6px; }
+.ss-tab {
+  height: 32px;
+  max-width: 260px;
+  min-width: 120px;
+  padding: 0 14px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #52525B;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.ss-tab.on { background: #FFFFFF; color: #18181B; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12); }
+.ss-fav {
+  width: 18px; height: 18px; flex: 0 0 18px;
+  border-radius: 5px;
+  background: #18181B;
+  color: #FFFFFF;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  text-transform: uppercase;
+}
+.ss-tab:not(.on) .ss-fav { background: #A1A1AA; }
+.ss-tt { overflow: hidden; text-overflow: ellipsis; }
+.ss-addr { position: absolute; left: 16px; right: 16px; top: 50px; height: 32px; }
+.ss-url {
+  height: 32px;
+  border-radius: 8px;
+  background: #FFFFFF;
+  border: 1px solid #DEDEE2;
+  font-size: 15px;
+  color: #3F3F46;
+  display: flex;
+  align-items: center;
+  padding-left: 14px;
+}
+.ss-view { position: relative; overflow: hidden; background: #FFFFFF; }
+.ss-page { position: absolute; left: 0; top: 0; width: 100%; height: 100%; transform-origin: 0 0; }
+.ss-img, .ss-ghost { position: absolute; left: 0; top: 0; width: 100%; height: auto; display: block; transform-origin: 0 0; }
+.ss-ghost { visibility: hidden; }
+.ss-over { position: absolute; left: 0; top: 0; pointer-events: none; }
+.ss-ripple {
+  position: absolute; left: 0; top: 0;
+  border-radius: 50%;
+  background: rgba(128, 128, 128, 0.42);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.7);
+  visibility: hidden;
+}
+.ss-cursor { position: absolute; left: 0; top: 0; width: 34px; height: 34px; transform-origin: 6px 4px; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.35)); }
+.ss-cursor svg { display: block; }
+.ss-hl {
+  position: absolute; left: 0; top: 0;
+  border-radius: 12px;
+  /* marching ants: four dashed gradient edges, animated via background-position in seek(t) */
+  background-image:
+    linear-gradient(90deg, #111 50%, transparent 50%), linear-gradient(90deg, #111 50%, transparent 50%),
+    linear-gradient(0deg, #111 50%, transparent 50%), linear-gradient(0deg, #111 50%, transparent 50%);
+  background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
+  background-size: 18px 4px, 18px 4px, 4px 18px, 4px 18px;
+  visibility: hidden;
+}

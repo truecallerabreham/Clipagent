@@ -1,0 +1,52 @@
+{
+  "id": "example-morning-routine-vertical",
+  "look": "stickman-story",
+  "engine": "html",
+  "mode": "full",
+  "size": [1080, 1920],
+  "transparent": false,
+  "fps": 30,
+  "duration": 16.0,
+  "concepts": {},
+  "scene": {
+    "elements": [
+      { "id": "sleep", "primitive": "Scene", "props": {
+          "caption": "My alarm went off at 7.",
+          "props": [{ "kind": "clock", "time": "6:58" }],
+          "layout": "center", "mood": "sleepy", "symbols": ["zzz"] } },
+      { "id": "scroll", "primitive": "Scene", "props": {
+          "caption": "Then I \"just checked\" my phone…",
+          "layout": "center", "facing": "right", "mood": "neutral", "arms": "scroll", "look": "phone" } },
+      { "id": "late", "primitive": "Scene", "props": {
+          "caption": "…for forty-five minutes.",
+          "props": [{ "kind": "timer", "seconds": 2700, "mode": "up" }],
+          "mood": "surprised", "arms": "rest" } },
+      { "id": "fix", "primitive": "Scene", "props": {
+          "caption": "Now the phone stays in the *kitchen*.",
+          "layout": "center", "mood": "happy", "arms": "rest" } }
+    ]
+  },
+  "beats": [
+    { "at": 1.6, "action": "clock", "target": "sleep", "args": { "to": "7:00", "dur": 1.0 } },
+    { "at": 2.6, "action": "clear", "target": "sleep", "args": { "kind": "zzz" } },
+    { "at": 2.6, "action": "symbol", "target": "sleep", "args": { "kind": "exclaim" } },
+    { "at": 2.6, "action": "mood", "target": "sleep", "args": { "mood": "surprised" } },
+    { "at": 2.8, "action": "look", "target": "sleep", "args": { "dir": "clock" } },
+
+    { "at": 4.0, "action": "cut", "target": "scroll" },
+    { "at": 4.6, "action": "bubble", "target": "scroll", "args": { "text": "just 1 minute" } },
+    { "at": 6.4, "action": "mood", "target": "scroll", "args": { "mood": "smile" } },
+    { "at": 7.0, "action": "blink", "target": "scroll" },
+
+    { "at": 8.0, "action": "cut", "target": "late" },
+    { "at": 8.2, "action": "timer", "target": "late", "args": { "run": true, "rate": 900 } },
+    { "at": 9.1, "action": "symbol", "target": "late", "args": { "kind": "sweat" } },
+    { "at": 9.4, "action": "mood", "target": "late", "args": { "mood": "stressed" } },
+    { "at": 10.0, "action": "facepalm", "target": "late" },
+
+    { "at": 12.0, "action": "cut", "target": "fix" },
+    { "at": 12.5, "action": "wave", "target": "fix" },
+    { "at": 12.6, "action": "talk", "target": "fix", "args": { "dur": 1.6 } },
+    { "at": 13.4, "action": "symbol", "target": "fix", "args": { "kind": "heart" } }
+  ]
+}

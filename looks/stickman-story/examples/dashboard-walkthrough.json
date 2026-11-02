@@ -1,0 +1,167 @@
+{
+  "id": "example-dashboard-walkthrough",
+  "look": "stickman-story",
+  "engine": "html",
+  "mode": "full",
+  "size": [
+    1920,
+    1080
+  ],
+  "transparent": false,
+  "fps": 30,
+  "duration": 14.0,
+  "concepts": {},
+  "scene": {
+    "elements": [
+      {
+        "id": "intro",
+        "primitive": "Scene",
+        "props": {
+          "caption": "Let me show you where the numbers live.",
+          "props": [
+            {
+              "kind": "monitor",
+              "screen": "chart"
+            },
+            "mug"
+          ],
+          "mood": "smile",
+          "arms": "rest",
+          "look": "camera"
+        }
+      },
+      {
+        "id": "ui",
+        "primitive": "Walkthrough",
+        "props": {
+          "tabs": [
+            {
+              "src": "media/dashboard.png",
+              "title": "Overview \u00b7 Pulse",
+              "url": "app.pulse.dev/overview"
+            },
+            {
+              "src": "media/billing.png",
+              "title": "Billing \u00b7 Pulse",
+              "url": "app.pulse.dev/billing"
+            }
+          ],
+          "aspect": 1.6
+        }
+      }
+    ]
+  },
+  "beats": [
+    {
+      "at": 0.8,
+      "action": "point",
+      "target": "intro",
+      "args": {
+        "at": "screen"
+      }
+    },
+    {
+      "at": 1.0,
+      "action": "talk",
+      "target": "intro",
+      "args": {
+        "dur": 1.8
+      }
+    },
+    {
+      "at": 2.2,
+      "action": "look",
+      "target": "intro",
+      "args": {
+        "dir": "camera"
+      }
+    },
+    {
+      "at": 3.5,
+      "action": "cut",
+      "target": "ui"
+    },
+    {
+      "at": 4.6,
+      "action": "click",
+      "target": "ui",
+      "args": {
+        "x": 0.3,
+        "y": 0.2
+      }
+    },
+    {
+      "at": 5.0,
+      "action": "zoom",
+      "target": "ui",
+      "args": {
+        "x": 0.3,
+        "y": 0.22,
+        "scale": 1.8
+      }
+    },
+    {
+      "at": 6.4,
+      "action": "highlight",
+      "target": "ui",
+      "args": {
+        "x": 0.18,
+        "y": 0.128,
+        "w": 0.25,
+        "h": 0.135,
+        "hold": 1.2
+      }
+    },
+    {
+      "at": 8.0,
+      "action": "unzoom",
+      "target": "ui"
+    },
+    {
+      "at": 9.0,
+      "action": "click",
+      "target": "ui",
+      "args": {
+        "x": 0.17,
+        "y": 0.04
+      }
+    },
+    {
+      "at": 9.05,
+      "action": "tab",
+      "target": "ui",
+      "args": {
+        "index": 1
+      }
+    },
+    {
+      "at": 10.6,
+      "action": "click",
+      "target": "ui",
+      "args": {
+        "x": 0.915,
+        "y": 0.37
+      }
+    },
+    {
+      "at": 11.3,
+      "action": "move",
+      "target": "ui",
+      "args": {
+        "x": 0.6,
+        "y": 0.33,
+        "dur": 0.6
+      }
+    },
+    {
+      "at": 11.4,
+      "action": "zoom",
+      "target": "ui",
+      "args": {
+        "x": 0.6,
+        "y": 0.3,
+        "scale": 1.8
+      }
+    }
+  ]
+}
