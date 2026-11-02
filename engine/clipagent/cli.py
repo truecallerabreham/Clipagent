@@ -347,7 +347,11 @@ def cmd_install_recorder(args):
     url = f"{RELEASES}/{name}"
     print(f"downloading {url}")
     tmp = dest / name
-    urllib.request.urlretrieve(url, tmp)
+    try:
+        urllib.request.urlretrieve(url, tmp)
+    except Exception as e:  # no release published yet (or offline): build from the checkout instead
+        print(f"download failed ({e}); building the recorder from source instead")
+        return _build_recorder_from_source(dest)
     if sysname == "linux":
         target = dest / "clipagent-recorder"
         tmp.chmod(0o755)
@@ -375,6 +379,25 @@ def cmd_install_recorder(args):
         target = dest / "clipagent-recorder.cmd"
         target.write_text(f'@"{exe}" %*\n')
     print(f"installed: {target}")
+
+
+def _build_recorder_from_source(dest: Path):
+    src = S.REPO_DIR / "recorder"
+    if not (src / "package.json").exists():
+        raise SystemExit("no recorder release and no recorder/ source folder: reinstall ClipAgent from git")
+    npm = shutil.which("npm")
+    if not npm:
+        raise SystemExit("building the recorder needs Node.js 20+ (npm): https://nodejs.org")
+    subprocess.run([npm, "install", "--no-audit", "--no-fund"], cwd=src, check=True)
+    if sys.platform == "win32":
+        target = dest / "clipagent-recorder.cmd"
+        target.write_text(f'@node "{src / "bin" / "clipagent-recorder"}" %*\n')
+    else:
+        target = dest / "clipagent-recorder"
+        if target.exists() or target.is_symlink():
+            target.unlink()
+        target.symlink_to(src / "bin" / "clipagent-recorder")
+    print(f"installed (from source): {target}")
 
 
 # ---------------------------------------------------------------- parser
