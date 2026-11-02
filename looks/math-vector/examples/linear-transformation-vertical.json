@@ -1,0 +1,38 @@
+{
+  "id": "example-linear-transformation-vertical",
+  "look": "math-vector",
+  "engine": "html",
+  "mode": "full",
+  "size": [1080, 1920],
+  "transparent": false,
+  "fps": 30,
+  "duration": 14.0,
+  "concepts": { "i hat": "#83C167", "j hat": "#FC6255", "input vector": "#FFFF00", "output": "#FF862F" },
+  "scene": {
+    "title": "A matrix moves the whole plane",
+    "elements": [
+      { "id": "plane", "primitive": "NumberPlane", "props": { "x_range": [-3.5, 3.5, 1], "y_range": [-3, 3, 1], "y": 0.4, "full": true } },
+      { "id": "i", "primitive": "Vector", "props": { "coords": [1, 0], "concept": "i hat", "label": "\\hat{\\imath}", "label_pos": "right" } },
+      { "id": "j", "primitive": "Vector", "props": { "coords": [0, 1], "concept": "j hat", "label": "\\hat{\\jmath}", "label_pos": "right" } },
+      { "id": "v", "primitive": "Vector", "props": { "coords": [-1, 2], "concept": "input vector", "label": "\\vec{v}" } },
+      { "id": "mat", "primitive": "Matrix", "props": { "rows": [[1, 1], [0, 1]], "col_colors": ["i hat", "j hat"], "prefix": "A = ", "size": 72, "x": 0.5, "y": 0.765, "backdrop": true } },
+      { "id": "eq", "primitive": "Tex", "props": {
+          "tex": "\\vec{v} = -1\\,\\hat{\\imath} + 2\\,\\hat{\\jmath}", "size": 60, "x": 0.5, "y": 0.895, "backdrop": true,
+          "colors": { "\\vec{v}": "input vector", "\\hat{\\imath}": "i hat", "\\hat{\\jmath}": "j hat" } } }
+    ]
+  },
+  "beats": [
+    { "at": 0.0, "action": "enter", "target": "title" },
+    { "at": 0.3, "action": "enter", "target": "plane" },
+    { "at": 1.8, "action": "enter", "target": ["i", "j"] },
+    { "at": 3.0, "action": "enter", "target": "v" },
+    { "at": 4.0, "action": "write", "target": "mat" },
+    { "at": 5.2, "action": "write", "target": "eq" },
+    { "at": 6.8, "action": "apply_matrix", "target": "plane", "args": { "matrix": [[1, 1], [0, 1]], "dur": 2.4 } },
+    { "at": 9.4, "action": "circumscribe", "target": "mat", "args": { "col": 1, "color": "j hat" } },
+    { "at": 10.0, "action": "transform", "target": "eq", "args": {
+        "tex": "A\\vec{v} = -1 \\textcolor{i hat}{\\begin{bmatrix} 1 \\\\ 0 \\end{bmatrix}} + 2 \\textcolor{j hat}{\\begin{bmatrix} 1 \\\\ 1 \\end{bmatrix}} = \\textcolor{output}{\\begin{bmatrix} 1 \\\\ 2 \\end{bmatrix}}",
+        "colors": { "\\vec{v}": "input vector" }, "dur": 1.6 } },
+    { "at": 12.2, "action": "indicate", "target": "v" }
+  ]
+}

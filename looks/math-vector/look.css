@@ -1,0 +1,36 @@
+/* math-vector Look: tokens + styles. Design units: the canvas short side is 1080 design px.
+   Everything visible is SVG drawn by primitives.js; KaTeX HTML is only used (off-stage) to lay
+   TeX out, then each glyph is redrawn as a path from the Computer Modern outlines. */
+@import url(assets/katex/katex.min.css);
+
+:root {
+  --bg: #000000;
+  --grid: #29ABCA;
+  --text: #FFFFFF;
+  --input: #FFFF00;
+  --comp-a: #83C167;
+  --comp-b: #FC6255;
+  --output: #FF862F;
+}
+#ca-stage { color: var(--text); font-family: KaTeX_Main, 'Times New Roman', serif; }
+
+/* every primitive draws into one full-canvas SVG */
+.mv-root { width: 100%; height: 100%; }
+.mv-root > svg { position: absolute; left: 0; top: 0; overflow: visible; }
+
+/* overlay mode (transparent Insert over the speaker): dark translucent veil + soft vignette */
+html.ca-transparent #ca-bg {
+  background: radial-gradient(ellipse 75% 70% at 50% 50%, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.72) 70%, rgba(0, 0, 0, 0.86) 100%);
+}
+
+/* off-stage TeX measuring box (never visible, never zoomed) */
+#mv-measure {
+  position: absolute;
+  left: -20000px;
+  top: 0;
+  visibility: hidden;
+  white-space: nowrap;
+  color: #FFFFFF;
+}
+#mv-measure .katex-display { margin: 0; }
+#mv-measure .katex { line-height: 1.2; }

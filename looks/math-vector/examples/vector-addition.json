@@ -1,0 +1,39 @@
+{
+  "id": "example-vector-addition",
+  "look": "math-vector",
+  "engine": "html",
+  "mode": "full",
+  "size": [1920, 1080],
+  "transparent": false,
+  "fps": 30,
+  "duration": 13.0,
+  "concepts": { "vector a": "#83C167", "vector b": "#FC6255", "sum": "#FF862F" },
+  "scene": {
+    "elements": [
+      { "id": "plane", "primitive": "NumberPlane", "props": { "x_range": [-2.5, 10.5, 1], "y_range": [-1.6, 5.4, 1] } },
+      { "id": "a", "primitive": "Vector", "props": { "coords": [3, 1], "concept": "vector a", "label": "\\vec{a}", "label_pos": "right" } },
+      { "id": "b", "primitive": "Vector", "props": { "coords": [1, 2], "concept": "vector b", "label": "\\vec{b}", "label_pos": "left" } },
+      { "id": "s", "primitive": "Vector", "props": { "coords": [4, 3], "concept": "sum", "label": "\\vec{a}+\\vec{b}", "label_pos": "left", "label_colors": { "\\vec{a}": "vector a", "\\vec{b}": "vector b" } } },
+      { "id": "proj", "primitive": "DashedProjection", "props": { "from": "s", "to": "both" } },
+      { "id": "bx", "primitive": "Brace", "props": { "from": [0, 0], "to": [4, 0], "side": "down", "label": "4", "color": "#FFFFFF" } },
+      { "id": "by", "primitive": "Brace", "props": { "from": [0, 0], "to": [0, 3], "side": "left", "label": "3" } },
+      { "id": "eq", "primitive": "Tex", "props": { "tex": "\\vec{a} + \\vec{b} = \\vec{s}", "size": 64, "pos": [8.0, 4.1],
+          "colors": { "\\vec{a}": "vector a", "\\vec{b}": "vector b", "\\vec{s}": "sum" } } }
+    ]
+  },
+  "beats": [
+    { "at": 0.0, "action": "enter", "target": "plane" },
+    { "at": 1.4, "action": "enter", "target": "a" },
+    { "at": 2.6, "action": "enter", "target": "b" },
+    { "at": 3.9, "action": "shift", "target": "b", "args": { "from": "a" } },
+    { "at": 5.3, "action": "enter", "target": "s" },
+    { "at": 5.6, "action": "write", "target": "eq" },
+    { "at": 7.0, "action": "enter", "target": "proj" },
+    { "at": 7.5, "action": "enter", "target": "bx" },
+    { "at": 7.9, "action": "enter", "target": "by" },
+    { "at": 9.4, "action": "transform", "target": "eq", "args": {
+        "tex": "\\textcolor{vector a}{\\begin{bmatrix} 3 \\\\ 1 \\end{bmatrix}} + \\textcolor{vector b}{\\begin{bmatrix} 1 \\\\ 2 \\end{bmatrix}} = \\textcolor{sum}{\\begin{bmatrix} 4 \\\\ 3 \\end{bmatrix}}",
+        "colors": {}, "dur": 1.6 } },
+    { "at": 11.6, "action": "circumscribe", "target": "eq" }
+  ]
+}

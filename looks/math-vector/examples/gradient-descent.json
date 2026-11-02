@@ -1,0 +1,44 @@
+{
+  "id": "example-gradient-descent",
+  "look": "math-vector",
+  "engine": "html",
+  "mode": "full",
+  "size": [1920, 1080],
+  "transparent": false,
+  "fps": 30,
+  "duration": 13.5,
+  "concepts": { "input": "#FFFF00", "slope": "#FC6255", "learning rate": "#83C167", "output": "#FF862F" },
+  "scene": {
+    "elements": [
+      { "id": "ax", "primitive": "Axes", "props": { "x_range": [-3, 3, 1], "y_range": [-1, 4.5, 1], "unit": 148, "x": 0.31, "y": 0.52, "x_label": "x", "y_label": "f(x)" } },
+      { "id": "f", "primitive": "Shape", "props": { "kind": "graph", "fn": "0.25*x^4 - 1.2*x^2 + 0.6*x + 2", "x_range": [-2.75, 2.42], "color": "#58C4DD", "stroke": 5 } },
+      { "id": "d", "primitive": "Dot", "props": { "on": "f", "x": 2.3, "color": "input", "radius": 11, "trace": true, "trace_color": "input" } },
+      { "id": "tan", "primitive": "Shape", "props": { "kind": "tangent", "graph": "f", "dot": "d", "length": 1.6, "color": "slope", "stroke": 4 } },
+      { "id": "rule", "primitive": "Tex", "props": { "tex": "x_{n+1} = x_n - \\eta\\, f'(x_n)", "size": 60, "x": 0.775, "y": 0.22,
+          "colors": { "x_{n+1}": "input", "x_n": "input", "\\eta": "learning rate", "f'": "slope" } } },
+      { "id": "cx", "primitive": "NumberCounter", "props": { "prefix": "x =", "track": "d.x", "decimals": 3, "size": 52, "x": 0.765, "y": 0.43, "anchor": "eq", "color": "input" } },
+      { "id": "cs", "primitive": "NumberCounter", "props": { "prefix": "f'(x) =", "track": "d.slope", "decimals": 3, "size": 52, "x": 0.765, "y": 0.53, "anchor": "eq", "color": "slope" } },
+      { "id": "cf", "primitive": "NumberCounter", "props": { "prefix": "f(x) =", "track": "d.y", "decimals": 3, "size": 52, "x": 0.765, "y": 0.63, "anchor": "eq", "color": "output" } },
+      { "id": "eta", "primitive": "Label", "props": { "text": "learning rate $\\eta = 0.08$", "size": 40, "x": 0.775, "y": 0.78, "colors": { "\\eta": "learning rate" }, "color": "#BBBBBB" } },
+      { "id": "note", "primitive": "Label", "props": { "text": "local minimum", "size": 40, "pos": [1.45, 0.45], "color": "#FFFFFF" } }
+    ]
+  },
+  "beats": [
+    { "at": 0.1, "action": "enter", "target": "ax" },
+    { "at": 1.4, "action": "create", "target": "f", "args": { "dur": 1.6 } },
+    { "at": 3.0, "action": "enter", "target": "d", "args": { "dur": 0.6 } },
+    { "at": 3.3, "action": "write", "target": "rule" },
+    { "at": 3.9, "action": "create", "target": "tan", "args": { "dur": 0.7 } },
+    { "at": 4.2, "action": "write", "target": ["cx", "cs", "cf"] },
+    { "at": 4.6, "action": "write", "target": "eta" },
+    { "at": 5.6, "action": "move", "target": "d", "args": { "x": 1.72, "dur": 1.0 } },
+    { "at": 6.9, "action": "move", "target": "d", "args": { "x": 1.595, "dur": 0.8 } },
+    { "at": 7.9, "action": "move", "target": "d", "args": { "x": 1.529, "dur": 0.7 } },
+    { "at": 8.8, "action": "move", "target": "d", "args": { "x": 1.49, "dur": 0.6 } },
+    { "at": 9.6, "action": "move", "target": "d", "args": { "x": 1.442, "dur": 0.8 } },
+    { "at": 10.5, "action": "flash", "target": "d" },
+    { "at": 10.6, "action": "write", "target": "note" },
+    { "at": 11.2, "action": "transform", "target": "rule", "args": { "tex": "f'(x^*) = 0", "colors": { "x^*": "input", "f'": "slope" } } },
+    { "at": 11.4, "action": "indicate", "target": "cs" }
+  ]
+}
