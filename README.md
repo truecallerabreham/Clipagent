@@ -18,6 +18,10 @@
 
 <sub>▶ <a href="demo/clipagent-demo.mp4"><b>Watch the full demo (with sound)</b></a>: edited by ClipAgent itself, from a raw take to the finished cut.</sub>
 
+<a href="brag-output/brag.mp4"><img src="brag-output/brag.jpg" alt="ClipAgent launch video" width="60%"></a>
+
+<sub>🎬 <a href="brag-output/brag.mp4"><b>20-second launch video</b></a>, made with the <a href="https://github.com/latent-spaces/brag"><code>/brag</code></a> skill from ClipAgent's own renders.</sub>
+
 </div>
 
 ---

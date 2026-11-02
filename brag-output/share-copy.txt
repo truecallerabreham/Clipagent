@@ -1,0 +1,1 @@
+Type /screen-record, talk like you normally would, and ClipAgent hands back the edited video: mistakes cut, clicks zoomed, and animations built from your own repo that land on the exact word you say. Five studio Looks, 100% local, free and open source → github.com/truecallerabreham/Clipagent
