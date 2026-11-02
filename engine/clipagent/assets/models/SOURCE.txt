@@ -1,0 +1,2 @@
+sh.rnnn: RNNoise "somnolent-hogwash" general speech model, from https://github.com/GregorR/rnnoise-models
+Used by ffmpeg arnndn for voice denoising.
