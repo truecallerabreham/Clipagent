@@ -1,0 +1,113 @@
+/* neon-telestrator Look: tokens + styles. Design units: the canvas short side is 1080 design px. */
+@font-face { font-family: 'Kalam'; src: url(assets/fonts/kalam-latin-400-normal.woff2) format('woff2'); font-weight: 400; }
+@font-face { font-family: 'Kalam'; src: url(assets/fonts/kalam-latin-700-normal.woff2) format('woff2'); font-weight: 700; }
+@font-face { font-family: 'Caveat'; src: url(assets/fonts/caveat-latin-500-normal.woff2) format('woff2'); font-weight: 500; }
+@font-face { font-family: 'Caveat'; src: url(assets/fonts/caveat-latin-700-normal.woff2) format('woff2'); font-weight: 700; }
+@font-face { font-family: 'Inter'; src: url(assets/fonts/inter-latin-400-normal.woff2) format('woff2'); font-weight: 400; }
+@font-face { font-family: 'Inter'; src: url(assets/fonts/inter-latin-600-normal.woff2) format('woff2'); font-weight: 600; }
+@font-face { font-family: 'Inter'; src: url(assets/fonts/inter-latin-700-normal.woff2) format('woff2'); font-weight: 700; }
+@font-face { font-family: 'JetBrains Mono'; src: url(assets/fonts/jetbrains-mono-latin-400-normal.woff2) format('woff2'); font-weight: 400; }
+@font-face { font-family: 'JetBrains Mono'; src: url(assets/fonts/jetbrains-mono-latin-700-normal.woff2) format('woff2'); font-weight: 700; }
+
+:root {
+  --bg: #000000;
+  --ink: #FFFFFF;
+  --green: #2ECC71;
+  --red: #FF2A2A;
+  --purple: #D946EF;
+  --blue: #3B82F6;
+  --yellow: #FACC15;
+  --grid: #222222;
+  --panel: #0A0A0B;
+  --panel-border: #262626;
+  --text-dim: #A1A1AA;
+  --hand: 'Kalam', 'Caveat', cursive;
+  --script: 'Caveat', 'Kalam', cursive;
+  --sans: 'Inter', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+#ca-stage { font-family: var(--hand); color: var(--ink); }
+
+/* ---------- ink layers (full-stage, global coordinates) */
+.nt-ink { width: 100%; height: 100%; }
+.nt-ink > svg { position: absolute; left: 0; top: 0; overflow: visible; }
+
+/* ---------- handwritten text (write-on per glyph) */
+.nt-hand {
+  position: absolute;
+  white-space: pre;
+  font-family: var(--hand);
+  font-weight: 400;
+  line-height: 1.12;
+  transform-origin: 50% 50%;
+}
+.nt-hand.script { font-family: var(--script); font-weight: 700; line-height: 1.0; }
+.nt-hand.bold { font-weight: 700; }
+.nt-hand .ln { display: block; }
+.nt-hand .ch { display: inline-block; white-space: pre; }
+
+/* ---------- Screenshot */
+.nt-shot { position: absolute; }
+.nt-shot .frame {
+  position: absolute;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #111;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14), 0 24px 70px rgba(0, 0, 0, 0.7);
+}
+.nt-shot img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: block; }
+.nt-shot .spot { position: absolute; border-radius: 8px; }
+.nt-shot .source {
+  position: absolute;
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #8B8B93;
+  white-space: nowrap;
+}
+.nt-shot .source b { color: #C4C4CC; font-weight: 600; }
+
+/* ---------- Charts */
+.nt-chart { position: absolute; }
+.nt-chart canvas { position: absolute; left: 0; top: 0; }
+.nt-chart .lab3d {
+  position: absolute;
+  left: 0; top: 0;
+  white-space: nowrap;
+  font-family: var(--hand);
+  color: #FFFFFF;
+  will-change: auto;
+}
+.nt-chart .lab3d.tick { font-size: 20px; color: #E4E4E7; }
+.nt-chart .lab3d.title { font-size: 28px; font-weight: 700; }
+.nt-chart .lab3d.series { font-size: 30px; font-weight: 700; }
+
+/* ---------- Metric */
+.nt-metric { position: absolute; white-space: nowrap; }
+.nt-metric .val { position: absolute; font-family: var(--hand); font-weight: 700; line-height: 1; white-space: nowrap; }
+.nt-metric .lab { position: absolute; font-family: var(--hand); color: #D4D4D8; white-space: nowrap; }
+
+/* ---------- CodeSnippet */
+.nt-code {
+  position: absolute;
+  background: var(--panel);
+  border: 1.5px solid var(--panel-border);
+  border-radius: 14px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  font-family: var(--mono);
+  color: #E5E7EB;
+  overflow: hidden;
+}
+.nt-code .bar { height: 44px; display: flex; align-items: center; gap: 8px; padding: 0 18px; border-bottom: 1px solid #1C1C1E; }
+.nt-code .bar i { width: 11px; height: 11px; border-radius: 50%; background: #2A2A2D; display: inline-block; }
+.nt-code .bar span { margin-left: 10px; font-size: 15px; color: #8B8B93; font-family: var(--mono); }
+.nt-code .body { padding: 16px 0 18px; }
+.nt-code .line { position: relative; white-space: pre; padding: 0 24px 0 66px; }
+.nt-code .line .no { position: absolute; left: 0; width: 44px; text-align: right; color: #4B4B52; }
+.nt-code .line .txt { display: inline-block; }
+.nt-code .k { color: #C4B5FD; }
+.nt-code .s { color: #86EFAC; }
+.nt-code .n { color: #FCD34D; }
+.nt-code .c { color: #6B7280; font-style: normal; }
+.nt-code .f { color: #93C5FD; }

@@ -1,0 +1,42 @@
+{
+  "id": "example-model-tradeoff-3d",
+  "look": "neon-telestrator",
+  "engine": "html",
+  "mode": "full",
+  "size": [1920, 1080],
+  "transparent": false,
+  "fps": 30,
+  "duration": 13.0,
+  "concepts": {},
+  "scene": {
+    "title": "Cost vs accuracy vs latency",
+    "elements": [
+      { "id": "chart", "primitive": "Chart3D", "props": {
+          "box": [0.04, 0.15, 0.92, 0.83],
+          "axes": {
+            "x": { "label": "cost ($/1M)", "min": 0, "max": 20, "ticks": 4, "prefix": "$" },
+            "y": { "label": "accuracy", "min": 60, "max": 95, "ticks": 5, "suffix": "%" },
+            "z": { "label": "latency (s)", "min": 0, "max": 10, "ticks": 5, "suffix": "s" }
+          },
+          "series": [
+            { "name": "Orion family", "color": "purple", "marker": "sphere", "points": [[1, 68, 1.0], [3, 79, 2.6], [6, 86, 4.4], [10, 89.4, 6.5]] },
+            { "name": "Kestrel family", "color": "blue", "marker": "cross", "points": [[4, 70, 2.0], [9, 77, 4.5], [14, 82, 7.0], [19, 84.7, 9.5]] }
+          ],
+          "camera": { "azimuth": -40, "elevation": 18 }
+      } },
+      { "id": "ptr", "primitive": "RedPointer", "props": { "target": "chart", "point": [10, 89.4, 6.5], "from": "top-left", "label": "89.4%" } },
+      { "id": "sweet", "primitive": "Loop", "props": { "target": "chart", "point": [3, 79, 2.6], "pad": 30, "color": "green" } },
+      { "id": "sweetNote", "primitive": "InkText", "props": { "text": "sweet spot", "target": "chart", "point": [3, 79, 2.6], "side": "left", "gap": 64, "size": 44, "color": "green", "font": "script" } }
+    ]
+  },
+  "beats": [
+    { "at": 0.4, "action": "enter", "target": "chart" },
+    { "at": 1.2, "action": "drawSeries", "target": "chart", "args": { "series": 0, "dur": 1.6 } },
+    { "at": 2.6, "action": "drawSeries", "target": "chart", "args": { "series": 1, "dur": 1.6 } },
+    { "at": 4.4, "action": "orbit", "target": "chart", "args": { "azimuth": -62, "elevation": 26, "dur": 2.2 } },
+    { "at": 5.2, "action": "point", "target": "ptr", "args": { "hold": 1.4 } },
+    { "at": 7.4, "action": "view", "target": "chart", "args": { "mode": "front", "dur": 1.8 } },
+    { "at": 9.6, "action": "draw", "target": "sweet" },
+    { "at": 10.3, "action": "write", "target": "sweetNote" }
+  ]
+}

@@ -1,0 +1,5 @@
+neon-telestrator sketch icons (assets/icons/sketch-icons.js)
+
+Original line art drawn for the ClipAgent project. No third-party icon set is used.
+Dedicated to the public domain under CC0 1.0 Universal:
+https://creativecommons.org/publicdomain/zero/1.0/

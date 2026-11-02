@@ -1,0 +1,38 @@
+{
+  "id": "example-benchmark-telestration",
+  "look": "neon-telestrator",
+  "engine": "html",
+  "mode": "full",
+  "size": [1920, 1080],
+  "transparent": false,
+  "fps": 30,
+  "duration": 11.0,
+  "concepts": {},
+  "scene": {
+    "elements": [
+      {"id": "shot", "primitive": "Screenshot", "props": {"src": "media/benchmark-leaderboard.png", "source": "evalboard.example", "mode": "full"}},
+      {"id": "loopNew", "primitive": "Loop", "props": {"target": "shot", "region": [0.085, 0.44, 0.115, 0.095]}},
+      {"id": "noteNew", "primitive": "InkText", "props": {"text": "new model", "target": "loopNew", "side": "right", "gap": 8, "dy": -2, "size": 44, "color": "purple", "font": "script"}},
+      {"id": "ulScores", "primitive": "Underline", "props": {"target": "shot", "region": [0.33, 0.455, 0.215, 0.055], "style": "single"}},
+      {"id": "yay", "primitive": "InkText", "props": {"text": "yay!", "target": "shot", "region": [0.33, 0.455, 0.215, 0.055], "side": "right", "gap": 26, "dy": 46, "size": 52, "color": "purple", "font": "script"}},
+      {"id": "ptr", "primitive": "RedPointer", "props": {"target": "shot", "region": [0.333, 0.455, 0.03, 0.055], "from": "bottom-left", "hold": 1.2}},
+      {"id": "xOld", "primitive": "CrossOut", "props": {"target": "shot", "region": [0.762, 0.575, 0.048, 0.055], "style": "x"}},
+      {"id": "loopPrice", "primitive": "Loop", "props": {"target": "shot", "region": [0.762, 0.458, 0.042, 0.05], "color": "green", "pad": 6}},
+      {"id": "cheaper", "primitive": "InkText", "props": {"text": "6x cheaper", "target": "shot", "region": [0.762, 0.458, 0.042, 0.05], "side": "right", "gap": 50, "size": 46, "color": "green", "font": "script"}},
+      {"id": "cat", "primitive": "Bracket", "props": {"target": "shot", "region": [0.325, 0.36, 0.38, 0.04], "side": "top", "kind": "category", "label": "accuracy", "gap": 10, "depth": 22}}
+    ]
+  },
+  "beats": [
+    {"at": 0.2, "action": "enter", "target": "shot"},
+    {"at": 1.1, "action": "spotlight", "target": "shot", "args": {"region": [0.02, 0.36, 0.96, 0.27], "level": 0.74}},
+    {"at": 1.4, "action": "draw", "target": "loopNew"},
+    {"at": 2.1, "action": "write", "target": "noteNew"},
+    {"at": 3.3, "action": "draw", "target": "cat"},
+    {"at": 4.3, "action": "draw", "target": "ulScores"},
+    {"at": 5.0, "action": "write", "target": "yay"},
+    {"at": 5.4, "action": "point", "target": "ptr"},
+    {"at": 7.2, "action": "draw", "target": "xOld"},
+    {"at": 7.9, "action": "draw", "target": "loopPrice"},
+    {"at": 8.6, "action": "write", "target": "cheaper"}
+  ]
+}

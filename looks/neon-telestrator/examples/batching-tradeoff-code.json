@@ -1,0 +1,37 @@
+{
+  "id": "example-batching-tradeoff-code",
+  "look": "neon-telestrator",
+  "engine": "html",
+  "mode": "full",
+  "size": [1920, 1080],
+  "transparent": false,
+  "fps": 30,
+  "duration": 13.0,
+  "concepts": {},
+  "scene": {
+    "title": "Bigger batches: the trade-off",
+    "elements": [
+      { "id": "code", "primitive": "CodeSnippet", "props": { "box": [0.05, 0.25, 0.4], "title": "serve.py", "fontSize": 26,
+          "code": "def serve(reqs):\n    batch = collect(reqs, size=64)\n    # one forward pass per batch\n    out = model.generate(batch)\n    return out" } },
+      { "id": "chart", "primitive": "LineChart", "props": { "box": [0.52, 0.2, 0.32, 0.6], "labels": ["1", "8", "32", "64"], "yTicks": 0, "endLabels": false,
+          "series": [
+            { "name": "throughput", "color": "blue", "values": [10, 45, 80, 92] },
+            { "name": "latency", "color": "purple", "values": [8, 14, 30, 58] }
+          ] } },
+      { "id": "xlab", "primitive": "InkText", "props": { "text": "batch size", "target": "chart", "part": "label", "index": 1, "side": "bottom", "gap": 26, "dx": 120, "size": 34, "color": "#A1A1AA" } },
+      { "id": "bA", "primitive": "Bracket", "props": { "target": "chart", "series": 0, "index": [2, 3], "side": "right", "kind": "tradeoff-b", "gap": 34, "depth": 22, "label": "throughput\nup 2x", "labelSize": 34 } },
+      { "id": "bB", "primitive": "Bracket", "props": { "target": "chart", "series": 1, "index": [2, 3], "side": "right", "kind": "tradeoff", "gap": 34, "depth": 22, "label": "latency\nup 2x", "labelSize": 34 } },
+      { "id": "link", "primitive": "Arrow", "props": { "from": { "target": "code", "line": 2 }, "fromSide": "right", "fromGap": 34, "to": { "target": "chart", "series": 0, "index": 3 }, "bend": -0.1, "label": "64", "labelSize": 34 } }
+    ]
+  },
+  "beats": [
+    { "at": 0.6, "action": "enter", "target": "code" },
+    { "at": 2.2, "action": "mark", "target": "code", "args": { "line": 2, "style": "box", "color": "purple" } },
+    { "at": 3.2, "action": "draw", "target": "chart", "args": { "dur": 2.6 } },
+    { "at": 6.0, "action": "draw", "target": "link" },
+    { "at": 6.8, "action": "write", "target": "xlab" },
+    { "at": 7.6, "action": "draw", "target": "bA" },
+    { "at": 9.0, "action": "draw", "target": "bB" },
+    { "at": 10.4, "action": "mark", "target": "code", "args": { "line": 4, "style": "underline", "color": "green", "note": "1 pass", "noteGap": 30 } }
+  ]
+}

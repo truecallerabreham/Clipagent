@@ -1,0 +1,35 @@
+{
+  "id": "example-price-drop-docked",
+  "look": "neon-telestrator",
+  "engine": "html",
+  "mode": "full",
+  "size": [1920, 1080],
+  "transparent": false,
+  "fps": 30,
+  "duration": 12.0,
+  "concepts": {},
+  "scene": {
+    "title": "Inference got 15x cheaper",
+    "elements": [
+      { "id": "news", "primitive": "Screenshot", "props": { "src": "media/inference-price-news.png", "source": "example-news.test", "mode": "dock" } },
+      { "id": "price", "primitive": "Metric", "props": { "value": "$38", "x": 0.16, "y": 0.3, "size": 110 } },
+      { "id": "bars", "primitive": "BarChart", "props": { "box": [0.6, 0.17, 0.3, 0.31], "fill": 0.14, "valueSize": 30, "labelSize": 28,
+          "bars": [ { "label": "2025", "value": 38, "display": "$38" }, { "label": "2026", "value": 2.5, "tone": "gain", "display": "$2.50" } ] } },
+      { "id": "loopStart", "primitive": "Loop", "props": { "target": "news", "region": [0.055, 0.25, 0.06, 0.07], "pad": 2 } },
+      { "id": "loopEnd", "primitive": "Loop", "props": { "target": "news", "region": [0.88, 0.72, 0.08, 0.13], "pad": 4 } },
+      { "id": "a1", "primitive": "Arrow", "props": { "from": "loopStart", "to": "price", "bend": 0.22 } },
+      { "id": "a2", "primitive": "Arrow", "props": { "from": "loopEnd", "to": { "target": "bars", "bar": 1, "part": "value" }, "toSide": "right", "bend": 0.3 } }
+    ]
+  },
+  "beats": [
+    { "at": 0.3, "action": "enter", "target": "news" },
+    { "at": 0.9, "action": "spotlight", "target": "news", "args": { "region": [0.02, 0.22, 0.96, 0.76], "level": 0.45 } },
+    { "at": 1.1, "action": "draw", "target": "loopStart" },
+    { "at": 1.8, "action": "draw", "target": "a1" },
+    { "at": 2.5, "action": "write", "target": "price" },
+    { "at": 3.6, "action": "draw", "target": "bars", "args": { "dur": 2.2 } },
+    { "at": 6.2, "action": "draw", "target": "loopEnd" },
+    { "at": 7.0, "action": "draw", "target": "a2" },
+    { "at": 8.0, "action": "strike", "target": "price", "args": { "to": "$2.50" } }
+  ]
+}

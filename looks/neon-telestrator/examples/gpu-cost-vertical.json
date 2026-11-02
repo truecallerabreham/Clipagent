@@ -1,0 +1,47 @@
+{
+  "id": "example-gpu-cost-vertical",
+  "look": "neon-telestrator",
+  "engine": "html",
+  "mode": "full",
+  "size": [1080, 1920],
+  "transparent": false,
+  "fps": 30,
+  "duration": 14.0,
+  "concepts": {},
+  "scene": {
+    "title": "Where the GPU money goes",
+    "elements": [
+      { "id": "user", "primitive": "Icon", "props": { "icon": "user", "x": 0.17, "y": 0.2, "size": 140, "label": "users" } },
+      { "id": "api", "primitive": "Icon", "props": { "icon": "server", "x": 0.5, "y": 0.2, "size": 140, "label": "API" } },
+      { "id": "gpu", "primitive": "Icon", "props": { "icon": "gpu", "x": 0.83, "y": 0.2, "size": 150, "label": "GPU cluster" } },
+      { "id": "f1", "primitive": "Arrow", "props": { "from": "user", "to": "api", "color": "white", "bend": -0.12, "head": 18 } },
+      { "id": "f2", "primitive": "Arrow", "props": { "from": "api", "to": "gpu", "color": "white", "bend": -0.12, "head": 18 } },
+      { "id": "util", "primitive": "Panel", "props": { "box": [0.08, 0.36, 0.84, 0.075], "radius": 14, "title": "" } },
+      { "id": "utilLabel", "primitive": "InkText", "props": { "text": "GPU utilization", "x": 0.08, "y": 0.333, "align": "left", "size": 40, "bold": true } },
+      { "id": "busy", "primitive": "InkText", "props": { "text": "busy 40%", "x": 0.25, "y": 0.398, "size": 40, "color": "green" } },
+      { "id": "idle", "primitive": "HatchZone", "props": { "box": [0.42, 0.36, 0.5, 0.075], "label": "idle 60%", "labelSide": "top", "outline": false } },
+      { "id": "ptr", "primitive": "RedPointer", "props": { "target": "idle", "from": "bottom", "length": 130 } },
+      { "id": "price", "primitive": "Metric", "props": { "value": "$15", "x": 0.3, "y": 0.56, "size": 130, "label": "per 1M tokens" } },
+      { "id": "code", "primitive": "CodeSnippet", "props": { "box": [0.06, 0.675, 0.88], "title": "serve.py", "fontSize": 27,
+          "code": "engine = Engine(\"orion-4\")\nengine.batch_size = 64\nengine.kv_cache = \"paged\"\nout = engine.generate(reqs)" } },
+      { "id": "cat", "primitive": "Bracket", "props": { "target": "code", "line": [2, 3], "side": "right", "gap": 30, "kind": "category", "label": "the fix", "labelSize": 34 } }
+    ]
+  },
+  "beats": [
+    { "at": 0.8, "action": "draw", "target": "user" },
+    { "at": 1.5, "action": "draw", "target": "f1" },
+    { "at": 1.9, "action": "draw", "target": "api" },
+    { "at": 2.7, "action": "draw", "target": "f2" },
+    { "at": 3.1, "action": "draw", "target": "gpu" },
+    { "at": 4.4, "action": "write", "target": "utilLabel" },
+    { "at": 4.8, "action": "draw", "target": "util" },
+    { "at": 5.4, "action": "write", "target": "busy" },
+    { "at": 5.9, "action": "draw", "target": "idle" },
+    { "at": 7.0, "action": "point", "target": "ptr" },
+    { "at": 7.4, "action": "write", "target": "price" },
+    { "at": 8.6, "action": "enter", "target": "code" },
+    { "at": 9.8, "action": "mark", "target": "code", "args": { "line": 2, "style": "underline", "color": "green" } },
+    { "at": 10.6, "action": "draw", "target": "cat" },
+    { "at": 11.4, "action": "strike", "target": "price", "args": { "to": "$2.50" } }
+  ]
+}
