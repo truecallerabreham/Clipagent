@@ -1,0 +1,43 @@
+{
+  "id": "example-latency-bottleneck",
+  "look": "architecture-flow",
+  "engine": "html",
+  "mode": "full",
+  "size": [1920, 1080],
+  "transparent": false,
+  "fps": 30,
+  "duration": 11.0,
+  "concepts": {},
+  "scene": {
+    "title": "Where is the bottleneck?",
+    "hook": "One slow query can stall *every* request upstream.",
+    "elements": [
+      { "id": "phone", "primitive": "Device", "props": { "place": "client", "label": "10k users", "screen": "home" } },
+      { "id": "gw", "primitive": "ServiceCard", "props": { "place": "center", "title": "Gateway", "subtitle": "rate limit · auth", "icon": "router", "width": 300 } },
+      { "id": "api", "primitive": "ServiceCard", "props": { "place": "server-top", "title": "Orders API", "subtitle": "3 replicas", "icon": "server", "blades": 3, "bladeLabel": "orders" } },
+      { "id": "db", "primitive": "Database", "props": { "place": "store-right", "title": "Orders DB", "subtitle": "single primary", "columns": ["query", "time"], "flex": [1.6, 1],
+          "rows": [ ["SELECT by id", "2 ms"], ["SELECT by email", "4 ms"], ["SELECT * WHERE note", "18 ms"] ] } },
+      { "id": "p99", "primitive": "Metric", "props": { "place": "center-bottom", "label": "p99 latency", "value": "120 ms" } },
+      { "id": "l1", "primitive": "Link", "props": { "from": "phone", "to": "gw" } },
+      { "id": "l2", "primitive": "Link", "props": { "from": "gw", "to": "api" } },
+      { "id": "l3", "primitive": "Link", "props": { "from": "api", "to": "db" } },
+      { "id": "s1", "primitive": "PacketStream", "props": { "link": "l1" } },
+      { "id": "s2", "primitive": "PacketStream", "props": { "link": "l2" } },
+      { "id": "s3", "primitive": "PacketStream", "props": { "link": "l3" } },
+      { "id": "note", "primitive": "Callout", "props": { "text": "full table scan", "target": "db", "row": 2, "side": "left", "color": "#F43F5E" } }
+    ]
+  },
+  "beats": [
+    { "at": 1.4, "action": "start", "target": "s1" },
+    { "at": 1.7, "action": "start", "target": "s2" },
+    { "at": 2.0, "action": "start", "target": "s3" },
+    { "at": 4.0, "action": "highlightRow", "target": "db", "args": { "row": 2, "color": "red" } },
+    { "at": 4.0, "action": "latency", "target": "db", "args": { "dependents": ["api"] } },
+    { "at": 4.3, "action": "setRow", "target": "db", "args": { "row": 2, "value": "2,400 ms", "color": "#F43F5E" } },
+    { "at": 4.3, "action": "set", "target": "p99", "args": { "value": "2,400 ms", "color": "#F43F5E", "dur": 1.4 } },
+    { "at": 4.6, "action": "slow", "target": ["s1", "s2"], "args": { "factor": 0.3 } },
+    { "at": 4.8, "action": "latency", "target": "gw", "args": { "streams": false } },
+    { "at": 5.2, "action": "enter", "target": "note" },
+    { "at": 8.0, "action": "reveal", "target": "hook" }
+  ]
+}

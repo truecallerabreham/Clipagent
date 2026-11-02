@@ -1,0 +1,43 @@
+{
+  "id": "example-token-replay-attack",
+  "look": "architecture-flow",
+  "engine": "html",
+  "mode": "full",
+  "size": [1920, 1080],
+  "transparent": false,
+  "fps": 30,
+  "duration": 12.0,
+  "concepts": { "session id": "#F59E0B" },
+  "scene": {
+    "title": "Session replay attack",
+    "hook": "How do you stop a stolen *session id* from being replayed?",
+    "elements": [
+      { "id": "phone", "primitive": "Device", "props": { "place": "client", "label": "Alice", "screen": "home" } },
+      { "id": "api", "primitive": "ServiceCard", "props": { "place": "server-top", "title": "API Server", "subtitle": "GET /account", "icon": "server",
+          "rows": [ { "k": "auth", "v": "cookie" }, { "k": "transport", "v": "HTTP (no TLS)" } ] } },
+      { "id": "db", "primitive": "Database", "props": { "place": "store-right", "title": "Sessions", "subtitle": "redis", "icon": "database", "columns": ["session id", "user"],
+          "rows": [ ["sid_19ac", "bob"], ["sid_7f3e", "alice"] ] } },
+      { "id": "hacker", "primitive": "Hacker", "props": { "place": "attacker", "label": "Attacker" } },
+      { "id": "l1", "primitive": "Link", "props": { "from": "phone", "to": "api" } },
+      { "id": "l2", "primitive": "Link", "props": { "from": "api", "to": "db" } },
+      { "id": "sid", "primitive": "TokenPill", "props": { "label": "sid_7f3e", "concept": "session id", "from": "phone" } },
+      { "id": "warn", "primitive": "Callout", "props": { "text": "the server can't tell the copy apart", "target": "api", "side": "top", "color": "#F43F5E" } }
+    ]
+  },
+  "beats": [
+    { "at": 0.0, "action": "enter", "target": "title" },
+    { "at": 0.3, "action": "enter", "target": "phone" },
+    { "at": 0.5, "action": "enter", "target": "api" },
+    { "at": 0.7, "action": "enter", "target": "db" },
+    { "at": 1.2, "action": "show", "target": "sid", "args": { "at": "phone" } },
+    { "at": 2.0, "action": "send", "target": "sid", "args": { "to": "api", "dur": 2.0 } },
+    { "at": 2.2, "action": "enter", "target": "hacker" },
+    { "at": 2.9, "action": "intercept", "target": "hacker", "args": { "pill": "sid", "link": "l1" } },
+    { "at": 4.3, "action": "validate", "target": "db", "args": { "pill": "sid", "row": "sid_7f3e", "hold": 0.8 } },
+    { "at": 6.3, "action": "replay", "target": "hacker", "args": { "to": "api" } },
+    { "at": 7.7, "action": "validate", "target": "db", "args": { "pill": "sid-copy", "row": "sid_7f3e", "hold": 1.4 } },
+    { "at": 9.0, "action": "alert", "target": "api" },
+    { "at": 9.1, "action": "enter", "target": "warn" },
+    { "at": 9.6, "action": "reveal", "target": "hook" }
+  ]
+}

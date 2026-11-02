@@ -1,0 +1,34 @@
+{
+  "id": "example-session-lookup-vertical",
+  "look": "architecture-flow",
+  "engine": "html",
+  "mode": "full",
+  "size": [1080, 1920],
+  "transparent": false,
+  "fps": 30,
+  "duration": 9.0,
+  "concepts": { "session id": "#F59E0B" },
+  "scene": {
+    "title": "Sessions, explained",
+    "hook": "Every request costs one *lookup*. That's the trade-off.",
+    "elements": [
+      { "id": "phone", "primitive": "Device", "props": { "place": "client", "label": "Browser", "screen": "home" } },
+      { "id": "api", "primitive": "ServiceCard", "props": { "place": "server", "title": "Web Server", "subtitle": "stateless", "icon": "server", "blades": 2, "bladeLabel": "web" } },
+      { "id": "cache", "primitive": "Database", "props": { "place": "store", "title": "Session store", "subtitle": "redis", "icon": "database", "columns": ["session id", "user"],
+          "rows": [ ["sid_19ac", "bob"], ["sid_7f3e", "alice"], ["sid_c201", "carol"] ] } },
+      { "id": "l1", "primitive": "Link", "props": { "from": "phone", "to": "api" } },
+      { "id": "l2", "primitive": "Link", "props": { "from": "api", "to": "cache" } },
+      { "id": "s1", "primitive": "PacketStream", "props": { "link": "l1", "speed": 300 } },
+      { "id": "sid", "primitive": "TokenPill", "props": { "label": "sid_7f3e", "concept": "session id", "from": "phone" } }
+    ]
+  },
+  "beats": [
+    { "at": 1.2, "action": "show", "target": "sid", "args": { "at": "phone" } },
+    { "at": 1.3, "action": "start", "target": "s1" },
+    { "at": 2.0, "action": "send", "target": "sid", "args": { "to": "api" } },
+    { "at": 3.3, "action": "lookup", "target": "cache", "args": { "row": "sid_7f3e" } },
+    { "at": 3.6, "action": "validate", "target": "cache", "args": { "pill": "sid", "row": "sid_7f3e", "hold": 1.6 } },
+    { "at": 5.8, "action": "screen", "target": "phone", "args": { "state": "success", "title": "Welcome, Alice" } },
+    { "at": 6.4, "action": "reveal", "target": "hook" }
+  ]
+}

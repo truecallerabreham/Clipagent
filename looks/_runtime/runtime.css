@@ -1,0 +1,47 @@
+/* ClipAgent HTML Insert runtime: shared base styles.
+   Determinism: nothing in a rendered frame may depend on wall-clock time, so all CSS
+   animations and transitions are disabled. Primitives animate only inside seek(t). */
+*, *::before, *::after {
+  box-sizing: border-box;
+  animation: none !important;
+  transition: none !important;
+  caret-color: transparent;
+}
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: #000;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
+}
+body.ca-transparent, html.ca-transparent { background: transparent !important; }
+
+#ca-stage {
+  position: absolute;
+  left: 0;
+  top: 0;
+  overflow: hidden;
+  transform-origin: 0 0;
+}
+.ca-layer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+svg.ca-layer { overflow: visible; }
+.ca-abs { position: absolute; left: 0; top: 0; will-change: auto; }
+.ca-word { display: inline-block; white-space: pre; }
+
+#ca-error {
+  position: absolute;
+  inset: 24px;
+  color: #ff6b6b;
+  font: 20px/1.4 monospace;
+  white-space: pre-wrap;
+  z-index: 99;
+}

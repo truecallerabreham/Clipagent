@@ -1,0 +1,229 @@
+/* architecture-flow Look: tokens + styles. Design units: the short side of the canvas is 960 design px (look.json design_short_side). */
+@font-face { font-family: 'Caveat Brush'; src: url(assets/fonts/caveat-brush-latin-400-normal.woff2) format('woff2'); font-weight: 400; }
+@font-face { font-family: 'Inter'; src: url(assets/fonts/inter-latin-400-normal.woff2) format('woff2'); font-weight: 400; }
+@font-face { font-family: 'Inter'; src: url(assets/fonts/inter-latin-500-normal.woff2) format('woff2'); font-weight: 500; }
+@font-face { font-family: 'Inter'; src: url(assets/fonts/inter-latin-600-normal.woff2) format('woff2'); font-weight: 600; }
+@font-face { font-family: 'Inter'; src: url(assets/fonts/inter-latin-700-normal.woff2) format('woff2'); font-weight: 700; }
+@font-face { font-family: 'Inter'; src: url(assets/fonts/inter-latin-800-normal.woff2) format('woff2'); font-weight: 800; }
+@font-face { font-family: 'JetBrains Mono'; src: url(assets/fonts/jetbrains-mono-latin-400-normal.woff2) format('woff2'); font-weight: 400; }
+@font-face { font-family: 'JetBrains Mono'; src: url(assets/fonts/jetbrains-mono-latin-500-normal.woff2) format('woff2'); font-weight: 500; }
+@font-face { font-family: 'JetBrains Mono'; src: url(assets/fonts/jetbrains-mono-latin-700-normal.woff2) format('woff2'); font-weight: 700; }
+
+:root {
+  --bg: #000000;
+  --card: #161618;
+  --card-border: #2A2A2E;
+  --card-inner: #1E1E21;
+  --divider: #242428;
+  --link: #4B5563;
+  --text: #F4F4F5;
+  --text-dim: #A1A1AA;
+  --text-faint: #71717A;
+  --alert: #F43F5E;
+  --ok: #22C55E;
+  --marker: 'Caveat Brush', 'Inter', sans-serif;
+  --sans: 'Inter', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+#ca-stage { font-family: var(--sans); color: var(--text); }
+
+/* ---------- SectionTitle */
+.af-title { text-align: center; white-space: nowrap; }
+.af-title .txt {
+  font-family: var(--marker);
+  font-size: 66px;
+  line-height: 1;
+  letter-spacing: 0.035em;
+  text-transform: uppercase;
+  color: #FFFFFF;
+}
+.af-title svg { display: block; margin: 6px auto 0; overflow: visible; }
+
+/* ---------- HookQuestion */
+.af-hook {
+  text-align: center;
+  font-weight: 600;
+  font-size: 40px;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: #FFFFFF;
+}
+.af-hook .em { font-weight: 800; }
+
+/* ---------- Cards (ServiceCard, Database) */
+.af-card {
+  background: var(--card);
+  border: 1.5px solid var(--card-border);
+  border-radius: 12px;
+  padding: 0 0 14px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
+}
+.af-card .hd {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px 12px;
+}
+.af-card .ic {
+  width: 44px; height: 44px;
+  flex: 0 0 44px;
+  border-radius: 10px;
+  background: var(--card-inner);
+  border: 1px solid #2E2E33;
+  display: flex; align-items: center; justify-content: center;
+}
+.af-card .ic svg { width: 24px; height: 24px; }
+.af-card .tt { flex: 1; min-width: 0; }
+.af-card .title {
+  font-family: var(--marker);
+  font-size: 32px;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #FFFFFF;
+  white-space: nowrap;
+}
+.af-card .sub {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-faint);
+  margin-top: 4px;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.af-card .spin { width: 30px; height: 30px; flex: 0 0 30px; }
+.af-card .rows { padding: 2px 14px 4px; }
+.af-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  height: 42px;
+  padding: 0 12px;
+  border-radius: 8px;
+  font-size: 18px;
+}
+.af-row + .af-row { border-top: 1px solid var(--divider); }
+.af-row .k { color: var(--text-dim); font-weight: 500; white-space: nowrap; }
+.af-row .v { color: var(--text); font-family: var(--mono); font-size: 17px; font-weight: 500; white-space: nowrap; }
+.af-row .bg { position: absolute; inset: 2px 0; border-radius: 8px; opacity: 0; }
+
+/* server blades */
+.af-blade {
+  position: relative;
+  display: flex; align-items: center; gap: 10px;
+  height: 30px;
+  margin: 8px 14px 0;
+  padding: 0 12px;
+  border-radius: 7px;
+  background: var(--card-inner);
+  border: 1px solid #2B2B30;
+}
+.af-blade .led { width: 7px; height: 7px; border-radius: 50%; background: #22C55E; }
+.af-blade .vent { flex: 1; height: 10px; background: repeating-linear-gradient(90deg, #34343A 0 3px, transparent 3px 8px); border-radius: 2px; opacity: 0.9; }
+.af-blade .bl { font-family: var(--mono); font-size: 13px; color: var(--text-faint); }
+
+/* database table */
+.af-table { padding: 0 14px 2px; }
+.af-thead { display: flex; height: 30px; align-items: center; padding: 0 12px; border-bottom: 1px solid var(--divider); }
+.af-thead div, .af-trow .c { flex: 1; white-space: nowrap; overflow: hidden; }
+.af-thead div { font-size: 13px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-faint); }
+.af-trow { position: relative; display: flex; align-items: center; height: 40px; padding: 0 12px; border-radius: 8px; }
+.af-trow + .af-trow { border-top: 1px solid var(--divider); }
+.af-trow .c { position: relative; font-family: var(--mono); font-size: 16px; font-weight: 500; color: var(--text); }
+.af-trow .c.dim { color: var(--text-dim); }
+.af-trow .bg { position: absolute; inset: 2px 0; border-radius: 8px; opacity: 0; }
+
+/* ---------- Device */
+.af-device { display: flex; flex-direction: column; align-items: center; }
+.af-phone {
+  position: relative;
+  width: 236px; height: 472px;
+  border-radius: 42px;
+  border: 3px solid #3F3F46;
+  background: #050506;
+  box-shadow: 0 0 0 1px #18181B, 0 24px 60px rgba(0,0,0,0.6);
+}
+.af-phone .btn { position: absolute; right: -6px; top: 120px; width: 3px; height: 54px; border-radius: 2px; background: #3F3F46; }
+.af-phone .btn.l { left: -6px; right: auto; top: 100px; height: 36px; }
+.af-screen {
+  position: absolute; inset: 9px;
+  border-radius: 33px;
+  background: #0C0C0E;
+  overflow: hidden;
+}
+.af-notch { position: absolute; top: 10px; left: 50%; width: 76px; height: 22px; margin-left: -38px; border-radius: 12px; background: #000; z-index: 3; }
+.af-status { position: absolute; top: 12px; left: 22px; right: 20px; height: 18px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 600; color: #E4E4E7; z-index: 2; }
+.af-status .bat { width: 20px; height: 10px; border: 1.5px solid #A1A1AA; border-radius: 3px; position: relative; }
+.af-status .bat::after { content: ''; position: absolute; inset: 1.5px 4px 1.5px 1.5px; background: #E4E4E7; border-radius: 1px; }
+.af-homebar { position: absolute; bottom: 8px; left: 50%; width: 84px; height: 4px; margin-left: -42px; border-radius: 2px; background: #52525B; z-index: 5; }
+.af-scr { position: absolute; inset: 0; padding: 50px 18px 24px; display: flex; flex-direction: column; }
+.af-scr .apptitle { font-size: 20px; font-weight: 700; color: #FAFAFA; margin: 4px 0 2px; }
+.af-scr .appsub { font-size: 12px; color: var(--text-faint); margin-bottom: 18px; }
+.af-scr .logo { width: 46px; height: 46px; border-radius: 14px; margin: 18px 0 14px; display:flex; align-items:center; justify-content:center; }
+.af-scr .logo svg { width: 24px; height: 24px; }
+.af-scr .field { height: 38px; border-radius: 10px; background: #18181B; border: 1px solid #27272A; margin-bottom: 10px; display: flex; align-items: center; padding: 0 12px; font-size: 13px; color: #A1A1AA; }
+.af-scr .button { height: 40px; border-radius: 10px; margin-top: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #0A0A0A; }
+.af-scr .feed { height: 64px; border-radius: 12px; background: #151518; border: 1px solid #222226; margin-bottom: 10px; padding: 12px; }
+.af-scr .feed i { display: block; height: 7px; border-radius: 4px; background: #2A2A30; margin-bottom: 8px; }
+.af-scr .center { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 14px; }
+.af-scr .big { font-size: 17px; font-weight: 700; color: #FAFAFA; }
+.af-scr .small { font-size: 12px; color: var(--text-dim); line-height: 1.4; }
+.af-scr .line { font-size: 13px; color: #D4D4D8; margin-bottom: 8px; }
+.af-dlabel { margin-top: 18px; font-size: 15px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: var(--text-dim); }
+.af-tray {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 0; z-index: 4;
+  background: linear-gradient(180deg, #141418 0%, #0E0E11 100%);
+  border-top: 1px solid #2A2A30;
+  border-radius: 14px 14px 0 0;
+  overflow: hidden;
+}
+.af-tray .cap { position: absolute; top: 10px; left: 0; right: 0; text-align: center; font-size: 10px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-faint); }
+.af-wallet-cap { position: absolute; left: 18px; right: 18px; bottom: 22px; font-size: 10px; font-weight: 700; letter-spacing: 0.16em; color: var(--text-faint); text-transform: uppercase; z-index: 1; }
+
+/* ---------- Token pill */
+.af-pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  height: 38px;
+  padding: 0 16px 0 12px;
+  border-radius: 19px;
+  font-size: 17px; font-weight: 700;
+  letter-spacing: 0.01em;
+  color: #0A0A0B;
+  white-space: nowrap;
+}
+.af-pill svg { width: 18px; height: 18px; flex: 0 0 18px; }
+.af-pill.noicon { padding: 0 16px; }
+
+/* ---------- Callout / Label */
+.af-callout {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 10px 16px;
+  background: #121214;
+  border: 1px solid #2E2E33;
+  border-radius: 12px;
+  font-size: 19px; font-weight: 600; color: var(--text);
+  white-space: nowrap;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+}
+.af-callout .dot { width: 9px; height: 9px; border-radius: 50%; flex: 0 0 9px; }
+.af-label { font-size: 15px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-dim); white-space: nowrap; }
+.af-label.marker { font-family: var(--marker); font-size: 30px; letter-spacing: 0.04em; font-weight: 400; color: #FFFFFF; }
+
+/* ---------- Link label */
+.af-linklabel {
+  padding: 3px 10px; border-radius: 7px;
+  background: #000; color: var(--text-dim);
+  font-family: var(--mono); font-size: 14px; font-weight: 500; white-space: nowrap;
+}
+
+/* ---------- Hacker */
+.af-hacker { display: flex; flex-direction: column; align-items: center; }
+.af-hacker svg { overflow: visible; }
+.af-hacker .lbl { margin-top: 6px; font-family: var(--marker); font-size: 28px; letter-spacing: 0.06em; color: #F43F5E; text-transform: uppercase; }
+
+/* ---------- Metric */
+.af-metric { text-align: center; }
+.af-metric .val { font-size: 64px; font-weight: 800; letter-spacing: -0.02em; line-height: 1; font-variant-numeric: tabular-nums; }
+.af-metric .lab { margin-top: 10px; font-size: 15px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-dim); }

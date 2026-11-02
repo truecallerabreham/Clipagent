@@ -1,0 +1,50 @@
+{
+  "id": "example-jwt-auth-flow",
+  "look": "architecture-flow",
+  "engine": "html",
+  "mode": "full",
+  "size": [1920, 1080],
+  "transparent": false,
+  "fps": 30,
+  "duration": 14.0,
+  "concepts": { "access token": "#38BDF8", "refresh token": "#A855F7", "session id": "#F59E0B" },
+  "scene": {
+    "title": "How JWT login works",
+    "hook": "So why does the server never *store* your access token?",
+    "elements": [
+      { "id": "phone", "primitive": "Device", "props": { "place": "client", "label": "Mobile app", "screen": "login", "app": "Acme" } },
+      { "id": "auth", "primitive": "ServiceCard", "props": {
+          "place": "server-top", "title": "Auth API", "subtitle": "POST /login", "icon": "shield-check", "accent": "#38BDF8",
+          "rows": [ { "k": "alg", "v": "RS256" }, { "k": "access ttl", "v": "15 min" }, { "k": "refresh ttl", "v": "30 days" } ] } },
+      { "id": "db", "primitive": "Database", "props": {
+          "place": "store-right", "title": "Users DB", "subtitle": "postgres", "columns": ["user", "password hash"],
+          "rows": [ ["bob@acme.io", "$2b$12$Qx…"], ["alice@acme.io", "$2b$12$9f…"], ["carol@acme.io", "$2b$12$Lm…"] ] } },
+      { "id": "l-phone-auth", "primitive": "Link", "props": { "from": "phone", "to": "auth", "label": "HTTPS" } },
+      { "id": "l-auth-db", "primitive": "Link", "props": { "from": "auth", "to": "db" } },
+      { "id": "creds", "primitive": "TokenPill", "props": { "label": "email + password", "from": "phone", "icon": "lock" } },
+      { "id": "access", "primitive": "TokenPill", "props": { "label": "access token", "from": "auth" } },
+      { "id": "refresh", "primitive": "TokenPill", "props": { "label": "refresh token", "from": "auth" } },
+      { "id": "c-sign", "primitive": "Callout", "props": { "text": "signed with the private key", "target": "auth", "side": "top", "color": "#38BDF8" } }
+    ]
+  },
+  "beats": [
+    { "at": 0.0, "action": "enter", "target": "title" },
+    { "at": 0.3, "action": "enter", "target": "phone" },
+    { "at": 0.6, "action": "enter", "target": "auth" },
+    { "at": 0.9, "action": "enter", "target": "db" },
+    { "at": 1.8, "action": "tap", "target": "phone" },
+    { "at": 2.0, "action": "send", "target": "creds", "args": { "to": "auth" } },
+    { "at": 3.3, "action": "highlight", "target": "auth" },
+    { "at": 3.6, "action": "validate", "target": "db", "args": { "pill": "creds", "row": "alice@acme.io", "hold": 1.0 } },
+    { "at": 5.0, "action": "unhighlight", "target": "auth" },
+    { "at": 6.1, "action": "enter", "target": "c-sign" },
+    { "at": 6.3, "action": "send", "target": "access", "args": { "to": "phone" } },
+    { "at": 6.8, "action": "send", "target": "refresh", "args": { "to": "phone" } },
+    { "at": 8.3, "action": "screen", "target": "phone", "args": { "state": "home" } },
+    { "at": 8.6, "action": "exit", "target": "c-sign" },
+    { "at": 9.4, "action": "dim", "target": ["db", "l-auth-db"] },
+    { "at": 9.6, "action": "send", "target": "access", "args": { "to": "auth", "then": "absorb" } },
+    { "at": 10.8, "action": "highlightRow", "target": "auth", "args": { "row": "alg", "hold": 1.4 } },
+    { "at": 11.0, "action": "reveal", "target": "hook" }
+  ]
+}
