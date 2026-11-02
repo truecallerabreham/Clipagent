@@ -1,5 +1,15 @@
 # Looks
 
+## The Looks
+
+| Look | Feel | Scene vocabulary |
+|---|---|---|
+| `architecture-flow` | dark system-design explainer: service cards, packets, token pills | [PRIMITIVES.md](architecture-flow/PRIMITIVES.md) |
+| `neon-telestrator` | black canvas, neon stylus ink over screenshots, 3D plots | [PRIMITIVES.md](neon-telestrator/PRIMITIVES.md) |
+| `math-vector` | 3Blue1Brown style: LaTeX, draw-on, morphs, planes | [PRIMITIVES.md](math-vector/PRIMITIVES.md) |
+| `whiteboard-saas` | white whiteboard, drawing hand, kinetic type, UI annotation | [PRIMITIVES.md](whiteboard-saas/PRIMITIVES.md) |
+| `stickman-story` | line-art stickman scenes, macOS walkthroughs | [PRIMITIVES.md](stickman-story/PRIMITIVES.md) |
+
 A **Look** is the single production style of a Session's video (see `GLOSSARY.md`): how Inserts look and move, plus how the screen recording is framed, the captions, chapter cards, transitions and sound. Each folder here is one Look. `_runtime/` is the shared HTML player every HTML Look runs in.
 
 An Insert is a resolved spec (Contract 2 in `docs/design.md`): a `scene` built from the Look's **Primitives** and a list of **Beats** (`{at, action, target, args}`) timed to spoken words. The engine renders it frame by frame in headless Chromium.

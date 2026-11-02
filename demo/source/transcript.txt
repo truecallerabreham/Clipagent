@@ -1,0 +1,5 @@
+[00:00.2-00:29.4] This is ClipAgent. You type [[slash?]] screen record in your coding agent and you just talk. No script, no notes, no editing. When you stop, the agent reads your transcript and your repo. It cuts the mistakes and the dead air, zooms where you click and cleaned up your voice and your webcam. Then it builds animations from your own code. Explain how login works and the phone, the gateway, and the database appear on screen. The access token travels on the exact word you say it and the gateway validates it against the session store.
+[00:29.4-00:31.8] Every concept keeps its color for the whole video
+[00:31.8-00:38.8] [[There?]] are five studio looks, architecture flows, neon telestration, vector math, whiteboard sketches, and stickman stories
+[00:38.8-00:45.1] You get the final video, vertical shorts, a thumbnail, captions, and your posts, all rendered on your own machine
+[00:45.1-00:49.2] ClipAgent, talk freely, chip studio quality

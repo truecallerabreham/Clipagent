@@ -1,0 +1,586 @@
+{
+  "version": 1,
+  "inputs": {
+    "screen": "<session>",
+    "camera": null,
+    "camera_offset": 0.0,
+    "camera_rect": null,
+    "audio": "screen"
+  },
+  "voice": {
+    "denoise": "light",
+    "mic": "earphones"
+  },
+  "output": {
+    "path": "<session>",
+    "format": "landscape",
+    "fps": 30
+  },
+  "style": {
+    "accent": "#38BDF8",
+    "background": [
+      "#0B0B0D",
+      "#111827"
+    ],
+    "screen_inset": 0.05,
+    "radius": 12,
+    "font": "Inter",
+    "captions": {
+      "enabled": true,
+      "words_per_line": 4,
+      "highlight": "#38BDF8",
+      "color": "#FFFFFF"
+    },
+    "badge": "Made with ClipAgent",
+    "frame": "plain",
+    "click_effect": "glow",
+    "annotation_color": "#38BDF8",
+    "transition": "crossfade",
+    "transition_colors": [
+      "#38BDF8",
+      "#A855F7",
+      "#F59E0B"
+    ],
+    "shortcut_badge": {
+      "bg": "#161618",
+      "fg": "#FFFFFF"
+    },
+    "dark": true,
+    "chapter_card": {
+      "bg": "#000000",
+      "fg": "#FFFFFF",
+      "tracking": 0.3,
+      "duration": 2.0
+    }
+  },
+  "camera": {
+    "source": "phone",
+    "grade": "auto",
+    "shape": "circle",
+    "size": 0.23,
+    "corner": "br",
+    "mirror": false,
+    "quality": null,
+    "allow_full": true
+  },
+  "glossary": {
+    "cloud code": "Claude Code",
+    "clod code": "Claude Code"
+  },
+  "caption_edits": [
+    {
+      "start": 48.0,
+      "end": 48.35,
+      "text": "ship"
+    },
+    {
+      "start": 15.25,
+      "end": 15.75,
+      "text": "cleans up"
+    }
+  ],
+  "segments": [
+    {
+      "start": 0.12,
+      "end": 47.58,
+      "speed": 1
+    },
+    {
+      "start": 48.0,
+      "end": 49.7,
+      "speed": 1
+    }
+  ],
+  "layouts": [],
+  "zooms": [
+    {
+      "start": 2.1,
+      "end": 8.6,
+      "rect": [
+        0.0,
+        0.02,
+        0.62,
+        0.62
+      ]
+    },
+    {
+      "start": 12.0,
+      "end": 19.2,
+      "rect": [
+        0.0,
+        0.12,
+        0.6,
+        0.6
+      ]
+    },
+    {
+      "start": 38.4,
+      "end": 45.2,
+      "rect": [
+        0.0,
+        0.42,
+        0.6,
+        0.6
+      ]
+    }
+  ],
+  "titles": [
+    {
+      "at": 0.15,
+      "duration": 1.9,
+      "text": "ClipAgent",
+      "sub": "talk freely, ship studio quality"
+    }
+  ],
+  "chapters": [],
+  "callouts": [],
+  "outro": {
+    "text": "ClipAgent",
+    "sub": "github.com/truecallerabreham/Clipagent",
+    "duration": 4
+  },
+  "look": "architecture-flow",
+  "concepts": {
+    "access token": "#38BDF8",
+    "transcript": "#A855F7",
+    "repo": "#F59E0B"
+  },
+  "inserts": [
+    {
+      "id": "ins-01",
+      "start": "w16",
+      "end": "w32",
+      "mode": "full",
+      "concepts": [
+        "transcript",
+        "repo"
+      ],
+      "scene": {
+        "title": "Talk. Stop. Ship.",
+        "elements": [
+          {
+            "id": "you",
+            "primitive": "ServiceCard",
+            "props": {
+              "title": "You",
+              "subtitle": "just talk",
+              "icon": "user",
+              "rows": [
+                [
+                  "script",
+                  "none"
+                ],
+                [
+                  "notes",
+                  "none"
+                ],
+                [
+                  "editing",
+                  "none"
+                ]
+              ],
+              "auto": false,
+              "x": 0.17,
+              "y": 0.52,
+              "width": 380
+            }
+          },
+          {
+            "id": "tr",
+            "primitive": "ServiceCard",
+            "props": {
+              "title": "Transcript",
+              "subtitle": "local whisper",
+              "icon": "message-square",
+              "auto": false,
+              "x": 0.5,
+              "y": 0.36,
+              "width": 380
+            }
+          },
+          {
+            "id": "repo",
+            "primitive": "ServiceCard",
+            "props": {
+              "title": "Your repo",
+              "subtitle": "context pack",
+              "icon": "boxes",
+              "auto": false,
+              "x": 0.5,
+              "y": 0.7,
+              "width": 380
+            }
+          },
+          {
+            "id": "agent",
+            "primitive": "ServiceCard",
+            "props": {
+              "title": "Agent",
+              "subtitle": "the editor",
+              "icon": "cpu",
+              "auto": false,
+              "x": 0.83,
+              "y": 0.52,
+              "width": 380
+            }
+          },
+          {
+            "id": "l1",
+            "primitive": "Link",
+            "props": {
+              "from": "you",
+              "to": "tr",
+              "route": "curve"
+            }
+          },
+          {
+            "id": "l2",
+            "primitive": "Link",
+            "props": {
+              "from": "tr",
+              "to": "agent",
+              "route": "curve"
+            }
+          },
+          {
+            "id": "l3",
+            "primitive": "Link",
+            "props": {
+              "from": "repo",
+              "to": "agent",
+              "route": "curve"
+            }
+          },
+          {
+            "id": "voice",
+            "primitive": "PacketStream",
+            "props": {
+              "link": "l1"
+            }
+          },
+          {
+            "id": "pt",
+            "primitive": "TokenPill",
+            "props": {
+              "label": "transcript",
+              "concept": "transcript",
+              "from": "tr"
+            }
+          },
+          {
+            "id": "pr",
+            "primitive": "TokenPill",
+            "props": {
+              "label": "repo",
+              "concept": "repo",
+              "from": "repo"
+            }
+          }
+        ]
+      },
+      "beats": [
+        {
+          "word": "w16",
+          "action": "enter",
+          "target": "you",
+          "lead": -0.2
+        },
+        {
+          "word": "w17",
+          "action": "highlightRow",
+          "target": "you",
+          "args": {
+            "row": 0,
+            "hold": 0.6
+          }
+        },
+        {
+          "word": "w19",
+          "action": "highlightRow",
+          "target": "you",
+          "args": {
+            "row": 1,
+            "hold": 0.6
+          }
+        },
+        {
+          "word": "w21",
+          "action": "highlightRow",
+          "target": "you",
+          "args": {
+            "row": 2,
+            "hold": 0.6
+          }
+        },
+        {
+          "word": "w22",
+          "action": "start",
+          "target": "voice"
+        },
+        {
+          "word": "w24",
+          "action": "enter",
+          "target": "tr",
+          "lead": -0.3
+        },
+        {
+          "word": "w26",
+          "action": "enter",
+          "target": "agent",
+          "lead": -0.2
+        },
+        {
+          "word": "w29",
+          "action": "send",
+          "target": "pt",
+          "args": {
+            "to": "agent"
+          }
+        },
+        {
+          "word": "w31",
+          "action": "enter",
+          "target": "repo",
+          "lead": -0.3
+        },
+        {
+          "word": "w32",
+          "action": "send",
+          "target": "pr",
+          "args": {
+            "to": "agent"
+          }
+        }
+      ]
+    },
+    {
+      "id": "ins-02",
+      "start": "w61",
+      "end": "w104",
+      "mode": "full",
+      "concepts": [
+        "access token"
+      ],
+      "scene": {
+        "title": "How login works",
+        "hook": "Every *concept* keeps its color for the whole video.",
+        "elements": [
+          {
+            "id": "phone",
+            "primitive": "Device",
+            "props": {
+              "place": "client",
+              "label": "Phone app",
+              "screen": "login",
+              "auto": false
+            }
+          },
+          {
+            "id": "gw",
+            "primitive": "ServiceCard",
+            "props": {
+              "place": "center",
+              "title": "API Gateway",
+              "icon": "router",
+              "rows": [
+                [
+                  "auth",
+                  "Bearer JWT"
+                ]
+              ],
+              "auto": false
+            }
+          },
+          {
+            "id": "db",
+            "primitive": "Database",
+            "props": {
+              "place": "store-right",
+              "title": "Session store",
+              "columns": [
+                "token",
+                "user"
+              ],
+              "rows": [
+                [
+                  "at_9f2c",
+                  "alice"
+                ],
+                [
+                  "at_41be",
+                  "bob"
+                ]
+              ],
+              "auto": false
+            }
+          },
+          {
+            "id": "l1",
+            "primitive": "Link",
+            "props": {
+              "from": "phone",
+              "to": "gw"
+            }
+          },
+          {
+            "id": "l2",
+            "primitive": "Link",
+            "props": {
+              "from": "gw",
+              "to": "db"
+            }
+          },
+          {
+            "id": "at",
+            "primitive": "TokenPill",
+            "props": {
+              "label": "access token",
+              "concept": "access token",
+              "from": "phone"
+            }
+          }
+        ]
+      },
+      "beats": [
+        {
+          "word": "w62",
+          "action": "enter",
+          "target": "phone",
+          "lead": -0.2
+        },
+        {
+          "word": "w69",
+          "action": "enter",
+          "target": "gw",
+          "lead": -0.2
+        },
+        {
+          "word": "w72",
+          "action": "enter",
+          "target": "db",
+          "lead": -0.2
+        },
+        {
+          "word": "w77",
+          "action": "show",
+          "target": "at",
+          "args": {
+            "at": "phone",
+            "dock": true
+          }
+        },
+        {
+          "word": "w79",
+          "action": "send",
+          "target": "at",
+          "args": {
+            "to": "gw",
+            "then": "stay"
+          }
+        },
+        {
+          "word": "w90",
+          "action": "validate",
+          "target": "db",
+          "args": {
+            "pill": "at",
+            "row": 0,
+            "result": "match",
+            "hold": 1.4,
+            "after": "stay"
+          }
+        },
+        {
+          "word": "w96",
+          "action": "reveal",
+          "target": "hook",
+          "args": {
+            "dur": 1.8
+          }
+        },
+        {
+          "word": "w100",
+          "action": "pulse",
+          "target": "at"
+        }
+      ]
+    }
+  ],
+  "annotations": [
+    {
+      "type": "box",
+      "start": 12.2,
+      "end": 15.9,
+      "rect": [
+        0.018,
+        0.3556296296296297,
+        0.44,
+        0.042
+      ],
+      "label": "cuts + click zooms"
+    },
+    {
+      "type": "box",
+      "start": 16.0,
+      "end": 19.0,
+      "rect": [
+        0.018,
+        0.31562962962962965,
+        0.42,
+        0.042
+      ],
+      "label": "clean voice + webcam"
+    },
+    {
+      "type": "box",
+      "start": 39.4,
+      "end": 45.0,
+      "rect": [
+        0.018,
+        0.6756296296296296,
+        0.56,
+        0.122
+      ],
+      "label": "ready to post"
+    }
+  ],
+  "shortcuts": [],
+  "clicks": [],
+  "typing": [],
+  "sound": {
+    "sfx": true,
+    "music": "dark-pulse",
+    "music_db": -21
+  },
+  "shorts": [
+    {
+      "start": "w53",
+      "end": "w104",
+      "title": "Animations from your own code"
+    }
+  ],
+  "thumbnail": {
+    "at": "w90",
+    "text": "Talk. Stop. Ship."
+  },
+  "publish": {
+    "title": "ClipAgent: talk freely, ship studio-quality video",
+    "description": "Type /screen-record in your coding agent, talk, and get a fully edited video with animations built from your own repo.",
+    "tags": [
+      "claude code",
+      "screen recording",
+      "video editing",
+      "motion graphics"
+    ],
+    "linkedin": "I built ClipAgent: type /screen-record in Claude Code, talk, and get a studio-edited video back.",
+    "x": "/screen-record \u2192 talk \u2192 studio-quality video. ClipAgent edits itself."
+  },
+  "mismatches": [],
+  "_draft_removed_gaps": [
+    [
+      47.58,
+      48.0
+    ]
+  ],
+  "_draft_scratched": []
+}

@@ -1,0 +1,32 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@font-face{font-family:Inter;src:url(../../engine/clipagent/assets/fonts/Inter-Black.ttf);font-weight:900}
+@font-face{font-family:Inter;src:url(../../engine/clipagent/assets/fonts/Inter-Medium.ttf);font-weight:500}
+@font-face{font-family:Inter;src:url(../../engine/clipagent/assets/fonts/Inter-SemiBold.ttf);font-weight:600}
+html,body{margin:0;width:1600px;height:520px;overflow:hidden;background:#05060a;font-family:Inter}
+.bg{position:absolute;inset:0;background:radial-gradient(900px 420px at 78% 40%,rgba(56,189,248,.16),transparent 60%),radial-gradient(700px 380px at 15% 90%,rgba(168,85,247,.16),transparent 60%),radial-gradient(500px 300px at 95% 100%,rgba(245,158,11,.10),transparent 60%)}
+.grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:40px 40px;mask-image:radial-gradient(ellipse at 60% 50%,black 30%,transparent 75%)}
+.left{position:absolute;left:90px;top:120px}
+.rec{display:inline-flex;align-items:center;gap:12px;padding:10px 20px;border-radius:999px;background:#16161a;border:1px solid #2a2a33;color:#e5e7eb;font-weight:600;font-size:22px}
+.dot{width:14px;height:14px;border-radius:50%;background:#ef4444;box-shadow:0 0 18px #ef4444}
+h1{margin:26px 0 0;font-size:112px;font-weight:900;letter-spacing:-4px;color:#fff;line-height:1}
+h1 span{background:linear-gradient(90deg,#38BDF8,#A855F7 60%,#F59E0B);-webkit-background-clip:text;color:transparent}
+p{margin:22px 0 0;font-size:30px;color:#a1a1aa;font-weight:500}
+p b{color:#fff;font-weight:600}
+svg{position:absolute;right:60px;top:60px}
+</style></head><body><div class="bg"></div><div class="grid"></div>
+<div class="left"><div class="rec"><div class="dot"></div>/screen-record</div>
+<h1>Clip<span>Agent</span></h1>
+<p><b>Talk freely.</b> Ship studio-quality video.</p></div>
+<svg width="640" height="400" viewBox="0 0 640 400">
+ <defs><filter id="g"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+ <path d="M150 120 C 260 120, 300 200, 420 200" stroke="#4B5563" stroke-width="2" fill="none"/>
+ <path d="M420 200 C 470 200, 470 300, 520 310" stroke="#4B5563" stroke-width="2" fill="none"/>
+ <path d="M150 300 C 260 300, 300 200, 420 200" stroke="#4B5563" stroke-width="2" fill="none"/>
+ <g><rect x="40" y="70" width="120" height="100" rx="12" fill="#161618" stroke="#2c2c31"/><text x="100" y="128" fill="#e5e7eb" font-family="Inter" font-weight="600" font-size="17" text-anchor="middle">SCREEN</text></g>
+ <g><rect x="40" y="250" width="120" height="100" rx="12" fill="#161618" stroke="#2c2c31"/><text x="100" y="308" fill="#e5e7eb" font-family="Inter" font-weight="600" font-size="17" text-anchor="middle">VOICE</text></g>
+ <g><rect x="360" y="140" width="150" height="120" rx="12" fill="#161618" stroke="#fff" stroke-dasharray="7 5" stroke-width="2"/><text x="435" y="196" fill="#fff" font-family="Inter" font-weight="900" font-size="18" text-anchor="middle">AGENT</text><text x="435" y="222" fill="#9ca3af" font-family="Inter" font-weight="500" font-size="14" text-anchor="middle">+ your repo</text></g>
+ <g><rect x="500" y="270" width="130" height="90" rx="12" fill="#161618" stroke="#2c2c31"/><text x="565" y="321" fill="#22C55E" font-family="Inter" font-weight="900" font-size="18" text-anchor="middle">▶ FINAL</text></g>
+ <g filter="url(#g)"><rect x="230" y="102" width="86" height="28" rx="14" fill="#38BDF8"/><text x="273" y="121" font-family="Inter" font-weight="600" font-size="13" text-anchor="middle" fill="#04131c">context</text>
+ <rect x="236" y="266" width="76" height="28" rx="14" fill="#A855F7"/><text x="274" y="285" font-family="Inter" font-weight="600" font-size="13" text-anchor="middle" fill="#fff">words</text>
+ <circle cx="468" cy="248" r="4" fill="#F59E0B"/><circle cx="482" cy="272" r="4" fill="#F59E0B"/><circle cx="494" cy="292" r="4" fill="#F59E0B"/></g>
+</svg></body></html>

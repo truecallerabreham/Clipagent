@@ -1,0 +1,73 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>terminal</title>
+<style>
+  html,body{margin:0;height:100%;background:#0d1016;font-family:"JetBrains Mono","DejaVu Sans Mono",monospace;color:#d8dee9}
+  .bar{height:52px;background:#161b24;display:flex;align-items:center;padding:0 22px;gap:10px;border-bottom:1px solid #222a36}
+  .dot{width:14px;height:14px;border-radius:50%}
+  .title{margin-left:18px;color:#7d8796;font-size:20px}
+  #t{padding:34px 44px;font-size:27px;line-height:1.6;white-space:pre-wrap}
+  .p{color:#61afef}.ok{color:#98c379}.dim{color:#6b7380}.acc{color:#e5c07b}.red{color:#e06c75}.cy{color:#56b6c2}
+  .cur{display:inline-block;width:14px;height:30px;background:#61afef;vertical-align:-5px;animation:b 1s steps(1) infinite}
+  @keyframes b{50%{opacity:0}}
+</style></head>
+<body>
+<div class="bar"><div class="dot" style="background:#ff5f57"></div><div class="dot" style="background:#febc2e"></div><div class="dot" style="background:#28c840"></div><div class="title">~/code/orders-api — agent</div></div>
+<div id="t"></div>
+<script>
+const T = document.getElementById('t');
+const steps = [
+  [0.6, 'type', '<span class="p">❯</span> ', '/screen-record --context ./api ./docs/auth.md --web'],
+  [3.6, 'line', '<span class="red">●</span> Recording  <span class="dim">screen + webcam + mic + input · stop with Ctrl+Alt+S</span>'],
+  [5.0, 'line', '<span class="dim">  talk naturally — say “cut that” to drop a sentence</span>'],
+  [9.5, 'line', '<span class="ok">■</span> Take finished <span class="dim">· 6m 12s recorded</span>'],
+  [10.6, 'line', '<span class="cy">↳ clipagent prepare</span>'],
+  [11.4, 'line', '  <span class="ok">✓</span> transcribed <span class="dim">1,184 words · local whisper</span>'],
+  [12.2, 'line', '  <span class="ok">✓</span> analyzed <span class="dim">voice SNR 31 dB · camera: good</span>'],
+  [13.0, 'line', '  <span class="ok">✓</span> draft <span class="dim">41 cuts · 2 scratched · 14 click zooms</span>'],
+  [14.6, 'line', '<span class="cy">↳ editorial pass</span> <span class="dim">reading transcript + ./api + docs/auth.md</span>'],
+  [16.2, 'line', '  Look: <span class="acc">architecture-flow</span> <span class="dim">· 9 Inserts · 3 shorts</span>'],
+  [18.0, 'bar', '  ins-01 login flow      '],
+  [20.5, 'bar', '  ins-02 token refresh   '],
+  [23.0, 'bar', '  ins-03 latency spike   '],
+  [26.0, 'line', '  <span class="ok">✓</span> self-check <span class="dim">9/9 Inserts pass</span>'],
+  [30.0, 'line', '<span class="cy">↳ clipagent render</span> <span class="dim">denoise · grade · captions · sfx</span>'],
+  [36.0, 'line', '<span class="ok">✓</span> deliverables/'],
+  [36.6, 'line', '   final.mp4  <span class="dim">8:04</span>   shorts/ ×3   thumbnail.png'],
+  [37.2, 'line', '   captions.srt   chapters.txt   copy.md   report.md'],
+  [40.0, 'type', '<span class="p">❯</span> ', ''],
+];
+let html = '';
+function render(extra){ T.innerHTML = html + (extra||'') + '<span class="cur"></span>'; }
+const t0 = performance.now();
+let i = 0;
+function tick(){
+  const t = (performance.now() - t0) / 1000;
+  while (i < steps.length && steps[i][0] <= t) {
+    const s = steps[i];
+    if (s[1] === 'line') { html += s[2] + '\n'; render(); }
+    if (s[1] === 'type') { typeOut(s[2], s[3]); }
+    if (s[1] === 'bar') { barOut(s[2]); }
+    i++;
+  }
+  requestAnimationFrame(tick);
+}
+function typeOut(prefix, text){
+  let k = 0;
+  const id = setInterval(() => {
+    k++; render(prefix + text.slice(0, k));
+    if (k >= text.length) { clearInterval(id); html += prefix + text + '\n'; render(); }
+  }, 42);
+  if (!text) { clearInterval(id); render(prefix); }
+}
+function barOut(label){
+  let k = 0;
+  const id = setInterval(() => {
+    k++;
+    const fill = '█'.repeat(k) + '<span class="dim">' + '░'.repeat(20 - k) + '</span>';
+    render(label + fill + ' ' + Math.round(k * 5) + '%');
+    if (k >= 20) { clearInterval(id); html += label + '<span class="ok">' + '█'.repeat(20) + '</span> <span class="ok">✓</span>\n'; render(); }
+  }, 100);
+}
+render(); requestAnimationFrame(tick);
+</script>
+</body></html>
