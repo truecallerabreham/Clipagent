@@ -1,0 +1,23 @@
+name: ci
+on:
+  push: { branches: [main] }
+  pull_request:
+jobs:
+  engine:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - run: uv sync --project engine --group dev
+      - run: uv run --project engine pytest engine/tests -q
+  recorder:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm ci --ignore-scripts
+        working-directory: recorder
+      - run: npm test
+        working-directory: recorder

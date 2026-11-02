@@ -1,0 +1,99 @@
+{
+  "name": "clipagent-recorder",
+  "version": "0.1.0",
+  "description": "ClipAgent recorder: captures screen, webcam, mic and input events into a Take",
+  "license": "MIT",
+  "author": "ClipAgent",
+  "main": "src/main/main.js",
+  "bin": {
+    "clipagent-recorder": "bin/clipagent-recorder"
+  },
+  "scripts": {
+    "start": "electron . --",
+    "test": "node --test \"test/*.test.js\"",
+    "list-devices": "electron . -- --list-devices",
+    "dist": "electron-builder --publish never",
+    "dist:linux": "electron-builder --linux --publish never",
+    "dist:mac": "electron-builder --mac --publish never",
+    "dist:win": "electron-builder --win --publish never"
+  },
+  "devDependencies": {
+    "electron": "45.2.1",
+    "electron-builder": "26.18.0"
+  },
+  "optionalDependencies": {
+    "uiohook-napi": "1.5.5"
+  },
+  "build": {
+    "appId": "dev.clipagent.recorder",
+    "productName": "ClipAgent Recorder",
+    "executableName": "clipagent-recorder",
+    "artifactName": "ClipAgent-Recorder-${os}-${arch}.${ext}",
+    "asar": false,
+    "npmRebuild": false,
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "src/**/*",
+      "package.json",
+      "node_modules/**/*"
+    ],
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "category": "AudioVideo"
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "universal"
+          ]
+        }
+      ],
+      "category": "public.app-category.video",
+      "hardenedRuntime": true,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist",
+      "extendInfo": {
+        "NSCameraUsageDescription": "ClipAgent Recorder records your webcam into the Take.",
+        "NSMicrophoneUsageDescription": "ClipAgent Recorder records your microphone into the Take.",
+        "NSScreenCaptureUsageDescription": "ClipAgent Recorder records your screen into the Take.",
+        "LSUIElement": true
+      }
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false
+    }
+  },
+  "allowScripts": {
+    "uiohook-napi@1.5.5": true,
+    "electron-winstaller@5.4.0": true
+  }
+}

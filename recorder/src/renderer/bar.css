@@ -1,0 +1,120 @@
+:root {
+  --bg: rgba(18, 18, 22, 0.94);
+  --border: rgba(255, 255, 255, 0.09);
+  --text: #f4f4f5;
+  --muted: #a1a1aa;
+  --hover: rgba(255, 255, 255, 0.08);
+  --red: #ef4444;
+  --amber: #f59e0b;
+  --green: #22c55e;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  background: transparent;
+  overflow: hidden;
+  user-select: none;
+  font-family: "Inter", "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI Variable", "Segoe UI", "Cantarell", "Ubuntu", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 44px;
+  margin: 2px;
+  padding: 0 6px 0 14px;
+  border-radius: 22px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  -webkit-app-region: drag;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--muted);
+  flex: none;
+}
+.bar[data-status="recording"] .dot { background: var(--red); animation: pulse 1.6s ease-in-out infinite; }
+.bar[data-status="paused"] .dot { background: var(--amber); }
+.bar[data-status="stopping"] .dot { background: var(--muted); }
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.55); }
+  50% { box-shadow: 0 0 0 5px rgba(239, 68, 68, 0); }
+}
+
+.time {
+  font-size: 14px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  min-width: 44px;
+}
+.bar[data-status="paused"] .time { color: var(--amber); }
+
+.meter { display: flex; align-items: flex-end; gap: 2px; height: 16px; }
+.meter i {
+  display: block;
+  width: 3px;
+  border-radius: 1.5px;
+  background: rgba(255, 255, 255, 0.16);
+  transition: background 0.08s;
+}
+.meter i:nth-child(1) { height: 5px; }
+.meter i:nth-child(2) { height: 8px; }
+.meter i:nth-child(3) { height: 11px; }
+.meter i:nth-child(4) { height: 14px; }
+.meter i:nth-child(5) { height: 16px; }
+.meter i.on { background: var(--green); }
+.meter i.on.hot { background: var(--amber); }
+.meter.off { opacity: 0.35; }
+
+.sep { width: 1px; height: 20px; background: var(--border); }
+
+.btn {
+  -webkit-app-region: no-drag;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 16px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.btn:hover { background: var(--hover); }
+.btn:active { background: rgba(255, 255, 255, 0.14); }
+.btn svg { width: 15px; height: 15px; fill: currentColor; }
+.btn.stop { color: var(--red); }
+.btn .i-play { display: none; }
+.bar[data-status="paused"] .btn .i-play { display: block; }
+.bar[data-status="paused"] .btn .i-pause { display: none; }
+.bar[data-status="starting"] .btn, .bar[data-status="stopping"] .btn { opacity: 0.4; pointer-events: none; }
+
+.toast {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 22px;
+  background: var(--amber);
+  color: #1c1917;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s;
+}
+.bar.flash .toast { opacity: 1; }

@@ -1,0 +1,60 @@
+#!/usr/bin/env node
+'use strict';
+// Dev launcher: runs the recorder from this checkout with the npm-installed Electron.
+//   recorder/bin/clipagent-recorder --session <DIR> [--camera <id>|none|default] [--no-mic] [--display <id>]
+//   recorder/bin/clipagent-recorder --stop <DIR>        (plain Node: no Electron started)
+//   recorder/bin/clipagent-recorder --list-devices
+
+const fs = require('fs');
+const path = require('path');
+const { spawn } = require('child_process');
+const { parseArgs, UsageError, USAGE } = require('../src/lib/cli');
+const { requestStop } = require('../src/lib/stopper');
+const { APP_VERSION } = require('../src/lib/take');
+
+const appDir = path.resolve(__dirname, '..');
+const args = process.argv.slice(2);
+
+let opts;
+try {
+  opts = parseArgs(args);
+} catch (e) {
+  if (!(e instanceof UsageError)) throw e;
+  console.error(`clipagent-recorder: ${e.message}\n\n${USAGE}`);
+  process.exit(2);
+}
+
+if (opts.mode === 'help') { console.log(USAGE); process.exit(0); }
+if (opts.mode === 'version') { console.log(`clipagent-recorder ${APP_VERSION}`); process.exit(0); }
+if (opts.mode === 'stop') {
+  requestStop(opts.session, { wait: opts.wait, timeout: opts.timeout }).then((r) => {
+    (r.code ? console.error : console.log)(`clipagent-recorder: ${r.message}`);
+    process.exit(r.code);
+  });
+} else {
+  let electron;
+  try {
+    electron = require('electron'); // path to the binary (downloaded on first use)
+  } catch (e) {
+    console.error(`clipagent-recorder: Electron is not installed: run \`npm install\` in ${appDir} (${e.message})`);
+    process.exit(1);
+  }
+  const flags = [];
+  if (process.platform === 'linux') {
+    // The npm Electron's chrome-sandbox is not setuid root; Ubuntu 24.04+ also blocks the userns sandbox.
+    const sandbox = path.join(path.dirname(electron), 'chrome-sandbox');
+    let suid = false;
+    try { const st = fs.statSync(sandbox); suid = st.uid === 0 && (st.mode & 0o4000) !== 0; } catch { /* missing */ }
+    if (!suid) flags.push('--no-sandbox');
+    const wayland = process.env.XDG_SESSION_TYPE === 'wayland' || !!process.env.WAYLAND_DISPLAY;
+    if (wayland && !process.env.CLIPAGENT_NATIVE_WAYLAND) flags.push('--ozone-platform=x11'); // see src/main/main.js
+  }
+  const env = { ...process.env };
+  delete env.ELECTRON_RUN_AS_NODE;
+  env.CLIPAGENT_RESPAWNED = '1'; // the recorder stops if this launcher dies
+  const child = spawn(electron, [...flags, appDir, '--', ...args], { stdio: 'inherit', env });
+  const forward = process.platform === 'win32' ? ['SIGINT', 'SIGTERM'] : ['SIGINT', 'SIGTERM', 'SIGHUP', 'SIGUSR1', 'SIGUSR2'];
+  for (const sig of forward) process.on(sig, () => child.kill(sig));
+  child.on('error', (e) => { console.error(`clipagent-recorder: failed to start Electron: ${e.message}`); process.exit(1); });
+  child.on('exit', (code, signal) => process.exit(code === null ? (signal ? 1 : 0) : code));
+}

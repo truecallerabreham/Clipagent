@@ -1,0 +1,93 @@
+name: release-recorder
+
+# Builds the ClipAgent recorder (Electron) for Linux, macOS and Windows on a `recorder-v*` tag
+# and attaches ClipAgent-Recorder-<os>-<arch>.<ext> to the GitHub Release for that tag.
+
+on:
+  push:
+    tags: ['recorder-v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: --linux
+          - os: macos-latest
+            target: --mac
+          - os: windows-latest
+            target: --win
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: recorder
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: recorder/package-lock.json
+
+      - name: Install
+        run: npm ci
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Check tag matches package.json version
+        if: startsWith(github.ref, 'refs/tags/recorder-v')
+        shell: bash
+        run: |
+          want="${GITHUB_REF_NAME#recorder-v}"
+          have="$(node -p "require('./package.json').version")"
+          if [ "$want" != "$have" ]; then echo "tag $want != package.json $have"; exit 1; fi
+
+      - name: Build
+        shell: bash
+        run: npx electron-builder ${{ matrix.target }} --publish never
+        env:
+          # Code signing is optional: set these repository secrets to sign (and notarize on macOS).
+          CSC_IDENTITY_AUTO_DISCOVERY: ${{ secrets.CSC_LINK != '' }}
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+
+      - name: List artifacts
+        shell: bash
+        run: ls -la release
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: recorder-${{ matrix.os }}
+          path: |
+            recorder/release/ClipAgent-Recorder-*.AppImage
+            recorder/release/ClipAgent-Recorder-*.dmg
+            recorder/release/ClipAgent-Recorder-*.exe
+            recorder/release/ClipAgent-Recorder-*.zip
+          if-no-files-found: error
+
+  release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/recorder-v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          name: ClipAgent Recorder ${{ github.ref_name }}
+          files: dist/ClipAgent-Recorder-*
+          fail_on_unmatched_files: true
