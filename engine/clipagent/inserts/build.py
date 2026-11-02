@@ -41,12 +41,16 @@ def canvas_size(fmt: str) -> tuple[int, int]:
 def insert_box(mode: str, W: int, H: int, rect=None, fmt="landscape") -> tuple[int, int, int, int]:
     """Where an Insert sits on the canvas (pixels). Shared by the renderer and the compositor."""
     if mode == "full":
+        if fmt == "landscape":  # leave the bottom band for captions and the camera bubble
+            return 0, 0, W, round(H * 0.86) // 2 * 2
         return 0, 0, W, H
     if mode == "split":
         if fmt == "landscape":
+            # two 16:10 panels side by side: the Insert keeps a landscape layout
             m = round(H * 0.045)
-            w = (W - 3 * m) // 2
-            return W - m - w, m, w, H - 2 * m
+            w = (W - 3 * m) // 2 // 2 * 2
+            h = round(w * 10 / 16) // 2 * 2
+            return W - m - w, (H - h) // 2, w, h
         m = round(W * 0.045)
         h = (H - 3 * m) // 2
         return m, m, W - 2 * m, h
@@ -125,7 +129,8 @@ def resolve(edl: dict, transcript: dict, tl: Timeline) -> tuple[list[dict], list
             "scene": ins.get("scene", {}),
             "beats": beats,
             "_placement": {"out_start": round(o0, 3), "out_end": round(o1, 3), "box": [x, y, w, h],
-                           "src": [round(s0, 3), round(s1, 3)], "transition": ins.get("transition")},
+                           "src": [round(s0, 3), round(s1, 3)], "transition": ins.get("transition"),
+                           "backdrop": ins.get("backdrop", True)},
         }
         specs.append(spec)
     _check_overlaps(specs, warnings)

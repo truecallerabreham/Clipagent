@@ -40,7 +40,10 @@ CHROME_ARGS = [
     "--disable-gpu",
     "--disable-partial-raster",
     "--disable-lcd-text",
+    "--enable-unsafe-swiftshader",  # keep software WebGL (three.js Inserts) available with --disable-gpu
 ]
+# /@file/<absolute path> serves local images referenced by absolute path in a spec (e.g. Screenshot src)
+FILE_ROUTE_EXTS = {".png", ".jpg", ".jpeg", ".webp", ".gif", ".avif"}
 INSTALL_HINT = (
     "No usable Chromium for Playwright: Google Chrome is not installed and the bundled Chromium is "
     "missing. Run `uv run playwright install chromium` (from engine/) and retry."
@@ -72,8 +75,8 @@ def frame_count(spec: dict) -> int:
 
 # --------------------------------------------------------------------------- local http server
 class _Handler(http.server.SimpleHTTPRequestHandler):
-    """Serves /looks/* from the looks dir (with /looks/_runtime falling back to the repo runtime)
-    and /spec/* from the spec's folder."""
+    """Serves /looks/* from the looks dir (with /looks/_runtime falling back to the repo runtime),
+    /spec/* from the spec's folder, and /@file/<absolute path> for local image files only."""
 
     roots: dict[str, Path] = {}
 
@@ -83,6 +86,9 @@ class _Handler(http.server.SimpleHTTPRequestHandler):
         if not parts:
             return "/nonexistent"
         head, rest = parts[0], parts[1:]
+        if head == "@file":
+            target = Path("/", *rest)
+            return str(target) if target.suffix.lower() in FILE_ROUTE_EXTS and target.is_file() else "/nonexistent"
         if head == "looks" and rest[:1] == ["_runtime"] and not (self.roots["looks"] / "_runtime").is_dir():
             base = REPO_LOOKS
         else:

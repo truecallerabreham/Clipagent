@@ -45,6 +45,8 @@ def header(W, H, fmt, font, accent):
     styles = [
         # Name, Font, Size, Primary, Secondary, Outline, Back, Bold, BorderStyle, Outline, Shadow, Align, MarginV
         ("Caption", f"{font} ExtraBold", cap, white, white, black, "&H90000000", 1, 1, 3.2 * s, 2 * s, 2, 0),
+        # over full Inserts: an opaque rounded-ish box so captions never fight the diagram
+        ("CaptionBox", f"{font} ExtraBold", cap, white, white, "&H28101012", "&H00000000", 1, 3, 14 * s, 0, 2, 0),
         ("Title", f"{font} Black", title, white, white, "&H00101010", "&H80000000", 1, 1, 0, 4 * s, 5, 0),
         ("TitleSub", f"{font} Medium", int(title * 0.42), "&H00E6E6E6", white, black, "&H80000000", 0, 1, 0, 2 * s, 5, 0),
         ("Chapter", f"{font} Bold", int(34 * s), white, white, box, "&H00000000", 1, 3, 16 * s, 0, 7, 0),
@@ -114,7 +116,7 @@ def apply_caption_edits(words, edits):
     return words
 
 
-def caption_events(words, timeline, cfg, W, H, fmt, accent):
+def caption_events(words, timeline, cfg, W, H, fmt, accent, boxed=()):
     """Words (source time) -> karaoke caption events (output time)."""
     P = PLACE[fmt]
     per = cfg.get("words_per_line", 4)
@@ -153,7 +155,8 @@ def caption_events(words, timeline, cfg, W, H, fmt, accent):
                 t = esc(o["w"])
                 parts.append(f"{{\\c{hl}\\fscx112\\fscy112}}{t}{{\\r\\c{base}}}" if j == k else t)
             pop = "\\fscx88\\fscy88\\t(0,120,\\fscx100\\fscy100)" if k == 0 else ""
-            out.append(ev(10, a, b, "Caption", f"{{\\an2\\pos({x:.0f},{y:.0f})\\c{base}{pop}}}" + " ".join(parts)))
+            style = "CaptionBox" if any(s0 - 0.05 <= a < e0 for s0, e0 in boxed) else "Caption"
+            out.append(ev(10, a, b, style, f"{{\\an2\\pos({x:.0f},{y:.0f})\\c{base}{pop}}}" + " ".join(parts)))
     return out
 
 

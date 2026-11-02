@@ -409,6 +409,16 @@ class Editor:
             canvas = self.draw_insert(canvas, ins, t, pin, pout)
             if ins["mode"] == "full" and cw >= W - 1 and ch >= H - 1:
                 cam_alpha = 0  # a full-frame camera never hides a full Insert
+            elif ins["mode"] == "full" and cw < W * 0.5:
+                # shrink the bubble into its corner so it doesn't sit on the diagram
+                q = 1 - 0.38 * C.ease(pin) * (1 - C.ease(pout))
+                ax = cx + cw if cx + cw / 2 > W / 2 else cx
+                ay = cy + ch if cy + ch / 2 > H / 2 else cy
+                nw, nh = cw * q, ch * q
+                cx = ax - nw if ax > cx else ax
+                cy = ay - nh if ay > cy else ay
+                cw, ch = nw, nh
+                g = dict(g, radius=g["radius"] * q)
 
         # camera
         if cam_alpha > 0.01 and cw > 4:
@@ -499,9 +509,14 @@ class Editor:
         if img is None:
             return canvas
         if ins["mode"] == "full":
-            full = img[..., :3] if img.shape[2] == 4 else img
-            if full.shape[:2] != canvas.shape[:2]:
-                full = cv2.resize(full, (canvas.shape[1], canvas.shape[0]))
+            body = img[..., :3] if img.shape[2] == 4 else img
+            if body.shape[:2] != canvas.shape[:2]:
+                # Insert laid out above the caption band: extend its own background down
+                full = np.empty_like(canvas)
+                full[:] = body[2, 2]
+                full[y:y + body.shape[0], x:x + body.shape[1]] = body[: canvas.shape[0] - y, : canvas.shape[1] - x]
+            else:
+                full = body
             if pin < 1:
                 return FX.transition(canvas, full, pin, ins["tkind"], self.trans_colors)
             if pout > 0:
@@ -513,9 +528,19 @@ class Editor:
             r = int(self.radius)
             C.blend_into(canvas, body, x, y, C.rounded_mask(w, h, r), alpha)
             return canvas
-        # overlay: transparent Insert, slight scale pop on entry
+        # overlay: transparent Insert on a glass backdrop, slight scale pop on entry
         if img.shape[2] == 3:
             img = cv2.cvtColor(img, cv2.COLOR_BGR2BGRA)
+        if ins.get("backdrop", True):
+            pad = int(10 * self.scale)
+            bx, by, bw, bh = x - pad, y - pad, w + 2 * pad, h + 2 * pad
+            roi = canvas[max(0, by):by + bh, max(0, bx):bx + bw]
+            if roi.size:
+                glass = cv2.GaussianBlur(roi, (0, 0), 18)
+                tint = np.full_like(glass, (14, 12, 12) if self.dark else (250, 250, 250))
+                glass = cv2.addWeighted(glass, 0.25, tint, 0.75, 0)
+                C.blend_into(canvas, glass, max(0, bx), max(0, by),
+                             C.rounded_mask(glass.shape[1], glass.shape[0], int(18 * self.scale)), alpha * 0.92)
         if pin < 1:
             s = 0.92 + 0.08 * C.ease(pin)
             img = cv2.resize(img, (max(2, int(w * s)), max(2, int(h * s))))
@@ -531,7 +556,9 @@ class Editor:
         cap = st.get("captions", {})
         if cap.get("enabled", True) and words:
             words = O.apply_caption_edits(words, self.edl.get("caption_edits", []))
-            lines += O.caption_events(O.apply_glossary(words, self.edl.get("glossary", {})), self.tl, cap, W, H, fmt, acc)
+            boxed = []  # full Inserts leave a caption band, so captions stay unboxed
+            lines += O.caption_events(O.apply_glossary(words, self.edl.get("glossary", {})), self.tl, cap, W, H, fmt, acc,
+                                      boxed=boxed)
         for a, b, t in self.titles:
             lines += O.title_events(a, b - a, t["text"], t.get("sub", ""), W, H, fmt, acc)
         for a, i, c in self.chapters:

@@ -43,6 +43,7 @@ TEXT_PROBE = """
   }
   const issues = [];
   for (const b of boxes) {
+    if (b.h < 12) issues.push({kind: 'tiny', text: b.text});
     if (b.x < 0 || b.y < 0 || b.x + b.w > W || b.y + b.h > H) issues.push({kind: 'clipped', text: b.text});
     else if (b.x < W * m || b.y < H * m || b.x + b.w > W * (1 - m) || b.y + b.h > H * (1 - m)) issues.push({kind: 'margin', text: b.text});
   }
@@ -142,7 +143,7 @@ def run_qa(work: Path, edl: dict, analysis: dict | None = None, text_probe: bool
                 break
         # blank frames: an Insert that renders nothing is broken
         last = imgs[-1]
-        if last.shape[2] == 4 and float(last[..., 3].mean()) < 1.0:
+        if last.shape[2] == 4 and int(last[..., 3].max()) == 0:
             rep["issues"].append({"kind": "blank", "text": "final frame is fully transparent"})
         elif last.shape[2] >= 3 and float(last[..., :3].std()) < 2.0:
             rep["issues"].append({"kind": "blank", "text": "final frame is a flat color"})
