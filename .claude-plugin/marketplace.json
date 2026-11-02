@@ -1,0 +1,12 @@
+{
+  "name": "clipagent",
+  "owner": { "name": "Abreham", "url": "https://github.com/truecallerabreham" },
+  "plugins": [
+    {
+      "name": "clipagent",
+      "source": "./",
+      "description": "/screen-record: talk freely, get a studio-edited video with animated Inserts from your own repo and docs.",
+      "version": "0.1.0"
+    }
+  ]
+}

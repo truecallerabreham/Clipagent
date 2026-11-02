@@ -1,0 +1,10 @@
+{
+  "name": "clipagent",
+  "version": "0.1.0",
+  "description": "/screen-record: talk freely, get a studio-edited video. Records screen + webcam + mic, then auto-edits with animated Inserts built from your repo, docs and the web.",
+  "author": { "name": "Abreham", "url": "https://github.com/truecallerabreham" },
+  "homepage": "https://github.com/truecallerabreham/Clipagent",
+  "repository": "https://github.com/truecallerabreham/Clipagent",
+  "license": "MIT",
+  "keywords": ["screen-recording", "video-editing", "motion-graphics", "tutorial", "skill"]
+}
