@@ -476,7 +476,7 @@ class Editor:
                 x1, y1 = self.to_canvas(rx + rw, ry + rh, box, z)
                 FX.marching_box(layer, (x0, y0, x1 - x0, y1 - y0), col, age, sc, min(1.0, age / 0.4))
                 if ann.get("label"):
-                    FX.pill_label(layer, (x0 + x1) / 2, y0 - 34 * sc, ann["label"], sc, **self._pill())
+                    self.box_label(layer, ann["label"], x0, y0, x1, y1, box)
             elif kind == "arrow" and ann.get("to"):
                 p1 = self.to_canvas(*ann["to"], box, z)
                 p0 = self.to_canvas(*ann["from"], box, z) if ann.get("from") else (p1[0] - 220 * sc, p1[1] - 140 * sc)
@@ -498,6 +498,23 @@ class Editor:
             if ct <= t < ct + 1.2:
                 cx, cy = self.to_canvas(x, y, box, z)
                 FX.click_effect(canvas, self.click_kind, cx, cy, t - ct, sc, self.ann_color)
+
+    def box_label(self, layer, text, x0, y0, x1, y1, box):
+        """Label pill in the Look accent, beside the box (right, else left, else above)."""
+        sc = self.scale * 1.25
+        img = FX.text_image(text, max(14, int(26 * sc)), "#0B0B0F" if self.dark else "#FFFFFF",
+                            self.accent, pad=max(8, int(12 * sc)))
+        w, h = img.shape[1], img.shape[0]
+        gap = int(16 * sc)
+        sx, sy, sw, sh = box
+        cy = int((y0 + y1) / 2 - h / 2)
+        if x1 + gap + w < sx + sw:
+            x = int(x1 + gap)
+        elif x0 - gap - w > sx:
+            x = int(x0 - gap - w)
+        else:
+            x, cy = int((x0 + x1) / 2 - w / 2), int(y0 - gap - h)
+        FX.paste_bgra(layer, img, x, cy)
 
     def _pill(self):
         return {"bg": self.badge.get("bg", "#1E1E1E"), "fg": self.badge.get("fg", "#FFFFFF")}

@@ -27,7 +27,9 @@ Don't make one when the speaker is showing something on screen the viewer must s
 **Mode:**
 - `full`: the concept *is* the content (architecture, story scenes, math). The camera bubble stays on top.
 - `split`: the screen still matters (the code they're explaining on the left, the diagram on the right).
-- `overlay`: a small transparent addition over the live screen: a number, a snippet, a token pill, a short label. Set `rect` away from what they're pointing at.
+- `overlay`: a small transparent addition over the live screen: a number, a snippet, a token pill, a short label. Set `rect` away from what they're pointing at, at least `0.32` of the height tall (smaller rects shrink the Look's type until it's unreadable). The compositor puts a frosted-glass backdrop behind it (`"backdrop": false` to disable).
+
+Canvas sizes the engine gives each mode (landscape): `full` 1920×928 (the bottom band stays free for captions and the camera bubble), `split` 886×554 beside the screen, `overlay` the `rect`. Lay scenes out for that shape: in `split`, use at most 4 nodes.
 
 ## 3. Anchor every Beat to a word
 
