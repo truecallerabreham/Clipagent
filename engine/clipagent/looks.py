@@ -83,6 +83,10 @@ def apply_look_style(edl: dict, look: dict) -> dict:
     })
     style["captions"] = {"enabled": cap.get("enabled", True), "words_per_line": cap.get("words_per_line", 4),
                          "highlight": cap.get("highlight", look["accent"]), "color": cap.get("color", "#FFFFFF")}
+    if cap.get("background"):  # light Looks: dark words on a solid box instead of an outline
+        style["captions"]["background"] = cap["background"]
+    if cap.get("font"):  # e.g. Stickman Story: handwritten Patrick Hand captions
+        style["captions"]["font"] = cap["font"]
     edl["look"] = look["id"]
     return edl
 

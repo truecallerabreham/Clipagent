@@ -99,7 +99,7 @@ Keys starting with `_` (e.g. `_draft_removed_gaps`, `_draft_scratched`) are note
   ],
 
   "annotations": [                         // drawn on the screen recording, follow zooms
-    { "type": "box",     "start": 41.0, "end": 45.5, "rect": [0.2, 0.3, 0.3, 0.1], "label": "pricing card" },  // marching ants
+    { "type": "box",     "start": 41.0, "end": 45.5, "rect": [0.2, 0.3, 0.3, 0.1], "label": "pricing card", "label_pos": "below" },  // marching ants; label_pos optional: right/left/below/above
     { "type": "arrow",   "start": 47.0, "end": 50.0, "to": [0.62, 0.41], "from": [0.4, 0.2], "label": "click here" },
     { "type": "chevron", "start": 52.0, "end": 54.0, "at": [0.7, 0.55], "dir": "right" },              // pulsing >>>
     { "type": "pill",    "start": 55.0, "end": 58.0, "at": [0.5, 0.12], "text": "Sidebar", "arrows": true },

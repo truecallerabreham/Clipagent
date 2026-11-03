@@ -49,7 +49,7 @@
     "transition_colors": ["#FFFFFF", "#111111", "#9CA3AF"],
     "shortcut_badge": { "bg": "#FFFFFF", "fg": "#111111" }
   },
-  "captions": { "enabled": true, "color": "#FFFFFF", "highlight": "#FFE066", "words_per_line": 4, "font": "Patrick Hand" },
+  "captions": { "enabled": true, "color": "#FFFFFF", "highlight": "#FFE066", "background": "#111111", "words_per_line": 4, "font": "Patrick Hand" },
   "chapter_card": { "bg": "#FFFFFF", "fg": "#111111", "tracking": 0.12, "duration": 2.0, "font": "Patrick Hand" },
   "sfx": {
     "transition": "whoosh",

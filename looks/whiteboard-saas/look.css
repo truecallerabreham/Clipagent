@@ -51,6 +51,7 @@ html, body { background: #FFFFFF; }
   text-align: center;
   line-height: 1.2;
   letter-spacing: -0.02em;
+  word-spacing: 0.1em; /* room for the keyword's pop/bounce scale */
 }
 .wb-kinetic .ca-word { transform-origin: 50% 70%; }
 .wb-kinetic .kw { position: relative; }
@@ -127,7 +128,7 @@ html, body { background: #FFFFFF; }
   display: inline-block; align-self: flex-start; background: var(--accent); color: #fff; font-weight: 600; font-size: 17px;
   padding: 7px 16px; border-radius: 999px; letter-spacing: 0.02em;
 }
-.wb-ui .plan { font-weight: 600; font-size: 26px; color: var(--ink-soft); margin: 14px 0 2px; }
+.wb-ui .plan { font-weight: 600; font-size: 26px; color: var(--ink-soft); margin: 14px 0 10px; }
 .wb-ui .title { font-weight: 700; font-size: 32px; line-height: 1.2; }
 .wb-ui .subtitle { font-weight: 500; font-size: 20px; color: var(--muted); margin-top: 6px; }
 .wb-ui .price { font-weight: 800; font-size: 72px; letter-spacing: -0.03em; line-height: 1.05; display: inline-block; }

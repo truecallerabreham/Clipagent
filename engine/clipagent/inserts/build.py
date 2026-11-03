@@ -141,8 +141,10 @@ def _check_overlaps(specs, warnings):
     seq = sorted(specs, key=lambda s: s["_placement"]["out_start"])
     for a, b in zip(seq, seq[1:]):
         if b["_placement"]["out_start"] < a["_placement"]["out_end"] - 0.05:
-            warnings.append(f"{a['id']} and {b['id']} overlap in time; {b['id']} starts when {a['id']} ends")
             shift = a["_placement"]["out_end"] - b["_placement"]["out_start"]
+            # back-to-back Inserts share only the lead-in/tail padding (0.25 + 0.45 s): a hard cut, not a problem
+            if shift > 0.75:
+                warnings.append(f"{a['id']} and {b['id']} overlap in time; {b['id']} starts when {a['id']} ends")
             b["_placement"]["out_start"] = a["_placement"]["out_end"]
             b["duration"] = round(b["duration"] - shift, 3)
             for bt in b["beats"]:

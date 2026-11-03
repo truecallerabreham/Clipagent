@@ -314,6 +314,10 @@ class Editor:
                 self.inserts.append({**ins, "n": n, "px": (x, y, max(2, w), max(2, h)), "tkind": tk,
                                      "T": FX.TRANSITION_T.get(tk, 0.35) or 0.0})
             self.inserts.sort(key=lambda i: i["out_start"])
+            # back-to-back full Inserts transition into each other, not out to the screen and back
+            for p, q in zip(self.inserts, self.inserts[1:]):
+                if p["mode"] == q["mode"] == "full" and abs(q["out_start"] - p["out_end"]) < 0.08:
+                    p["next_adj"], q["prev_adj"] = True, p
             for i in self.inserts:
                 if i["mode"] == "split":
                     x, y, w, h = i["px"]
@@ -332,7 +336,7 @@ class Editor:
             a, b, T = ins["out_start"], ins["out_end"], ins["T"]
             if a <= t < b:
                 pin = 1.0 if T <= 0 else min(1.0, (t - a) / T)
-                pout = 0.0 if T <= 0 else max(0.0, 1 - (b - t) / T)
+                pout = 0.0 if T <= 0 or ins.get("next_adj") else max(0.0, 1 - (b - t) / T)
                 return ins, pin, pout
         return None, 0.0, 0.0
 
@@ -476,7 +480,7 @@ class Editor:
                 x1, y1 = self.to_canvas(rx + rw, ry + rh, box, z)
                 FX.marching_box(layer, (x0, y0, x1 - x0, y1 - y0), col, age, sc, min(1.0, age / 0.4))
                 if ann.get("label"):
-                    self.box_label(layer, ann["label"], x0, y0, x1, y1, box)
+                    self.box_label(layer, ann["label"], x0, y0, x1, y1, box, ann.get("label_pos"))
             elif kind == "arrow" and ann.get("to"):
                 p1 = self.to_canvas(*ann["to"], box, z)
                 p0 = self.to_canvas(*ann["from"], box, z) if ann.get("from") else (p1[0] - 220 * sc, p1[1] - 140 * sc)
@@ -499,22 +503,35 @@ class Editor:
                 cx, cy = self.to_canvas(x, y, box, z)
                 FX.click_effect(canvas, self.click_kind, cx, cy, t - ct, sc, self.ann_color)
 
-    def box_label(self, layer, text, x0, y0, x1, y1, box):
-        """Label pill in the Look accent, beside the box (right, else left, else above)."""
+    def box_label(self, layer, text, x0, y0, x1, y1, box, pos=None):
+        """Label pill in the Look accent beside the box.
+
+        `pos` ("right", "left", "below", "above") forces a side; otherwise the first side
+        that fits inside the visible screen wins, in that order. The pill is always clamped
+        to the screen box, so a zoom that pushes the box near an edge can't throw it off-frame.
+        """
         sc = self.scale * 1.25
         img = FX.text_image(text, max(14, int(26 * sc)), "#0B0B0F" if self.dark else "#FFFFFF",
                             self.accent, pad=max(8, int(12 * sc)))
         w, h = img.shape[1], img.shape[0]
         gap = int(16 * sc)
         sx, sy, sw, sh = box
-        cy = int((y0 + y1) / 2 - h / 2)
-        if x1 + gap + w < sx + sw:
-            x = int(x1 + gap)
-        elif x0 - gap - w > sx:
-            x = int(x0 - gap - w)
+        # the visible part of the box (zooms can push it past the screen edges)
+        vx0, vy0, vx1, vy1 = max(x0, sx), max(y0, sy), min(x1, sx + sw), min(y1, sy + sh)
+        mx, my = (vx0 + vx1) / 2, (vy0 + vy1) / 2
+        spots = {
+            "right": (vx1 + gap, my - h / 2, vx1 + gap + w <= sx + sw),
+            "left": (vx0 - gap - w, my - h / 2, vx0 - gap - w >= sx),
+            "below": (mx - w / 2, vy1 + gap, vy1 + gap + h <= sy + sh),
+            "above": (mx - w / 2, vy0 - gap - h, vy0 - gap - h >= sy),
+        }
+        if pos in spots:
+            x, y, _ = spots[pos]
         else:
-            x, cy = int((x0 + x1) / 2 - w / 2), int(y0 - gap - h)
-        FX.paste_bgra(layer, img, x, cy)
+            x, y, _ = next((s for s in spots.values() if s[2]), spots["above"])
+        x = int(min(max(x, sx + 4), sx + sw - w - 4))
+        y = int(min(max(y, sy + 4), sy + sh - h - 4))
+        FX.paste_bgra(layer, img, x, y)
 
     def _pill(self):
         return {"bg": self.badge.get("bg", "#1E1E1E"), "fg": self.badge.get("fg", "#FFFFFF")}
@@ -535,6 +552,9 @@ class Editor:
             else:
                 full = body
             if pin < 1:
+                prev = ins.get("prev_adj")
+                if prev is not None:  # wipe from the previous Insert's last frame
+                    canvas = self.draw_insert(canvas, prev, prev["out_end"] - 1e-3, 1.0, 0.0)
                 return FX.transition(canvas, full, pin, ins["tkind"], self.trans_colors)
             if pout > 0:
                 return FX.transition(full, canvas, pout, ins["tkind"], self.trans_colors)
@@ -569,8 +589,8 @@ class Editor:
     def write_ass(self, path, words):
         W, H, fmt, acc = self.W, self.H, self.fmt, self.accent
         st = self.edl.get("style", {})
-        lines = O.header(W, H, fmt, st.get("font", "Inter"), acc)
         cap = st.get("captions", {})
+        lines = O.header(W, H, fmt, st.get("font", "Inter"), acc, cap.get("font"))
         if cap.get("enabled", True) and words:
             words = O.apply_caption_edits(words, self.edl.get("caption_edits", []))
             boxed = []  # full Inserts leave a caption band, so captions stay unboxed

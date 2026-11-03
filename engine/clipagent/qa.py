@@ -113,7 +113,8 @@ def run_qa(work: Path, edl: dict, analysis: dict | None = None, text_probe: bool
     manifest = load_manifest(work)
     look = load_look(edl.get("look") or "architecture-flow")
     refs = sorted(Path(look["_dir"], "reference").glob("*.png"))
-    ref = cv2.imread(str(refs[0]), cv2.IMREAD_UNCHANGED) if refs else None
+    ref_imgs = [cv2.imread(str(r), cv2.IMREAD_UNCHANGED) for r in refs]
+    ref = ref_imgs[0] if ref_imgs else None
     typing = edl.get("typing", [])
     result = {"look": look["id"], "inserts": [], "global": list(manifest.get("warnings", []))}
 
@@ -147,8 +148,10 @@ def run_qa(work: Path, edl: dict, analysis: dict | None = None, text_probe: bool
             rep["issues"].append({"kind": "blank", "text": "final frame is fully transparent"})
         elif last.shape[2] >= 3 and float(last[..., :3].std()) < 2.0:
             rep["issues"].append({"kind": "blank", "text": "final frame is a flat color"})
-        if ref is not None and ins["mode"] == "full":
-            d = palette_distance(imgs[1], ref)
+        best = ref
+        if ref_imgs and ins["mode"] == "full":
+            # compare with the closest reference frame: a Look's references differ (e.g. a black chapter card)
+            d, best = min(((palette_distance(imgs[1], r), r) for r in ref_imgs), key=lambda dr: dr[0])
             rep["palette_distance"] = round(d, 3)
             if d > 0.75:
                 rep["issues"].append({"kind": "palette", "text": f"colors far from the Look reference ({d:.2f})"})
@@ -156,7 +159,7 @@ def run_qa(work: Path, edl: dict, analysis: dict | None = None, text_probe: bool
             dur = ins["duration"]
             rep["issues"] += probe_text(Path(ins["spec"]), [dur * 0.5, max(0.0, dur - 0.1)])
         sheet = work / "qa" / f"{ins['id']}.png"
-        side_by_side(imgs, ref, sheet, ins["id"])
+        side_by_side(imgs, best, sheet, ins["id"])
         rep["sheet"] = str(sheet)
         rep["pass"] = not any(i["kind"] in ("clipped", "overlap", "blank", "no-frames", "not-rendered") for i in rep["issues"])
         result["inserts"].append(rep)

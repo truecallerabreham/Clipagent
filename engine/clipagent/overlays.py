@@ -35,18 +35,22 @@ def esc(text):
     return text.replace("\\", "\\\\").replace("{", "(").replace("}", ")").replace("\n", "\\N")
 
 
-def header(W, H, fmt, font, accent):
+def header(W, H, fmt, font, accent, caption_font=None):
     P = PLACE[fmt]
     cap = int(H * P["caption_size"]) if fmt == "landscape" else int(W * 0.062)
     title = int(H * P["title_size"]) if fmt == "landscape" else int(W * 0.095)
     s = max(1.0, H / 1080) if fmt == "landscape" else max(1.0, W / 1080)
     white, black, acc = "&H00FFFFFF", "&H00000000", ass_color(accent)
     box = "&H30121212"
+    # a Look caption font (single-weight, e.g. Patrick Hand) is used as is, a little larger
+    cf, cb = (caption_font, 0) if caption_font else (f"{font} ExtraBold", 1)
+    if caption_font:
+        cap = int(cap * 1.12)
     styles = [
         # Name, Font, Size, Primary, Secondary, Outline, Back, Bold, BorderStyle, Outline, Shadow, Align, MarginV
-        ("Caption", f"{font} ExtraBold", cap, white, white, black, "&H90000000", 1, 1, 3.2 * s, 2 * s, 2, 0),
+        ("Caption", cf, cap, white, white, black, "&H90000000", cb, 1, 3.2 * s, 2 * s, 2, 0),
         # over full Inserts: an opaque rounded-ish box so captions never fight the diagram
-        ("CaptionBox", f"{font} ExtraBold", cap, white, white, "&H28101012", "&H00000000", 1, 3, 14 * s, 0, 2, 0),
+        ("CaptionBox", cf, cap, white, white, "&H28101012", "&H00000000", cb, 3, 14 * s, 0, 2, 0),
         ("Title", f"{font} Black", title, white, white, "&H00101010", "&H80000000", 1, 1, 0, 4 * s, 5, 0),
         ("TitleSub", f"{font} Medium", int(title * 0.42), "&H00E6E6E6", white, black, "&H80000000", 0, 1, 0, 2 * s, 5, 0),
         ("Chapter", f"{font} Bold", int(34 * s), white, white, box, "&H00000000", 1, 3, 16 * s, 0, 7, 0),
@@ -122,6 +126,8 @@ def caption_events(words, timeline, cfg, W, H, fmt, accent, boxed=()):
     per = cfg.get("words_per_line", 4)
     hl = tag_color(cfg.get("highlight", accent))
     base = tag_color(cfg.get("color", "#FFFFFF"))
+    # a caption background (light Looks) draws every line in a solid box of that color
+    bg = f"\\3c{tag_color(cfg['background'])}\\3a&H00&" if cfg.get("background") else ""
     mapped = []
     for w in words:
         if w.get("filler") or not w["w"].strip():
@@ -153,10 +159,11 @@ def caption_events(words, timeline, cfg, W, H, fmt, accent, boxed=()):
             parts = []
             for j, o in enumerate(ch):
                 t = esc(o["w"])
-                parts.append(f"{{\\c{hl}\\fscx112\\fscy112}}{t}{{\\r\\c{base}}}" if j == k else t)
+                grow = "" if bg else "\\fscx112\\fscy112"  # a scaled word would break the solid box
+                parts.append(f"{{\\c{hl}{grow}}}{t}{{\\r\\c{base}{bg}}}" if j == k else t)
             pop = "\\fscx88\\fscy88\\t(0,120,\\fscx100\\fscy100)" if k == 0 else ""
-            style = "CaptionBox" if any(s0 - 0.05 <= a < e0 for s0, e0 in boxed) else "Caption"
-            out.append(ev(10, a, b, style, f"{{\\an2\\pos({x:.0f},{y:.0f})\\c{base}{pop}}}" + " ".join(parts)))
+            style = "CaptionBox" if bg or any(s0 - 0.05 <= a < e0 for s0, e0 in boxed) else "Caption"
+            out.append(ev(10, a, b, style, f"{{\\an2\\pos({x:.0f},{y:.0f})\\c{base}{bg}{pop}}}" + " ".join(parts)))
     return out
 
 
@@ -247,7 +254,8 @@ def chapter_card_events(t, text, W, H, card):
     size = int(H * 0.06)
     track = card.get("tracking", 0.3) * size
     fg = tag_color(card.get("fg", "#FFFFFF"))
+    fn = f"\\fn{card['font']}\\b0" if card.get("font") else ""
     ms = int(dur * 1000)
     return [ev(25, t, t + dur, "Title",
-               f"{{\\an5\\pos({W / 2:.0f},{H / 2:.0f})\\fs{size}\\fsp{track:.0f}\\c{fg}\\shad0\\bord0"
+               f"{{\\an5\\pos({W / 2:.0f},{H / 2:.0f}){fn}\\fs{size}\\fsp{track:.0f}\\c{fg}\\shad0\\bord0"
                f"\\fscx100\\fscy100\\t(0,{ms},\\fscx108\\fscy108)\\fad(160,200)}}{esc(text.upper())}")]
