@@ -100,6 +100,20 @@ def suggest_zooms(activity, src_aspect, window=3.0):
     return [z for z in out if z["end"] - z["start"] >= 2.5]
 
 
+def untangle_zooms(zooms, min_len=1.2):
+    """Zooms never overlap: each one ends where the next begins (the render pans between them),
+    and any zoom left shorter than `min_len` seconds is dropped (it would only flash)."""
+    out = []
+    for z in sorted(zooms, key=lambda z: z["start"]):
+        if out and z["start"] < out[-1]["end"]:
+            out[-1]["end"] = z["start"]
+            if out[-1]["end"] - out[-1]["start"] < min_len:
+                out.pop()
+        if z["end"] - z["start"] >= min_len:
+            out.append(dict(z))
+    return out
+
+
 def _iou(a, b):
     ax1, ay1, bx1, by1 = a[0] + a[2], a[1] + a[3], b[0] + b[2], b[1] + b[3]
     iw = max(0, min(ax1, bx1) - max(a[0], b[0])); ih = max(0, min(ay1, by1) - max(a[1], b[1]))
@@ -140,6 +154,7 @@ def main(argv=None):
     zooms = sorted(czooms + [z for z in zooms if not any(_iou(z["rect"], c["rect"]) > 0.2 and
                                                            z["start"] < c["end"] and c["start"] < z["end"] for c in czooms)],
                    key=lambda z: z["start"])
+    zooms = untangle_zooms(zooms)
     segs, scratched = EV.apply_scratches(segs, words, EV.scratch_markers(ev["events"]), EV.spoken_scratches(words))
     cam_q = (an.get("camera_look") or {}).get("quality", {})
     # the mic with the best signal-to-noise wins (earphones on the laptop vs. the phone's own mic)

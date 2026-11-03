@@ -124,3 +124,7 @@ src/renderer/bar.*         floating control bar
 src/lib/                   pure modules: cli, clock, keys, events, evdev, geometry, take, stopper
 test/                      node --test unit tests
 ```
+
+## End-to-end test without your devices
+
+`test/e2e/run.sh PAGE.html VOICE.wav [SECONDS]` runs the real recorder against a separate X display (`:99`, Xvfb or rootful Xwayland) showing a scripted page, with `--camera none --no-mic`. It drives real X input (clicks and a shortcut via XTest) so the input hook is tested, adds the voice track, and runs `prepare → inserts → qa → render → deliver` on the resulting Take. Your own screen, camera and microphone are never opened.

@@ -74,3 +74,13 @@ def test_insert_boxes_inside_canvas():
         for mode in ("full", "split", "overlay"):
             x, y, w, h = insert_box(mode, W, H, None, fmt)
             assert x >= 0 and y >= 0 and x + w <= W and y + h <= H
+
+
+def test_untangle_zooms_never_overlap():
+    from clipagent.draft import untangle_zooms
+    zs = untangle_zooms([{"start": 36.4, "end": 42.2, "rect": [0, 0, .6, .6]},
+                         {"start": 41.7, "end": 44.8, "rect": [.3, 0, .6, .6]},
+                         {"start": 42.4, "end": 45.5, "rect": [0, .3, .6, .6]}])
+    assert all(a["end"] <= b["start"] for a, b in zip(zs, zs[1:]))
+    assert all(z["end"] - z["start"] >= 1.2 for z in zs)
+    assert zs[0]["start"] == 36.4 and zs[-1]["end"] == 45.5
