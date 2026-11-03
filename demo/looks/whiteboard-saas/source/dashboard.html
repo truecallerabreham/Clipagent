@@ -1,0 +1,120 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Pagewise dashboard</title>
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;width:1920px;height:1080px;overflow:hidden;background:#F6F7F9;font-family:"Poppins","Inter","DejaVu Sans",sans-serif;color:#111827}
+  .top{position:absolute;left:280px;right:0;top:0;height:76px;background:#fff;border-bottom:1px solid #E5E7EB;display:flex;align-items:center;padding:0 40px}
+  .top h1{font-size:28px;font-weight:700;margin:0}
+  .top .sub{margin-left:18px;color:#6B7280;font-size:20px}
+  .btn{position:absolute;right:60px;top:16px;height:46px;padding:0 26px;border-radius:12px;background:#5E17EB;color:#fff;font-weight:600;font-size:20px;display:flex;align-items:center;gap:10px;transition:transform .12s}
+  .btn.press{transform:scale(.94)}
+  .side{position:absolute;left:0;top:0;bottom:0;width:280px;background:#111827;color:#9CA3AF;padding:26px 22px}
+  .logo{display:flex;align-items:center;gap:12px;color:#fff;font-size:28px;font-weight:700;margin-bottom:48px}
+  .logo i{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#5E17EB,#A78BFA);display:block}
+  .item{font-size:22px;padding:14px 18px;border-radius:12px;margin-bottom:8px;transition:background .2s,color .2s}
+  .item.on{background:#1F2937;color:#fff}
+  .item.hov{background:#1a2230;color:#E5E7EB}
+  .stats{position:absolute;left:320px;right:40px;top:110px;display:flex;gap:28px}
+  .stat{flex:1;background:#fff;border:1px solid #E5E7EB;border-radius:18px;padding:24px 28px;height:150px}
+  .stat .l{color:#6B7280;font-size:19px}.stat .v{font-size:44px;font-weight:700;margin-top:8px}
+  .stat .d{color:#16A34A;font-size:18px;margin-left:10px;font-weight:600}
+  .chart{position:absolute;left:320px;right:40px;top:300px;bottom:40px;background:#fff;border:1px solid #E5E7EB;border-radius:18px;padding:30px 40px}
+  .chart h2{margin:0;font-size:26px}.chart .cap{color:#6B7280;font-size:19px;margin-top:4px}
+  .bars{position:absolute;left:60px;right:60px;bottom:70px;top:140px;display:flex;align-items:flex-end;gap:34px}
+  .bar{flex:1;background:#DDD6FE;border-radius:10px 10px 4px 4px;position:relative}
+  .bar.hi{background:#5E17EB}
+  .bar span{position:absolute;bottom:-40px;left:0;right:0;text-align:center;color:#6B7280;font-size:18px}
+  .tip{position:absolute;padding:10px 16px;background:#111827;color:#fff;border-radius:10px;font-size:19px;opacity:0;transition:opacity .2s;white-space:nowrap}
+  .shade{position:absolute;inset:0;background:rgba(17,24,39,.42);opacity:0;transition:opacity .25s;pointer-events:none}
+  .modal{position:absolute;left:640px;top:330px;width:640px;height:340px;background:#fff;border-radius:22px;padding:36px 40px;box-shadow:0 30px 80px rgba(0,0,0,.25);opacity:0;transform:scale(.96);transition:all .25s}
+  .modal h3{margin:0;font-size:30px}.modal p{margin:8px 0 26px;color:#6B7280;font-size:19px}
+  .field{height:62px;border:2px solid #E5E7EB;border-radius:12px;padding:0 18px;display:flex;align-items:center;font-size:22px}
+  .field.focus{border-color:#5E17EB}
+  .send{position:absolute;right:40px;bottom:34px;height:52px;width:160px;border-radius:12px;background:#5E17EB;color:#fff;font-weight:600;font-size:21px;display:flex;align-items:center;justify-content:center;transition:transform .12s}
+  .send.press{transform:scale(.94)}
+  .toast{position:absolute;left:50%;bottom:60px;transform:translate(-50%,20px);background:#111827;color:#fff;padding:18px 30px;border-radius:14px;font-size:21px;opacity:0;transition:all .3s}
+  .toast b{color:#86EFAC}
+  #cur{position:absolute;left:0;top:0;width:34px;height:34px;transform:translate(1200px,700px);z-index:99}
+  .caret{display:inline-block;width:2px;height:28px;background:#5E17EB;margin-left:2px;animation:b 1s steps(1) infinite}
+  @keyframes b{50%{opacity:0}}
+</style></head>
+<body>
+<div class="side">
+  <div class="logo"><i></i>Pagewise</div>
+  <div class="item on" id="i0">Overview</div>
+  <div class="item" id="i1">Reports</div>
+  <div class="item" id="i2">Goals</div>
+  <div class="item" id="i3">Team</div>
+  <div class="item" id="i4">Billing</div>
+  <div class="item" id="i5">Settings</div>
+</div>
+<div class="top"><h1>Overview</h1><span class="sub">acme-coffee.com · last 7 days</span>
+  <div class="btn" id="invite">＋ Invite team</div></div>
+<div class="stats">
+  <div class="stat"><div class="l">Visitors</div><div class="v">12,480<span class="d">▲ 18%</span></div></div>
+  <div class="stat"><div class="l">Signups</div><div class="v">342<span class="d">▲ 9%</span></div></div>
+  <div class="stat"><div class="l">Conversion</div><div class="v">2.7%<span class="d">▲ 0.4</span></div></div>
+</div>
+<div class="chart"><h2>Weekly visitors</h2><div class="cap">Unique visitors per day</div>
+  <div class="bars">
+    <div class="bar" style="height:42%"><span>Mon</span></div>
+    <div class="bar" style="height:55%"><span>Tue</span></div>
+    <div class="bar" style="height:48%"><span>Wed</span></div>
+    <div class="bar" style="height:66%"><span>Thu</span></div>
+    <div class="bar" style="height:61%"><span>Fri</span></div>
+    <div class="bar" style="height:74%"><span>Sat</span></div>
+    <div class="bar hi" id="last" style="height:88%"><span>Sun</span></div>
+  </div>
+  <div class="tip" id="tip">Sun · 2,481 visitors</div>
+</div>
+<div class="shade" id="shade"></div>
+<div class="modal" id="modal"><h3>Invite your team</h3><p>They'll see every report and goal.</p>
+  <div class="field" id="field"><span id="txt" style="color:#9CA3AF">name@company.com</span></div>
+  <div class="send" id="send">Send invite</div></div>
+<div class="toast" id="toast"><b>✓</b> Invite sent to maya@acme-coffee.com</div>
+<svg id="cur" viewBox="0 0 24 24"><path d="M3 2l7.5 19 2.6-7.9L21 10.5z" fill="#111" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg>
+<script>
+const $ = id => document.getElementById(id);
+let cx = 1200, cy = 700;
+const moves = [];  // [t0, t1, x0, y0, x1, y1]
+function moveTo(t0, dur, x, y){ moves.push({t0, t1: t0 + dur, x, y}); }
+const ease = p => p < .5 ? 2*p*p : 1 - Math.pow(-2*p + 2, 2)/2;
+const acts = [];
+const at = (t, f) => acts.push({t, f, done: false});
+// timeline (seconds from load); keep in sync with the narration
+moveTo(1.0, 1.2, 1000, 620);
+moveTo(8.9, 0.6, 140, 255);     // sidebar
+at(9.4, () => $('i1').classList.add('hov'));
+moveTo(9.7, 0.4, 140, 315);
+at(9.8, () => { $('i1').classList.remove('hov'); $('i2').classList.add('hov'); });
+at(10.5, () => $('i2').classList.remove('hov'));
+moveTo(10.6, 0.8, 1640, 560);   // last bar
+at(11.4, () => { const t = $('tip'); t.style.left = '1380px'; t.style.top = '150px'; t.style.opacity = 1; });
+moveTo(12.4, 0.55, 1750, 40);   // invite button
+at(12.98, () => $('invite').classList.add('press'));
+at(13.1, () => { $('invite').classList.remove('press'); $('tip').style.opacity = 0; $('shade').style.opacity = 1; const m = $('modal'); m.style.opacity = 1; m.style.transform = 'scale(1)'; });
+moveTo(13.3, 0.45, 900, 505);
+at(13.8, () => { $('field').classList.add('focus'); $('txt').textContent = ''; $('txt').style.color = '#111827'; });
+const email = 'maya@acme-coffee.com';
+for (let k = 1; k <= email.length; k++) at(14.0 + k * 0.065, () => { $('txt').innerHTML = email.slice(0, k) + '<span class="caret"></span>'; });
+moveTo(15.45, 0.45, 1165, 618);
+at(15.98, () => $('send').classList.add('press'));
+at(16.12, () => { $('send').classList.remove('press'); const m = $('modal'); m.style.opacity = 0; m.style.transform = 'scale(.96)'; $('shade').style.opacity = 0; const t = $('toast'); t.style.opacity = 1; t.style.transform = 'translate(-50%,0)'; });
+moveTo(16.6, 0.8, 1300, 760);
+at(20.5, () => { const t = $('toast'); t.style.opacity = 0; });
+const t0 = performance.now();
+function tick(){
+  const t = (performance.now() - t0) / 1000;
+  for (const a of acts) if (!a.done && a.t <= t) { a.f(); a.done = true; }
+  let x = cx, y = cy;
+  for (const m of moves) {
+    if (t >= m.t1) { x = m.x; y = m.y; m.x0 ??= x; continue; }
+    if (t >= m.t0) { if (m.x0 === undefined) { m.x0 = x; m.y0 = y; } const p = ease((t - m.t0) / (m.t1 - m.t0)); x = m.x0 + (m.x - m.x0) * p; y = m.y0 + (m.y - m.y0) * p; }
+    break;
+  }
+  $('cur').style.transform = `translate(${x - 4}px,${y - 3}px)`;
+  requestAnimationFrame(tick);
+}
+tick();
+</script>
+</body></html>

@@ -1,0 +1,8 @@
+This week a small lab shipped a model called Nova Three, and the pricing is the real story.
+Last year, a million output tokens on this tier cost thirty eight dollars.
+Nova Three charges two dollars fifty. That is fifteen times cheaper.
+Look at the leaderboard. Nova Three scores eighty nine point four on the reasoning suite, just behind the top model.
+But the top model costs six times more per token.
+So here is the trade off. Plot cost, accuracy and latency together, and the sweet spot is not the biggest model.
+It is the mid size one, fast, cheap, and good enough for most agents.
+If you build products on these models, re-run your evals this week.

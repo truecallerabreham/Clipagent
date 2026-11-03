@@ -1,0 +1,11 @@
+This is our deploy dashboard. And that red build is the reason I write tests first now.
+Let me tell you what happened last Friday.
+It was five p.m., and I just wanted to go home.
+So I skipped the tests, and pushed straight to production.
+Two hours later, my phone would not stop buzzing.
+Checkout was broken, for every single customer.
+Here is the failing run. One missing null check in the cart service.
+The pipeline would have caught it in ninety seconds.
+So now I follow three simple rules.
+Write the test first. Let the pipeline go green. And never deploy on a Friday evening.
+My weekends are quiet again.

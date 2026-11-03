@@ -1,0 +1,745 @@
+{
+  "version": 1,
+  "inputs": {
+    "screen": "<session>/raw.mp4",
+    "camera": null,
+    "camera_offset": 0.0,
+    "camera_rect": null,
+    "audio": "screen"
+  },
+  "voice": {
+    "denoise": "light",
+    "mic": "studio"
+  },
+  "output": {
+    "path": "<session>/deliverables/final.mp4",
+    "format": "landscape",
+    "fps": 30
+  },
+  "style": {
+    "accent": "#FFFF00",
+    "background": [
+      "#000000",
+      "#0A0F14"
+    ],
+    "screen_inset": 0.05,
+    "radius": 10,
+    "font": "Inter",
+    "captions": {
+      "enabled": true,
+      "words_per_line": 5,
+      "highlight": "#FFFF00",
+      "color": "#FFFFFF"
+    },
+    "badge": "Made with ClipAgent",
+    "frame": "plain",
+    "click_effect": "glow",
+    "annotation_color": "#FFFF00",
+    "transition": "crossfade",
+    "transition_colors": [
+      "#FFFF00",
+      "#83C167",
+      "#FC6255"
+    ],
+    "shortcut_badge": {
+      "bg": "#111111",
+      "fg": "#FFFFFF"
+    },
+    "dark": true,
+    "chapter_card": {
+      "bg": "#000000",
+      "fg": "#FFFFFF",
+      "tracking": 0.12,
+      "duration": 2.0
+    }
+  },
+  "camera": {
+    "source": "phone",
+    "grade": "auto",
+    "shape": "circle",
+    "size": 0.23,
+    "corner": "br",
+    "mirror": false,
+    "quality": null,
+    "allow_full": true
+  },
+  "glossary": {
+    "cloud code": "Claude Code",
+    "clod code": "Claude Code"
+  },
+  "caption_edits": [],
+  "segments": [
+    {
+      "start": 0.12,
+      "end": 37.48,
+      "speed": 1
+    }
+  ],
+  "layouts": [],
+  "zooms": [
+    {
+      "start": 3.6,
+      "end": 7.5,
+      "rect": [
+        0.05,
+        0.08,
+        0.62,
+        0.62
+      ],
+      "note": "matrix A"
+    }
+  ],
+  "titles": [
+    {
+      "at": 0.3,
+      "duration": 2.8,
+      "text": "What a matrix does to space",
+      "sub": "linear algebra for ML, in one notebook"
+    }
+  ],
+  "chapters": [
+    {
+      "at": 21.0,
+      "text": "Gradient descent"
+    }
+  ],
+  "callouts": [],
+  "outro": {
+    "text": "ClipAgent",
+    "sub": "math-vector Look \u00b7 github.com/truecallerabreham/Clipagent",
+    "duration": 4
+  },
+  "look": "math-vector",
+  "concepts": {
+    "i hat": "#83C167",
+    "j hat": "#FC6255",
+    "input": "#FFFF00",
+    "output": "#FF862F",
+    "slope": "#FC6255",
+    "learning rate": "#83C167"
+  },
+  "inserts": [
+    {
+      "id": "ins-01",
+      "start": "w25",
+      "end": "w69",
+      "mode": "full",
+      "engine": "html",
+      "concepts": [
+        "i hat",
+        "j hat",
+        "input",
+        "output"
+      ],
+      "scene": {
+        "elements": [
+          {
+            "id": "plane",
+            "primitive": "NumberPlane",
+            "props": {
+              "x_range": [
+                -3.2,
+                5.8,
+                1
+              ],
+              "y_range": [
+                -1.6,
+                2.75,
+                1
+              ]
+            }
+          },
+          {
+            "id": "A",
+            "primitive": "Matrix",
+            "props": {
+              "rows": [
+                [
+                  1,
+                  1
+                ],
+                [
+                  0,
+                  1
+                ]
+              ],
+              "prefix": "A = ",
+              "col_colors": [
+                "i hat",
+                "j hat"
+              ],
+              "size": 60,
+              "backdrop": true,
+              "to_edge": "ul",
+              "buff": 80,
+              "auto": false
+            }
+          },
+          {
+            "id": "i",
+            "primitive": "Vector",
+            "props": {
+              "coords": [
+                1,
+                0
+              ],
+              "concept": "i hat",
+              "label": "\\hat{\\imath}",
+              "label_pos": "end",
+              "auto": false
+            }
+          },
+          {
+            "id": "j",
+            "primitive": "Vector",
+            "props": {
+              "coords": [
+                0,
+                1
+              ],
+              "concept": "j hat",
+              "label": "\\hat{\\jmath}",
+              "label_pos": "left",
+              "auto": false
+            }
+          },
+          {
+            "id": "v",
+            "primitive": "Vector",
+            "props": {
+              "coords": [
+                2,
+                1
+              ],
+              "concept": "input",
+              "label": "\\vec{v}",
+              "label_pos": "end",
+              "stroke": 7,
+              "auto": false
+            }
+          },
+          {
+            "id": "eq",
+            "primitive": "Tex",
+            "props": {
+              "tex": "\\vec{v} = \\begin{bmatrix} 2 \\\\ 1 \\end{bmatrix}",
+              "size": 60,
+              "backdrop": true,
+              "to_edge": "ur",
+              "buff": 80,
+              "align": "right",
+              "colors": {
+                "\\vec{v}": "input"
+              },
+              "auto": false
+            }
+          }
+        ]
+      },
+      "beats": [
+        {
+          "word": "w25",
+          "action": "enter",
+          "target": "plane",
+          "lead": -0.25
+        },
+        {
+          "word": "w27",
+          "action": "write",
+          "target": "A"
+        },
+        {
+          "word": "w31",
+          "action": "enter",
+          "target": "i",
+          "lead": -0.15
+        },
+        {
+          "word": "w32",
+          "action": "circumscribe",
+          "target": "A",
+          "args": {
+            "col": 0,
+            "color": "i hat"
+          }
+        },
+        {
+          "word": "w41",
+          "action": "enter",
+          "target": "j",
+          "lead": -0.15
+        },
+        {
+          "word": "w42",
+          "action": "circumscribe",
+          "target": "A",
+          "args": {
+            "col": 1,
+            "color": "j hat"
+          }
+        },
+        {
+          "word": "w44",
+          "action": "enter",
+          "target": "v",
+          "lead": -0.2
+        },
+        {
+          "word": "w44",
+          "action": "write",
+          "target": "eq",
+          "lead": 0.2
+        },
+        {
+          "word": "w46",
+          "action": "apply_matrix",
+          "target": "plane",
+          "args": {
+            "matrix": [
+              [
+                1,
+                1
+              ],
+              [
+                0,
+                1
+              ]
+            ],
+            "dur": 2.4
+          }
+        },
+        {
+          "word": "w58",
+          "action": "indicate",
+          "target": "j",
+          "args": {
+            "color": "j hat"
+          }
+        },
+        {
+          "word": "w67",
+          "action": "transform",
+          "target": "eq",
+          "args": {
+            "tex": "A\\vec{v} = \\begin{bmatrix} 3 \\\\ 1 \\end{bmatrix}",
+            "colors": {
+              "\\vec{v}": "input",
+              "3": "output"
+            },
+            "dur": 1.0
+          }
+        },
+        {
+          "word": "w68",
+          "action": "indicate",
+          "target": "v",
+          "args": {
+            "color": "output"
+          }
+        }
+      ]
+    },
+    {
+      "id": "ins-02",
+      "start": "w94",
+      "end": "w120",
+      "mode": "full",
+      "engine": "html",
+      "concepts": [
+        "input",
+        "slope",
+        "learning rate",
+        "output"
+      ],
+      "scene": {
+        "elements": [
+          {
+            "id": "ax",
+            "primitive": "Axes",
+            "props": {
+              "x_range": [
+                -3,
+                3,
+                1
+              ],
+              "y_range": [
+                -1,
+                4.5,
+                1
+              ],
+              "unit": 140,
+              "x": 0.3,
+              "y": 0.5,
+              "x_label": "x",
+              "y_label": "f(x)",
+              "auto": false
+            }
+          },
+          {
+            "id": "f",
+            "primitive": "Shape",
+            "props": {
+              "kind": "graph",
+              "fn": "0.25*x^4 - 1.2*x^2 + 0.6*x + 2",
+              "x_range": [
+                -2.75,
+                2.42
+              ],
+              "color": "#58C4DD",
+              "stroke": 5,
+              "auto": false
+            }
+          },
+          {
+            "id": "d",
+            "primitive": "Dot",
+            "props": {
+              "on": "f",
+              "x": 2.3,
+              "color": "input",
+              "radius": 11,
+              "trace": true,
+              "trace_color": "input",
+              "auto": false
+            }
+          },
+          {
+            "id": "tan",
+            "primitive": "Shape",
+            "props": {
+              "kind": "tangent",
+              "graph": "f",
+              "dot": "d",
+              "length": 1.6,
+              "color": "slope",
+              "stroke": 4,
+              "auto": false
+            }
+          },
+          {
+            "id": "rule",
+            "primitive": "Tex",
+            "props": {
+              "tex": "x_{n+1} = x_n - \\eta\\, f'(x_n)",
+              "size": 62,
+              "x": 0.76,
+              "y": 0.2,
+              "colors": {
+                "x_{n+1}": "input",
+                "x_n": "input",
+                "\\eta": "learning rate",
+                "f'": "slope"
+              },
+              "auto": false
+            }
+          },
+          {
+            "id": "cx",
+            "primitive": "NumberCounter",
+            "props": {
+              "prefix": "x =",
+              "track": "d.x",
+              "decimals": 3,
+              "size": 54,
+              "x": 0.75,
+              "y": 0.44,
+              "anchor": "eq",
+              "color": "input",
+              "auto": false
+            }
+          },
+          {
+            "id": "cs",
+            "primitive": "NumberCounter",
+            "props": {
+              "prefix": "f'(x) =",
+              "track": "d.slope",
+              "decimals": 3,
+              "size": 54,
+              "x": 0.75,
+              "y": 0.57,
+              "anchor": "eq",
+              "color": "slope",
+              "auto": false
+            }
+          },
+          {
+            "id": "eta",
+            "primitive": "Label",
+            "props": {
+              "text": "learning rate $\\eta = 0.08$",
+              "size": 42,
+              "x": 0.76,
+              "y": 0.75,
+              "colors": {
+                "\\eta": "learning rate"
+              },
+              "color": "#BBBBBB",
+              "auto": false
+            }
+          },
+          {
+            "id": "note",
+            "primitive": "Label",
+            "props": {
+              "text": "minimum",
+              "size": 42,
+              "pos": [
+                1.4,
+                0.35
+              ],
+              "color": "#FFFFFF",
+              "auto": false
+            }
+          }
+        ]
+      },
+      "beats": [
+        {
+          "word": "w94",
+          "action": "enter",
+          "target": "ax",
+          "lead": -0.25
+        },
+        {
+          "word": "w95",
+          "action": "create",
+          "target": "f",
+          "args": {
+            "dur": 1.3
+          }
+        },
+        {
+          "word": "w97",
+          "action": "write",
+          "target": "rule"
+        },
+        {
+          "word": "w98",
+          "action": "enter",
+          "target": "d",
+          "args": {
+            "dur": 0.5
+          }
+        },
+        {
+          "word": "w101",
+          "action": "write",
+          "target": "eta"
+        },
+        {
+          "word": "w103",
+          "action": "write",
+          "target": [
+            "cx",
+            "cs"
+          ]
+        },
+        {
+          "word": "w105",
+          "action": "create",
+          "target": "tan",
+          "args": {
+            "dur": 0.6
+          }
+        },
+        {
+          "word": "w106",
+          "action": "move",
+          "target": "d",
+          "args": {
+            "x": 1.72,
+            "dur": 0.8
+          }
+        },
+        {
+          "word": "w109",
+          "action": "move",
+          "target": "d",
+          "args": {
+            "x": 1.55,
+            "dur": 0.6
+          }
+        },
+        {
+          "word": "w112",
+          "action": "move",
+          "target": "d",
+          "args": {
+            "x": 1.45,
+            "dur": 0.6
+          }
+        },
+        {
+          "word": "w114",
+          "action": "move",
+          "target": "d",
+          "args": {
+            "x": 1.405,
+            "dur": 0.5
+          }
+        },
+        {
+          "word": "w115",
+          "action": "flash",
+          "target": "d"
+        },
+        {
+          "word": "w115",
+          "action": "write",
+          "target": "note",
+          "lead": 0.2
+        },
+        {
+          "word": "w117",
+          "action": "transform",
+          "target": "rule",
+          "args": {
+            "tex": "f'(x^*) = 0",
+            "colors": {
+              "x^*": "input",
+              "f'": "slope"
+            },
+            "dur": 0.9
+          }
+        },
+        {
+          "word": "w118",
+          "action": "indicate",
+          "target": "cs"
+        }
+      ]
+    },
+    {
+      "id": "ins-03",
+      "start": "w121",
+      "end": "w131",
+      "mode": "overlay",
+      "rect": [
+        0.6,
+        0.05,
+        0.36,
+        0.26
+      ],
+      "engine": "html",
+      "concepts": [
+        "i hat",
+        "slope"
+      ],
+      "scene": {
+        "elements": [
+          {
+            "id": "l1",
+            "primitive": "Tex",
+            "props": {
+              "tex": "A \\;\\to\\; \\text{moves space}",
+              "size": 120,
+              "x": 0.5,
+              "y": 0.32,
+              "colors": {
+                "A": "i hat"
+              },
+              "auto": false
+            }
+          },
+          {
+            "id": "l2",
+            "primitive": "Tex",
+            "props": {
+              "tex": "-\\nabla f \\;\\to\\; \\text{downhill}",
+              "size": 120,
+              "x": 0.5,
+              "y": 0.7,
+              "colors": {
+                "\\nabla f": "slope"
+              },
+              "auto": false
+            }
+          }
+        ]
+      },
+      "beats": [
+        {
+          "word": "w121",
+          "action": "write",
+          "target": "l1",
+          "lead": -0.15
+        },
+        {
+          "word": "w125",
+          "action": "write",
+          "target": "l2",
+          "lead": -0.15
+        },
+        {
+          "word": "w129",
+          "action": "circumscribe",
+          "target": "l2",
+          "args": {
+            "color": "slope"
+          }
+        }
+      ]
+    }
+  ],
+  "annotations": [
+    {
+      "type": "box",
+      "start": 18.8,
+      "end": 20.9,
+      "rect": [
+        0.115,
+        0.612,
+        0.37,
+        0.05
+      ],
+      "label": "A v = (3, 1)"
+    },
+    {
+      "type": "box",
+      "start": 33.5,
+      "end": 36.9,
+      "rect": [
+        0.115,
+        0.558,
+        0.36,
+        0.055
+      ],
+      "label": "f'(x) = 0"
+    }
+  ],
+  "shortcuts": [],
+  "clicks": [],
+  "typing": [],
+  "sound": {
+    "sfx": true,
+    "music": "ambient-pad",
+    "music_db": -22
+  },
+  "shorts": [
+    {
+      "start": "w25",
+      "end": "w69",
+      "title": "A matrix is a shear of space"
+    }
+  ],
+  "thumbnail": {
+    "at": "w58",
+    "text": "What a matrix does"
+  },
+  "publish": {
+    "title": "What a matrix does to space (and why gradients point downhill)",
+    "description": "A 40-second notebook walkthrough: a 2x2 matrix shears the plane, then gradient descent slides into a minimum. Edited by ClipAgent with the Math Vector Look.",
+    "tags": [
+      "linear algebra",
+      "gradient descent",
+      "machine learning",
+      "numpy"
+    ],
+    "linkedin": "Matrices move space; gradients tell you which way is down. 40 seconds, one notebook.",
+    "x": "A matrix is just where i-hat and j-hat land. 40 s, one notebook."
+  },
+  "mismatches": [],
+  "_draft_removed_gaps": [],
+  "_draft_scratched": []
+}

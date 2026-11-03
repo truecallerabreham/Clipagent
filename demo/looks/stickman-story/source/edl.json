@@ -1,0 +1,516 @@
+{
+  "version": 1,
+  "inputs": {
+    "screen": "<session>/raw.mp4",
+    "camera": null,
+    "camera_offset": 0.0,
+    "camera_rect": null,
+    "audio": "screen"
+  },
+  "voice": {
+    "denoise": "light",
+    "mic": "studio"
+  },
+  "output": {
+    "path": "<session>/deliverables/final.mp4",
+    "format": "landscape",
+    "fps": 30
+  },
+  "style": {
+    "accent": "#111111",
+    "background": [
+      "#000000",
+      "#0a0a0a"
+    ],
+    "screen_inset": 0.06,
+    "radius": 16,
+    "font": "Inter",
+    "captions": {
+      "enabled": true,
+      "words_per_line": 4,
+      "highlight": "#FFE066",
+      "color": "#FFFFFF",
+      "font": "Patrick Hand",
+      "background": "#111111"
+    },
+    "badge": "Made with ClipAgent",
+    "frame": "macos",
+    "click_effect": "ripple",
+    "annotation_color": "#FFFFFF",
+    "transition": "radial_blur",
+    "transition_colors": [
+      "#FFFFFF",
+      "#111111",
+      "#9CA3AF"
+    ],
+    "shortcut_badge": {
+      "bg": "#FFFFFF",
+      "fg": "#111111"
+    },
+    "dark": false,
+    "chapter_card": {
+      "bg": "#FFFFFF",
+      "fg": "#111111",
+      "tracking": 0.12,
+      "duration": 2.0,
+      "font": "Patrick Hand"
+    }
+  },
+  "camera": {
+    "source": "phone",
+    "grade": "auto",
+    "shape": "circle",
+    "size": 0.23,
+    "corner": "br",
+    "mirror": false,
+    "quality": null,
+    "allow_full": true
+  },
+  "glossary": {
+    "cloud code": "Claude Code",
+    "clod code": "Claude Code"
+  },
+  "caption_edits": [
+    {
+      "start": 21.2,
+      "end": 21.5,
+      "text": "cart"
+    },
+    {
+      "start": 22.5,
+      "end": 22.9,
+      "text": "would"
+    }
+  ],
+  "segments": [
+    {
+      "start": 0.02,
+      "end": 19.46,
+      "speed": 1
+    },
+    {
+      "start": 19.68,
+      "end": 34.48,
+      "speed": 1
+    }
+  ],
+  "layouts": [],
+  "zooms": [
+    {
+      "start": 2.9,
+      "end": 5.7,
+      "rect": [
+        0.13,
+        0.1,
+        0.52,
+        0.52
+      ],
+      "note": "the red build"
+    },
+    {
+      "start": 20.0,
+      "end": 24.0,
+      "rect": [
+        0.575,
+        0.2,
+        0.42,
+        0.42
+      ],
+      "note": "test report"
+    }
+  ],
+  "titles": [
+    {
+      "at": 0.15,
+      "duration": 2.5,
+      "text": "Why I test before Friday deploys",
+      "sub": "a two-minute story, in thirty seconds"
+    }
+  ],
+  "chapters": [],
+  "callouts": [],
+  "outro": {
+    "text": "ClipAgent",
+    "sub": "github.com/truecallerabreham/Clipagent",
+    "duration": 4
+  },
+  "look": "stickman-story",
+  "concepts": {},
+  "inserts": [
+    {
+      "id": "ins-01",
+      "start": "w17",
+      "end": "w60",
+      "mode": "full",
+      "concepts": [],
+      "scene": {
+        "elements": [
+          {
+            "id": "s1",
+            "primitive": "Scene",
+            "props": {
+              "caption": "Last *Friday*\u2026",
+              "props": [
+                {
+                  "kind": "clock",
+                  "time": "4:58"
+                }
+              ],
+              "mood": "smile",
+              "look": "camera"
+            }
+          },
+          {
+            "id": "s2",
+            "primitive": "Scene",
+            "props": {
+              "caption": "5 pm. I just wanted to go *home*.",
+              "props": [
+                "laptop",
+                {
+                  "kind": "clock",
+                  "time": "4:58"
+                }
+              ],
+              "mood": "sleepy",
+              "arms": "type"
+            }
+          },
+          {
+            "id": "s3",
+            "primitive": "Scene",
+            "props": {
+              "caption": "Skip the tests. *Ship it.*",
+              "props": [
+                {
+                  "kind": "laptop",
+                  "screen": "code"
+                },
+                "mug"
+              ],
+              "mood": "confident",
+              "arms": "rest"
+            }
+          },
+          {
+            "id": "s4",
+            "primitive": "Scene",
+            "props": {
+              "caption": "Two hours later\u2026",
+              "props": [
+                {
+                  "kind": "clock",
+                  "time": "7:02"
+                }
+              ],
+              "mood": "neutral",
+              "arms": "phone",
+              "look": "phone"
+            }
+          },
+          {
+            "id": "s5",
+            "primitive": "Scene",
+            "props": {
+              "caption": "Checkout: *broken*. For everyone.",
+              "props": [
+                {
+                  "kind": "laptop",
+                  "screen": "error"
+                }
+              ],
+              "mood": "stressed",
+              "arms": "rest"
+            }
+          }
+        ]
+      },
+      "beats": [
+        {
+          "word": "w18",
+          "action": "talk",
+          "target": "s1",
+          "args": {
+            "dur": 1.0
+          }
+        },
+        {
+          "word": "w23",
+          "action": "look",
+          "target": "s1",
+          "args": {
+            "dir": "clock"
+          }
+        },
+        {
+          "word": "w25",
+          "action": "cut",
+          "target": "s2"
+        },
+        {
+          "word": "w27",
+          "action": "clock",
+          "target": "s2",
+          "args": {
+            "to": "5:00",
+            "dur": 0.8
+          }
+        },
+        {
+          "word": "w31",
+          "action": "bubble",
+          "target": "s2",
+          "args": {
+            "icon": "house"
+          }
+        },
+        {
+          "word": "w35",
+          "action": "cut",
+          "target": "s3"
+        },
+        {
+          "word": "w37",
+          "action": "symbol",
+          "target": "s3",
+          "args": {
+            "kind": "exclaim",
+            "hold": 0.9
+          }
+        },
+        {
+          "word": "w41",
+          "action": "press",
+          "target": "s3",
+          "args": {
+            "at": "screen"
+          }
+        },
+        {
+          "word": "w42",
+          "action": "mood",
+          "target": "s3",
+          "args": {
+            "mood": "happy"
+          }
+        },
+        {
+          "word": "w45",
+          "action": "cut",
+          "target": "s4"
+        },
+        {
+          "word": "w49",
+          "action": "mood",
+          "target": "s4",
+          "args": {
+            "mood": "surprised"
+          }
+        },
+        {
+          "word": "w52",
+          "action": "symbol",
+          "target": "s4",
+          "args": {
+            "kind": "exclaim"
+          }
+        },
+        {
+          "word": "w53",
+          "action": "symbol",
+          "target": "s4",
+          "args": {
+            "kind": "sweat"
+          }
+        },
+        {
+          "word": "w54",
+          "action": "cut",
+          "target": "s5"
+        },
+        {
+          "word": "w56",
+          "action": "facepalm",
+          "target": "s5"
+        },
+        {
+          "word": "w58",
+          "action": "symbol",
+          "target": "s5",
+          "args": {
+            "kind": "stress"
+          }
+        }
+      ]
+    },
+    {
+      "id": "ins-02",
+      "start": "w83",
+      "end": "w110",
+      "mode": "full",
+      "concepts": [],
+      "scene": {
+        "elements": [
+          {
+            "id": "r1",
+            "primitive": "Scene",
+            "props": {
+              "caption": "Three simple *rules*.",
+              "props": [
+                {
+                  "kind": "checklist",
+                  "title": "Before you deploy",
+                  "items": [
+                    "Write the test first",
+                    "Let CI go green",
+                    "No Friday-evening deploys"
+                  ]
+                }
+              ],
+              "mood": "focused"
+            }
+          },
+          {
+            "id": "r2",
+            "primitive": "Scene",
+            "props": {
+              "caption": "Quiet *weekends* again.",
+              "props": [],
+              "layout": "center",
+              "mood": "smile",
+              "look": "camera"
+            }
+          }
+        ]
+      },
+      "beats": [
+        {
+          "word": "w86",
+          "action": "point",
+          "target": "r1",
+          "args": {
+            "at": "checklist"
+          }
+        },
+        {
+          "word": "w92",
+          "action": "check",
+          "target": "r1",
+          "args": {
+            "item": 0
+          }
+        },
+        {
+          "word": "w97",
+          "action": "check",
+          "target": "r1",
+          "args": {
+            "item": 1
+          }
+        },
+        {
+          "word": "w98",
+          "action": "nod",
+          "target": "r1"
+        },
+        {
+          "word": "w104",
+          "action": "check",
+          "target": "r1",
+          "args": {
+            "item": 2
+          }
+        },
+        {
+          "word": "w105",
+          "action": "mood",
+          "target": "r1",
+          "args": {
+            "mood": "confident"
+          }
+        },
+        {
+          "word": "w106",
+          "action": "cut",
+          "target": "r2"
+        },
+        {
+          "word": "w109",
+          "action": "victory",
+          "target": "r2"
+        }
+      ]
+    }
+  ],
+  "annotations": [
+    {
+      "type": "box",
+      "start": 3.1,
+      "end": 5.6,
+      "rect": [
+        0.158,
+        0.282,
+        0.432,
+        0.083
+      ],
+      "label": "tests skipped"
+    },
+    {
+      "type": "box",
+      "start": 20.3,
+      "end": 23.8,
+      "rect": [
+        0.61,
+        0.39,
+        0.25,
+        0.095
+      ],
+      "label": "one missing null check"
+    }
+  ],
+  "shortcuts": [],
+  "clicks": [
+    {
+      "t": 18.75,
+      "x": 0.25,
+      "y": 0.325
+    }
+  ],
+  "typing": [],
+  "sound": {
+    "sfx": true,
+    "music": "bright-pluck",
+    "music_db": -21
+  },
+  "shorts": [
+    {
+      "start": "w17",
+      "end": "w60",
+      "title": "The Friday deploy"
+    }
+  ],
+  "thumbnail": {
+    "at": "w56",
+    "text": "Never skip tests on Friday"
+  },
+  "publish": {
+    "title": "Why I write tests before Friday deploys",
+    "description": "A 30-second story about one skipped test suite, edited by ClipAgent in the Stickman Story Look.",
+    "tags": [
+      "testing",
+      "ci",
+      "devlife",
+      "stickman"
+    ],
+    "linkedin": "One skipped test suite, one broken checkout, three rules I follow now.",
+    "x": "Skipped the tests at 5 pm on a Friday. Here's what happened."
+  },
+  "mismatches": [],
+  "_draft_removed_gaps": [
+    [
+      19.46,
+      19.68
+    ]
+  ],
+  "_draft_scratched": []
+}

@@ -1,0 +1,7 @@
+Welcome to Pagewise, the analytics dashboard for small teams. Let me show you how to get set up in two minutes.
+First, open your dashboard. The sidebar is on the left, and in the middle you see your weekly visitors.
+Now click invite team. Type your teammate's email, and hit send.
+Here's how onboarding works. You connect your site, invite your team, and your first report lands in your inbox.
+Next, pricing. The Starter plan is free. The Pro plan is twenty nine dollars a month, and it's the best value for growing teams.
+Before you launch, check three things. Your domain is connected, your team is invited, and your goals are set.
+That's it. Pagewise turns your traffic into decisions.

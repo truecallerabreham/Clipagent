@@ -1,0 +1,56 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>The Inference Weekly</title>
+<style>
+  html,body{margin:0;background:#0e0f13;color:#e6e8ee;font-family:Inter,"DejaVu Sans",sans-serif}
+  .nav{position:fixed;top:0;left:0;right:0;height:64px;background:#15171d;border-bottom:1px solid #262a33;display:flex;align-items:center;padding:0 48px;gap:28px;z-index:2}
+  .logo{font-weight:800;font-size:24px;letter-spacing:-.5px}.logo b{color:#a78bfa}
+  .nav a{color:#8b93a3;font-size:18px;text-decoration:none}
+  main{width:1180px;margin:0 auto;padding:110px 0 400px}
+  .tag{display:inline-block;background:#2a2140;color:#c4b5fd;font-size:16px;padding:6px 12px;border-radius:999px;font-weight:600}
+  h1{font-size:58px;line-height:1.1;margin:18px 0 12px;letter-spacing:-1.5px}
+  .by{color:#8b93a3;font-size:19px;margin-bottom:34px}
+  p{font-size:24px;line-height:1.6;color:#c9cdd6}
+  .cards{display:flex;gap:26px;margin:34px 0 60px}
+  .card{flex:1;background:#171a21;border:1px solid #2a2f3a;border-radius:16px;padding:26px 30px}
+  .card .k{color:#8b93a3;font-size:18px}.card .v{font-size:52px;font-weight:800;margin-top:8px}
+  .old{color:#8b93a3;text-decoration:line-through}.new{color:#34d399}
+  h2{font-size:36px;margin:20px 0 18px}
+  table{width:100%;border-collapse:collapse;font-size:24px;background:#171a21;border-radius:16px;overflow:hidden}
+  th{background:#1f232c;color:#8b93a3;text-align:left;padding:18px 24px;font-weight:600;font-size:19px}
+  td{padding:20px 24px;border-top:1px solid #262a33}
+  tr.hl td{background:#1d1830}
+  .note{color:#8b93a3;font-size:18px;margin-top:12px}
+</style></head>
+<body>
+<div class="nav"><div class="logo">The Inference <b>Weekly</b></div><a>Models</a><a>Pricing</a><a>Benchmarks</a><a>Newsletter</a></div>
+<main>
+  <span class="tag">MODEL LAUNCH</span>
+  <h1>Nova-3 launches at $2.50 per million output tokens</h1>
+  <div class="by">Illustrative example · fictional models and numbers · 6 min read</div>
+  <p>A small lab released Nova-3 this week. The headline is not the benchmark: it is the price, which undercuts last year's tier by more than an order of magnitude.</p>
+  <div class="cards">
+    <div class="card"><div class="k">Same tier, 2025</div><div class="v old">$38.00</div></div>
+    <div class="card"><div class="k">Nova-3, 2026</div><div class="v new">$2.50</div></div>
+    <div class="card"><div class="k">Change</div><div class="v">15× cheaper</div></div>
+  </div>
+  <h2 id="lb">Reasoning suite leaderboard</h2>
+  <table>
+    <tr><th>#</th><th>Model</th><th>Reasoning</th><th>Latency (p50)</th><th>$ / 1M out</th></tr>
+    <tr><td>1</td><td>Atlas-XL</td><td>91.2%</td><td>6.5 s</td><td>$15.00</td></tr>
+    <tr class="hl"><td>2</td><td>Nova-3</td><td>89.4%</td><td>2.6 s</td><td>$2.50</td></tr>
+    <tr><td>3</td><td>Kestrel-2</td><td>84.7%</td><td>4.5 s</td><td>$9.00</td></tr>
+    <tr><td>4</td><td>Orion-mini</td><td>79.0%</td><td>1.0 s</td><td>$1.00</td></tr>
+  </table>
+  <div class="note">Scores are illustrative. Source: example evalboard.</div>
+  <h2 style="margin-top:60px">What it means for builders</h2>
+  <p>For most agent workloads, a mid-size model that is fast and cheap beats the biggest model. Re-run your evals before you renew your contract.</p>
+</main>
+<script>
+const at=[[13.5,560],[30.5,1000]];
+const t0=performance.now();
+function tick(){const t=(performance.now()-t0)/1000;
+  for(const [s,y] of at){ if(t>=s && !tick['d'+s]){ tick['d'+s]=1; window.scrollTo({top:y,behavior:'smooth'}); } }
+  requestAnimationFrame(tick);}
+tick();
+</script>
+</body></html>

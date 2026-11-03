@@ -1,0 +1,10 @@
+In this notebook, let's see what a matrix actually does to space.
+Here I define a matrix A, with columns one zero and one one.
+The first column tells you where i hat lands, and the second column tells you where j hat lands.
+When we apply A, every point on the grid moves, and the whole plane shears to the right.
+So the vector two one becomes three one.
+Now let's use this idea for training a model.
+Gradient descent looks at the slope at the current point, and takes a step downhill.
+The update rule is x minus the learning rate times the derivative.
+Run the cell, and the dot slides into the minimum, where the slope is zero.
+Matrices move space, and gradients tell you which way is down.

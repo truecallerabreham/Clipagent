@@ -1,0 +1,68 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Shipyard · Pipelines</title>
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:#f6f7f9;font-family:Inter,"DejaVu Sans",system-ui,sans-serif;color:#111827}
+  .app{display:grid;grid-template-columns:260px 1fr;height:100%}
+  .side{background:#fff;border-right:1px solid #e5e7eb;padding:28px 22px}
+  .logo{font-weight:800;font-size:26px;display:flex;align-items:center;gap:10px;margin-bottom:34px}
+  .logo i{width:30px;height:30px;border-radius:8px;background:#111827;display:inline-block}
+  .nav div{padding:12px 14px;border-radius:10px;font-size:19px;color:#4b5563;margin-bottom:4px}
+  .nav .on{background:#f3f4f6;color:#111827;font-weight:600}
+  main{padding:30px 40px;overflow:hidden}
+  h1{margin:0 0 6px;font-size:32px}
+  .sub{color:#6b7280;font-size:18px;margin-bottom:24px}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+  .stat{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:20px 24px}
+  .stat b{display:block;font-size:34px;margin-top:4px}.stat span{color:#6b7280;font-size:16px}
+  .red{color:#dc2626}.green{color:#16a34a}
+  .grid{display:grid;grid-template-columns:1.15fr 1fr;gap:20px}
+  .card{background:#fff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden}
+  .card h2{margin:0;padding:16px 20px;font-size:19px;border-bottom:1px solid #e5e7eb}
+  .run{display:grid;grid-template-columns:26px 1fr auto;gap:12px;align-items:center;padding:24px 22px;border-bottom:1px solid #f1f2f4;font-size:21px;transition:background .3s}
+  .run .d{width:14px;height:14px;border-radius:50%}
+  .run small{display:block;color:#6b7280;font-size:15px;margin-top:2px}
+  .run.sel{background:#fef2f2;box-shadow:inset 4px 0 0 #dc2626}
+  .log{font-family:"JetBrains Mono","DejaVu Sans Mono",monospace;font-size:19px;line-height:1.7;padding:20px 24px;background:#0f1218;color:#d8dee9;min-height:610px;white-space:pre;opacity:.25;transition:opacity .5s}
+  .log.open{opacity:1}
+  .log .f{color:#ff6b6b;font-weight:700}.log .dim{color:#6b7380}.log .y{color:#e5c07b}.log .g{color:#98c379}
+  .skip{display:inline-block;background:#fee2e2;color:#b91c1c;font-size:14px;font-weight:700;padding:2px 8px;border-radius:6px;margin-left:8px}
+</style></head>
+<body><div class="app">
+<div class="side"><div class="logo"><i></i>Shipyard</div>
+<div class="nav"><div>Overview</div><div class="on">Pipelines</div><div>Deployments</div><div>Tests</div><div>Incidents</div><div>Settings</div></div></div>
+<main>
+<h1>Pipelines</h1><div class="sub">acme/storefront · branch main</div>
+<div class="stats">
+<div class="stat"><span>Last deploy</span><b class="red">Failed</b></div>
+<div class="stat"><span>Checkout errors</span><b class="red">100%</b></div>
+<div class="stat"><span>Test suite</span><b>1m 32s</b></div>
+<div class="stat"><span>Deployed</span><b>Fri 5:02 pm</b></div>
+</div>
+<div class="grid">
+<div class="card"><h2>Recent runs</h2>
+<div class="run" id="r1"><div class="d" style="background:#dc2626"></div><div>#482 hotfix: cart totals <span class="skip">tests skipped</span><small>deploy → production · Fri 5:02 pm</small></div><div class="red">failed</div></div>
+<div class="run"><div class="d" style="background:#16a34a"></div><div>#481 copy: footer links<small>deploy → production · Fri 2:14 pm</small></div><div class="green">passed</div></div>
+<div class="run"><div class="d" style="background:#16a34a"></div><div>#480 feat: saved carts<small>deploy → production · Thu 4:40 pm</small></div><div class="green">passed</div></div>
+<div class="run"><div class="d" style="background:#16a34a"></div><div>#479 fix: tax rounding<small>deploy → production · Thu 11:05 am</small></div><div class="green">passed</div></div>
+<div class="run"><div class="d" style="background:#16a34a"></div><div>#478 chore: bump deps<small>deploy → staging · Wed 3:21 pm</small></div><div class="green">passed</div></div>
+</div>
+<div class="card"><h2>Run #482 · test report</h2>
+<div class="log" id="log"><span class="dim">$ npm test  (re-run on #482)</span>
+<span class="g">✓</span> cart.service › adds an item
+<span class="g">✓</span> cart.service › applies a coupon
+<span class="f">✗ cart.service › totals an empty cart</span>
+<span class="y">  TypeError: Cannot read properties
+  of null (reading 'items')</span>
+<span class="dim">    at cartTotal (src/cart/service.ts:41)</span>
+<span class="dim">    at checkout (src/checkout/index.ts:18)</span>
+
+<span class="f">Tests: 1 failed</span>, 87 passed
+<span class="dim">Time:  1m 32s</span></div>
+</div></div>
+</main></div>
+<script>
+const T = parseFloat(new URLSearchParams(location.search).get('fail') || '18.55');
+setTimeout(() => { document.getElementById('r1').classList.add('sel'); document.getElementById('log').classList.add('open'); }, T * 1000);
+</script>
+</body></html>

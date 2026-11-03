@@ -1,0 +1,801 @@
+{
+  "version": 1,
+  "inputs": {
+    "screen": "<take>/raw.mp4",
+    "camera": null,
+    "camera_offset": 0.0,
+    "camera_rect": null,
+    "audio": "screen"
+  },
+  "voice": {
+    "denoise": "normal",
+    "mic": "earphones"
+  },
+  "output": {
+    "path": "<session>/deliverables/final.mp4",
+    "format": "landscape",
+    "fps": 30
+  },
+  "style": {
+    "accent": "#D946EF",
+    "background": [
+      "#000000",
+      "#0A0A0F"
+    ],
+    "screen_inset": 0.05,
+    "radius": 12,
+    "font": "Inter",
+    "captions": {
+      "enabled": true,
+      "words_per_line": 4,
+      "highlight": "#D946EF",
+      "color": "#FFFFFF"
+    },
+    "badge": "Made with ClipAgent",
+    "frame": "plain",
+    "click_effect": "red_arrow",
+    "annotation_color": "#FF2A2A",
+    "transition": "crossfade",
+    "transition_colors": [
+      "#D946EF",
+      "#3B82F6",
+      "#FACC15"
+    ],
+    "shortcut_badge": {
+      "bg": "#0A0A0B",
+      "fg": "#FFFFFF"
+    },
+    "dark": true,
+    "chapter_card": {
+      "bg": "#000000",
+      "fg": "#FFFFFF",
+      "tracking": 0.3,
+      "duration": 2.0
+    }
+  },
+  "camera": {
+    "source": "phone",
+    "grade": "auto",
+    "shape": "circle",
+    "size": 0.23,
+    "corner": "br",
+    "mirror": false,
+    "quality": null,
+    "allow_full": true
+  },
+  "glossary": {
+    "nova 3": "Nova-3",
+    "small lab": "small lab"
+  },
+  "caption_edits": [
+    {
+      "start": 9.4,
+      "end": 10.2,
+      "text": "$2.50."
+    },
+    {
+      "start": 15.2,
+      "end": 16.2,
+      "text": "89.4"
+    }
+  ],
+  "segments": [
+    {
+      "start": 0.0,
+      "end": 8.3,
+      "speed": 1
+    },
+    {
+      "start": 8.54,
+      "end": 23.62,
+      "speed": 1
+    },
+    {
+      "start": 23.8,
+      "end": 37.58,
+      "speed": 1
+    }
+  ],
+  "layouts": [],
+  "zooms": [
+    {
+      "start": 2.0,
+      "end": 4.75,
+      "rect": [
+        0.17,
+        0.04,
+        0.62,
+        0.62
+      ],
+      "note": "headline"
+    },
+    {
+      "start": 12.4,
+      "end": 13.95,
+      "rect": [
+        0.17,
+        0.0,
+        0.66,
+        0.66
+      ],
+      "note": "leaderboard"
+    },
+    {
+      "start": 33.3,
+      "end": 37.4,
+      "rect": [
+        0.17,
+        0.2,
+        0.64,
+        0.64
+      ],
+      "note": "takeaway"
+    }
+  ],
+  "titles": [
+    {
+      "at": 0.1,
+      "duration": 1.9,
+      "text": "Nova-3 is 15x cheaper",
+      "sub": "Neon Telestrator Look"
+    }
+  ],
+  "chapters": [],
+  "callouts": [],
+  "outro": {
+    "text": "ClipAgent",
+    "sub": "Neon Telestrator Look",
+    "duration": 3.5
+  },
+  "look": "neon-telestrator",
+  "concepts": {},
+  "inserts": [
+    {
+      "id": "ins-01",
+      "start": "w17",
+      "end": "w37",
+      "mode": "full",
+      "concepts": [],
+      "scene": {
+        "title": "Inference got 15x cheaper",
+        "elements": [
+          {
+            "id": "news",
+            "primitive": "Screenshot",
+            "props": {
+              "src": "<take>/pricecards.png",
+              "source": "theinferenceweekly.example",
+              "mode": "dock"
+            }
+          },
+          {
+            "id": "price",
+            "primitive": "Metric",
+            "props": {
+              "value": "$38",
+              "x": 0.2,
+              "y": 0.3,
+              "size": 120,
+              "auto": false
+            }
+          },
+          {
+            "id": "bars",
+            "primitive": "BarChart",
+            "props": {
+              "box": [
+                0.6,
+                0.17,
+                0.3,
+                0.31
+              ],
+              "fill": 0.14,
+              "valueSize": 30,
+              "labelSize": 28,
+              "auto": false,
+              "bars": [
+                {
+                  "label": "2025",
+                  "value": 38,
+                  "display": "$38"
+                },
+                {
+                  "label": "2026",
+                  "value": 2.5,
+                  "tone": "gain",
+                  "display": "$2.50"
+                }
+              ]
+            }
+          },
+          {
+            "id": "loopStart",
+            "primitive": "Loop",
+            "props": {
+              "target": "news",
+              "region": [
+                0.033,
+                0.28,
+                0.172,
+                0.28
+              ],
+              "pad": 2,
+              "auto": false
+            }
+          },
+          {
+            "id": "loopEnd",
+            "primitive": "Loop",
+            "props": {
+              "target": "news",
+              "region": [
+                0.369,
+                0.28,
+                0.14,
+                0.28
+              ],
+              "pad": 2,
+              "color": "green",
+              "auto": false
+            }
+          },
+          {
+            "id": "a1",
+            "primitive": "Arrow",
+            "props": {
+              "from": "loopStart",
+              "to": "price",
+              "bend": -0.15,
+              "auto": false,
+              "fromSide": "top",
+              "toSide": "bottom"
+            }
+          },
+          {
+            "id": "a2",
+            "primitive": "Arrow",
+            "props": {
+              "from": "loopEnd",
+              "to": {
+                "target": "bars",
+                "bar": 1,
+                "part": "value"
+              },
+              "toSide": "bottom",
+              "bend": 0.2,
+              "auto": false,
+              "fromSide": "top"
+            }
+          }
+        ]
+      },
+      "beats": [
+        {
+          "word": "w17",
+          "action": "enter",
+          "target": "news",
+          "lead": -0.15
+        },
+        {
+          "word": "w20",
+          "action": "spotlight",
+          "target": "news",
+          "args": {
+            "region": [
+              0.0,
+              0.0,
+              1.0,
+              1.0
+            ],
+            "level": 0.3
+          }
+        },
+        {
+          "word": "w25",
+          "action": "draw",
+          "target": "loopStart"
+        },
+        {
+          "word": "w26",
+          "action": "draw",
+          "target": "a1"
+        },
+        {
+          "word": "w27",
+          "action": "write",
+          "target": "price",
+          "lead": -0.1
+        },
+        {
+          "word": "w29",
+          "action": "draw",
+          "target": "bars",
+          "args": {
+            "dur": 2.0
+          }
+        },
+        {
+          "word": "w31",
+          "action": "draw",
+          "target": "loopEnd"
+        },
+        {
+          "word": "w32",
+          "action": "draw",
+          "target": "a2"
+        },
+        {
+          "word": "w35",
+          "action": "strike",
+          "target": "price",
+          "args": {
+            "to": "$2.50"
+          },
+          "lead": -0.15
+        }
+      ]
+    },
+    {
+      "id": "ins-02",
+      "start": "w42",
+      "end": "w65",
+      "mode": "full",
+      "concepts": [],
+      "scene": {
+        "elements": [
+          {
+            "id": "shot",
+            "primitive": "Screenshot",
+            "props": {
+              "src": "<take>/leaderboard.png",
+              "source": "evalboard.example (illustrative)",
+              "mode": "full"
+            }
+          },
+          {
+            "id": "loopNova",
+            "primitive": "Loop",
+            "props": {
+              "target": "shot",
+              "region": [
+                0.115,
+                0.43,
+                0.12,
+                0.11
+              ],
+              "auto": false
+            }
+          },
+          {
+            "id": "noteNova",
+            "primitive": "InkText",
+            "props": {
+              "text": "new!",
+              "target": "loopNova",
+              "side": "right",
+              "gap": 12,
+              "size": 50,
+              "color": "purple",
+              "font": "script",
+              "auto": false
+            }
+          },
+          {
+            "id": "ulScore",
+            "primitive": "Underline",
+            "props": {
+              "target": "shot",
+              "region": [
+                0.343,
+                0.43,
+                0.07,
+                0.11
+              ],
+              "auto": false
+            }
+          },
+          {
+            "id": "ptr",
+            "primitive": "RedPointer",
+            "props": {
+              "target": "shot",
+              "region": [
+                0.345,
+                0.44,
+                0.065,
+                0.09
+              ],
+              "from": "bottom-left",
+              "hold": 1.2
+            }
+          },
+          {
+            "id": "loopTop",
+            "primitive": "Loop",
+            "props": {
+              "target": "shot",
+              "region": [
+                0.115,
+                0.285,
+                0.13,
+                0.11
+              ],
+              "color": "white",
+              "auto": false
+            }
+          },
+          {
+            "id": "noteTop",
+            "primitive": "InkText",
+            "props": {
+              "text": "#1",
+              "target": "loopTop",
+              "side": "right",
+              "gap": 12,
+              "size": 50,
+              "color": "white",
+              "font": "script",
+              "auto": false
+            }
+          },
+          {
+            "id": "ptrPrice",
+            "primitive": "RedPointer",
+            "props": {
+              "target": "shot",
+              "region": [
+                0.795,
+                0.29,
+                0.08,
+                0.1
+              ],
+              "from": "top-left",
+              "hold": 1.4,
+              "label": "6x the price",
+              "labelSize": 40
+            }
+          },
+          {
+            "id": "loopCheap",
+            "primitive": "Loop",
+            "props": {
+              "target": "shot",
+              "region": [
+                0.795,
+                0.43,
+                0.075,
+                0.11
+              ],
+              "color": "green",
+              "pad": 6,
+              "auto": false
+            }
+          }
+        ]
+      },
+      "beats": [
+        {
+          "word": "w42",
+          "action": "enter",
+          "target": "shot",
+          "lead": -0.2
+        },
+        {
+          "word": "w43",
+          "action": "spotlight",
+          "target": "shot",
+          "args": {
+            "region": [
+              0.02,
+              0.15,
+              0.96,
+              0.41
+            ],
+            "level": 0.6
+          }
+        },
+        {
+          "word": "w43",
+          "action": "draw",
+          "target": "loopNova"
+        },
+        {
+          "word": "w44",
+          "action": "write",
+          "target": "noteNova"
+        },
+        {
+          "word": "w45",
+          "action": "draw",
+          "target": "ulScore"
+        },
+        {
+          "word": "w46",
+          "action": "point",
+          "target": "ptr"
+        },
+        {
+          "word": "w54",
+          "action": "draw",
+          "target": "loopTop",
+          "lead": -0.2
+        },
+        {
+          "word": "w55",
+          "action": "write",
+          "target": "noteTop"
+        },
+        {
+          "word": "w60",
+          "action": "point",
+          "target": "ptrPrice",
+          "lead": -0.1
+        },
+        {
+          "word": "w64",
+          "action": "draw",
+          "target": "loopCheap"
+        }
+      ]
+    },
+    {
+      "id": "ins-03",
+      "start": "w67",
+      "end": "w100",
+      "mode": "full",
+      "concepts": [],
+      "scene": {
+        "title": "Cost vs accuracy vs latency",
+        "elements": [
+          {
+            "id": "chart",
+            "primitive": "Chart3D",
+            "props": {
+              "box": [
+                0.04,
+                0.13,
+                0.92,
+                0.82
+              ],
+              "autoDraw": false,
+              "auto": false,
+              "axes": {
+                "x": {
+                  "label": "cost ($/1M)",
+                  "min": 0,
+                  "max": 16,
+                  "ticks": 4,
+                  "prefix": "$"
+                },
+                "y": {
+                  "label": "accuracy",
+                  "min": 75,
+                  "max": 95,
+                  "ticks": 4,
+                  "suffix": "%"
+                },
+                "z": {
+                  "label": "latency (s)",
+                  "min": 0,
+                  "max": 8,
+                  "ticks": 4,
+                  "suffix": "s"
+                }
+              },
+              "series": [
+                {
+                  "name": "4 models",
+                  "color": "purple",
+                  "marker": "sphere",
+                  "points": [
+                    [
+                      1,
+                      79,
+                      1.0
+                    ],
+                    [
+                      2.5,
+                      89.4,
+                      2.6
+                    ],
+                    [
+                      9,
+                      84.7,
+                      4.5
+                    ],
+                    [
+                      15,
+                      91.2,
+                      6.5
+                    ]
+                  ]
+                }
+              ],
+              "camera": {
+                "azimuth": -40,
+                "elevation": 18
+              },
+              "zoom": 1.0
+            }
+          },
+          {
+            "id": "sweet",
+            "primitive": "Loop",
+            "props": {
+              "target": "chart",
+              "point": [
+                2.5,
+                89.4,
+                2.6
+              ],
+              "pad": 30,
+              "color": "green",
+              "auto": false
+            }
+          },
+          {
+            "id": "sweetNote",
+            "primitive": "InkText",
+            "props": {
+              "text": "sweet spot",
+              "target": "chart",
+              "point": [
+                2.5,
+                89.4,
+                2.6
+              ],
+              "side": "top",
+              "gap": 46,
+              "size": 46,
+              "color": "green",
+              "font": "script",
+              "auto": false
+            }
+          },
+          {
+            "id": "ptrBig",
+            "primitive": "RedPointer",
+            "props": {
+              "target": "chart",
+              "point": [
+                15,
+                91.2,
+                6.5
+              ],
+              "from": "top-left",
+              "label": "biggest",
+              "hold": 1.2
+            }
+          },
+          {
+            "id": "fastNote",
+            "primitive": "InkText",
+            "props": {
+              "text": "fast + cheap",
+              "size": 42,
+              "color": "green",
+              "font": "script",
+              "auto": false,
+              "x": 0.47,
+              "y": 0.6
+            }
+          }
+        ]
+      },
+      "beats": [
+        {
+          "word": "w67",
+          "action": "enter",
+          "target": "chart",
+          "lead": -0.2
+        },
+        {
+          "word": "w72",
+          "action": "drawSeries",
+          "target": "chart",
+          "args": {
+            "series": 0,
+            "dur": 1.8
+          }
+        },
+        {
+          "word": "w76",
+          "action": "orbit",
+          "target": "chart",
+          "args": {
+            "azimuth": -58,
+            "elevation": 24,
+            "dur": 1.6
+          }
+        },
+        {
+          "word": "w80",
+          "action": "draw",
+          "target": "sweet"
+        },
+        {
+          "word": "w81",
+          "action": "write",
+          "target": "sweetNote"
+        },
+        {
+          "word": "w85",
+          "action": "point",
+          "target": "ptrBig"
+        },
+        {
+          "word": "w93",
+          "action": "write",
+          "target": "fastNote"
+        }
+      ]
+    }
+  ],
+  "annotations": [
+    {
+      "type": "box",
+      "start": 3.3,
+      "end": 4.75,
+      "rect": [
+        0.185,
+        0.135,
+        0.6,
+        0.125
+      ],
+      "label": "the real story"
+    },
+    {
+      "type": "box",
+      "start": 34.6,
+      "end": 37.4,
+      "rect": [
+        0.185,
+        0.535,
+        0.62,
+        0.08
+      ]
+    }
+  ],
+  "shortcuts": [],
+  "clicks": [],
+  "typing": [],
+  "sound": {
+    "sfx": true,
+    "music": "dark-pulse",
+    "music_db": -21
+  },
+  "shorts": [
+    {
+      "start": "w17",
+      "end": "w65",
+      "title": "Nova-3: 15x cheaper"
+    }
+  ],
+  "thumbnail": {
+    "at": "w37",
+    "text": "15x cheaper"
+  },
+  "publish": {
+    "title": "Nova-3 is 15x cheaper (illustrative)",
+    "description": "A Neon Telestrator demo edited by ClipAgent. Fictional models and numbers.",
+    "tags": [
+      "ai",
+      "pricing",
+      "benchmarks"
+    ],
+    "linkedin": "Nova-3 changes the price curve.",
+    "x": "15x cheaper inference, telestrated."
+  },
+  "mismatches": [],
+  "_draft_removed_gaps": [
+    [
+      8.3,
+      8.54
+    ],
+    [
+      23.62,
+      23.8
+    ]
+  ],
+  "_draft_scratched": []
+}

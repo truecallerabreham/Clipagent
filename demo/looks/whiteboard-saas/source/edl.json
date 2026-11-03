@@ -1,0 +1,631 @@
+{
+  "version": 1,
+  "inputs": {
+    "screen": "<session>",
+    "camera": null,
+    "camera_offset": 0.0,
+    "camera_rect": null,
+    "audio": "screen"
+  },
+  "voice": {
+    "denoise": "light",
+    "mic": "earphones"
+  },
+  "output": {
+    "path": "<session>",
+    "format": "landscape",
+    "fps": 30
+  },
+  "style": {
+    "accent": "#5E17EB",
+    "background": [
+      "#F4F4F6",
+      "#E5E7EB"
+    ],
+    "screen_inset": 0.05,
+    "radius": 16,
+    "font": "Inter",
+    "captions": {
+      "enabled": true,
+      "words_per_line": 4,
+      "highlight": "#5E17EB",
+      "color": "#111111",
+      "background": "#FFFFFF"
+    },
+    "badge": "Made with ClipAgent",
+    "frame": "plain",
+    "click_effect": "pointer_hand",
+    "annotation_color": "#5E17EB",
+    "transition": "diagonal_wipe",
+    "transition_colors": [
+      "#5E17EB",
+      "#111111",
+      "#FACC15"
+    ],
+    "shortcut_badge": {
+      "bg": "#1E1E1E",
+      "fg": "#FFFFFF"
+    },
+    "dark": false,
+    "chapter_card": {
+      "enabled": true,
+      "bg": "#000000",
+      "fg": "#FFFFFF",
+      "tracking": 0.3,
+      "duration": 2.0,
+      "scale": [
+        1.0,
+        1.08
+      ]
+    }
+  },
+  "camera": {
+    "source": "phone",
+    "grade": "auto",
+    "shape": "circle",
+    "size": 0.23,
+    "corner": "br",
+    "mirror": false,
+    "quality": null,
+    "allow_full": true
+  },
+  "glossary": {
+    "PageWise": "Pagewise"
+  },
+  "caption_edits": [
+    {
+      "start": 3.4,
+      "end": 3.86,
+      "text": "teams."
+    },
+    {
+      "start": 36.6,
+      "end": 37.0,
+      "text": "That's it."
+    }
+  ],
+  "segments": [
+    {
+      "start": 0.0,
+      "end": 23.4,
+      "speed": 1
+    },
+    {
+      "start": 23.72,
+      "end": 40.26,
+      "speed": 1
+    }
+  ],
+  "layouts": [],
+  "zooms": [
+    {
+      "start": 8.8,
+      "end": 10.7,
+      "rect": [
+        0.0,
+        0.0,
+        0.46,
+        0.46
+      ],
+      "note": "sidebar"
+    },
+    {
+      "start": 10.8,
+      "end": 12.1,
+      "rect": [
+        0.42,
+        0.22,
+        0.58,
+        0.58
+      ],
+      "note": "weekly visitors"
+    },
+    {
+      "start": 12.2,
+      "end": 16.3,
+      "rect": [
+        0.3,
+        0.0,
+        0.7,
+        0.7
+      ],
+      "note": "invite modal"
+    }
+  ],
+  "titles": [
+    {
+      "at": 0.15,
+      "duration": 2.8,
+      "text": "Pagewise in 2 minutes",
+      "sub": "set up analytics for your team"
+    }
+  ],
+  "chapters": [
+    {
+      "at": 22.15,
+      "text": "Pricing"
+    }
+  ],
+  "callouts": [],
+  "outro": {
+    "text": "Made with ClipAgent",
+    "sub": "github.com/truecallerabreham/Clipagent",
+    "duration": 4
+  },
+  "look": "whiteboard-saas",
+  "concepts": {
+    "pro plan": "#5E17EB"
+  },
+  "inserts": [
+    {
+      "id": "ins-01",
+      "start": "w51",
+      "end": "w69",
+      "mode": "full",
+      "concepts": [],
+      "scene": {
+        "title": "How *onboarding* works",
+        "elements": [
+          {
+            "id": "flow",
+            "primitive": "Diagram",
+            "props": {
+              "nodes": [
+                {
+                  "id": "site",
+                  "label": "Connect site",
+                  "icon": "browser"
+                },
+                {
+                  "id": "team",
+                  "label": "Invite team",
+                  "icon": "team"
+                },
+                {
+                  "id": "report",
+                  "label": "First report",
+                  "icon": "mail"
+                }
+              ],
+              "y": 0.56,
+              "boxW": 360,
+              "boxH": 250,
+              "gap": 150,
+              "iconSize": 130,
+              "labelSize": 52,
+              "auto": false
+            }
+          }
+        ]
+      },
+      "beats": [
+        {
+          "word": "w55",
+          "action": "step",
+          "target": "flow",
+          "args": {
+            "node": "site",
+            "dur": 1.1
+          },
+          "lead": -0.15
+        },
+        {
+          "word": "w59",
+          "action": "step",
+          "target": "flow",
+          "args": {
+            "node": "team",
+            "dur": 1.0
+          }
+        },
+        {
+          "word": "w64",
+          "action": "step",
+          "target": "flow",
+          "args": {
+            "node": "report",
+            "dur": 1.0
+          }
+        },
+        {
+          "word": "w69",
+          "action": "fill",
+          "target": "flow",
+          "args": {
+            "node": "report",
+            "color": "green"
+          }
+        }
+      ]
+    },
+    {
+      "id": "ins-02",
+      "start": "w72",
+      "end": "w92",
+      "mode": "full",
+      "concepts": [
+        "pro plan"
+      ],
+      "scene": {
+        "title": "Pick the plan that *scales*",
+        "elements": [
+          {
+            "id": "starter",
+            "primitive": "UIMock",
+            "props": {
+              "variant": "pricing",
+              "plan": "Starter",
+              "price": "$0",
+              "period": "/month",
+              "features": [
+                "1 site",
+                "7-day history",
+                "Email reports"
+              ],
+              "button": "Get started",
+              "ghost": true,
+              "x": 0.3,
+              "y": 0.56,
+              "width": 440,
+              "height": 0.52,
+              "auto": false
+            }
+          },
+          {
+            "id": "pro",
+            "primitive": "UIMock",
+            "props": {
+              "variant": "pricing",
+              "badge": "Most popular",
+              "plan": "Pro",
+              "price": "$29",
+              "period": "/month",
+              "features": [
+                "Unlimited sites",
+                "Team seats",
+                "Goals + alerts"
+              ],
+              "button": "Start free trial",
+              "x": 0.56,
+              "y": 0.56,
+              "width": 440,
+              "height": 0.52,
+              "auto": false
+            }
+          },
+          {
+            "id": "note",
+            "primitive": "SketchText",
+            "props": {
+              "text": "best value!",
+              "size": 68,
+              "color": "accent",
+              "x": 0.86,
+              "y": 0.3,
+              "auto": false
+            }
+          },
+          {
+            "id": "arrow",
+            "primitive": "Arrow",
+            "props": {
+              "from": "note",
+              "to": "pro",
+              "bend": 0.3,
+              "dashed": true,
+              "color": "accent",
+              "auto": false
+            }
+          },
+          {
+            "id": "box",
+            "primitive": "MarchingBox",
+            "props": {
+              "target": "pro",
+              "pad": 22,
+              "radius": 30,
+              "auto": false
+            }
+          },
+          {
+            "id": "cursor",
+            "primitive": "PointerHand",
+            "props": {
+              "target": "pro.button",
+              "auto": false
+            }
+          }
+        ]
+      },
+      "beats": [
+        {
+          "word": "w75",
+          "action": "enter",
+          "target": "starter",
+          "args": {
+            "dur": 1.0
+          },
+          "lead": -0.2
+        },
+        {
+          "word": "w78",
+          "action": "enter",
+          "target": "pro",
+          "args": {
+            "dur": 1.2
+          },
+          "lead": -0.2
+        },
+        {
+          "word": "w81",
+          "action": "pulse",
+          "target": "pro"
+        },
+        {
+          "word": "w86",
+          "action": "enter",
+          "target": "box"
+        },
+        {
+          "word": "w86",
+          "action": "select",
+          "target": "pro"
+        },
+        {
+          "word": "w87",
+          "action": "write",
+          "target": "note",
+          "args": {
+            "dur": 0.7
+          }
+        },
+        {
+          "word": "w89",
+          "action": "enter",
+          "target": "arrow",
+          "args": {
+            "dur": 0.6
+          }
+        },
+        {
+          "word": "w88",
+          "action": "enter",
+          "target": "cursor"
+        },
+        {
+          "word": "w90",
+          "action": "click",
+          "target": "cursor"
+        },
+        {
+          "word": "w90",
+          "action": "click",
+          "target": "pro",
+          "args": {
+            "part": "button"
+          }
+        }
+      ]
+    },
+    {
+      "id": "ins-03",
+      "start": "w93",
+      "end": "w112",
+      "mode": "full",
+      "concepts": [],
+      "scene": {
+        "title": "Before you *launch*",
+        "elements": [
+          {
+            "id": "list",
+            "primitive": "Checklist",
+            "props": {
+              "items": [
+                "Domain connected",
+                "Team invited",
+                "Goals set"
+              ],
+              "size": 76,
+              "gap": 40,
+              "x": 0.36,
+              "y": 0.58,
+              "hand": false,
+              "auto": false
+            }
+          },
+          {
+            "id": "rocket",
+            "primitive": "HandDraw",
+            "props": {
+              "art": "rocket",
+              "size": 400,
+              "x": 0.72,
+              "y": 0.56,
+              "boxW": 360,
+              "boxH": 250,
+              "gap": 150,
+              "iconSize": 130,
+              "labelSize": 52,
+              "auto": false
+            }
+          }
+        ]
+      },
+      "beats": [
+        {
+          "word": "w93",
+          "action": "write",
+          "target": "list",
+          "args": {
+            "dur": 1.9
+          }
+        },
+        {
+          "word": "w96",
+          "action": "draw",
+          "target": "rocket",
+          "args": {
+            "dur": 1.3
+          }
+        },
+        {
+          "word": "w101",
+          "action": "check",
+          "target": "list",
+          "args": {
+            "item": 0
+          }
+        },
+        {
+          "word": "w105",
+          "action": "check",
+          "target": "list",
+          "args": {
+            "item": 1
+          }
+        },
+        {
+          "word": "w110",
+          "action": "check",
+          "target": "list",
+          "args": {
+            "item": 2
+          }
+        },
+        {
+          "word": "w110",
+          "action": "pop",
+          "target": "rocket"
+        }
+      ]
+    },
+    {
+      "id": "ins-04",
+      "start": "w112",
+      "end": "w118",
+      "mode": "full",
+      "concepts": [],
+      "scene": {
+        "elements": [
+          {
+            "id": "k",
+            "primitive": "KineticText",
+            "props": {
+              "text": "Turn your traffic\ninto *decisions*",
+              "size": 104,
+              "highlight": "marker",
+              "y": 0.5,
+              "auto": false
+            }
+          }
+        ]
+      },
+      "beats": [
+        {
+          "word": "w113",
+          "action": "reveal",
+          "target": "k",
+          "args": {
+            "dur": 1.6
+          },
+          "lead": -0.15
+        },
+        {
+          "word": "w118",
+          "action": "emphasize",
+          "target": "k"
+        }
+      ]
+    }
+  ],
+  "annotations": [
+    {
+      "type": "box",
+      "start": 9.2,
+      "end": 10.7,
+      "rect": [
+        0.008,
+        0.105,
+        0.13,
+        0.36
+      ],
+      "label": "sidebar"
+    },
+    {
+      "type": "box",
+      "start": 11.0,
+      "end": 12.1,
+      "rect": [
+        0.66,
+        0.3,
+        0.32,
+        0.64
+      ],
+      "label": "weekly visitors"
+    }
+  ],
+  "shortcuts": [],
+  "clicks": [
+    {
+      "t": 13.0,
+      "x": 0.911,
+      "y": 0.034
+    },
+    {
+      "t": 13.8,
+      "x": 0.469,
+      "y": 0.468
+    },
+    {
+      "t": 16.0,
+      "x": 0.607,
+      "y": 0.572
+    }
+  ],
+  "typing": [
+    [
+      14.0,
+      15.4
+    ]
+  ],
+  "sound": {
+    "sfx": true,
+    "music": "bright-pluck",
+    "music_db": -22
+  },
+  "shorts": [
+    {
+      "start": "w51",
+      "end": "w91",
+      "title": "How Pagewise onboarding works"
+    }
+  ],
+  "thumbnail": {
+    "at": "w88",
+    "text": "Onboarding in 2 min"
+  },
+  "publish": {
+    "title": "Pagewise in 2 minutes: set up analytics for your team",
+    "description": "A quick onboarding walkthrough: dashboard, team invites, pricing and a launch checklist. Edited by ClipAgent with the Whiteboard SaaS Look.",
+    "tags": [
+      "saas",
+      "onboarding",
+      "analytics",
+      "product demo"
+    ],
+    "linkedin": "Onboarding a new analytics tool in two minutes, edited end to end by ClipAgent.",
+    "x": "Pagewise onboarding in 2 minutes. Recorded once, edited by ClipAgent."
+  },
+  "mismatches": [],
+  "_draft_removed_gaps": [
+    [
+      23.4,
+      23.72
+    ],
+    [
+      37.22,
+      37.5
+    ]
+  ],
+  "_draft_scratched": []
+}
