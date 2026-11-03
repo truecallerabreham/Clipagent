@@ -87,19 +87,19 @@ Each Look is one production style for the **whole** video: how Inserts look and 
 
 ### Watch every Look in a real edited video
 
-Each of these went through the full pipeline (raw take → transcript → the agent's edit → Inserts → self-check → render), with nothing touched by hand afterwards. Click a poster to play it (with sound).
+Each of these went through the full pipeline (raw take → transcript → the agent's edit → Inserts → self-check → render), with nothing touched by hand afterwards. The previews loop silently; click one to watch the full video with sound.
 
 <table>
 <tr>
-<td width="50%"><a href="demo/clipagent-demo.mp4"><img src="demo/thumbnail.png" alt="Architecture Flow demo"></a><br><b>Architecture Flow</b> · 52 s · how ClipAgent itself works, with a JWT login flow built from the spoken words</td>
-<td width="50%"><a href="demo/looks/neon-telestrator/video.mp4"><img src="demo/looks/neon-telestrator/poster.jpg" alt="Neon Telestrator demo"></a><br><b>Neon Telestrator</b> · 41 s · an AI pricing story: telestrated leaderboard, a price that strikes through, a 3D cost/accuracy/latency plot</td>
+<td width="50%"><a href="demo/clipagent-demo.mp4"><img src="docs/media/demos/architecture-flow.gif" alt="Architecture Flow demo"></a><br><b>Architecture Flow</b> · 52 s · how ClipAgent itself works, with a JWT login flow built from the spoken words</td>
+<td width="50%"><a href="demo/looks/neon-telestrator/video.mp4"><img src="docs/media/demos/neon-telestrator.gif" alt="Neon Telestrator demo"></a><br><b>Neon Telestrator</b> · 41 s · an AI pricing story: telestrated leaderboard, a price that strikes through, a 3D cost/accuracy/latency plot</td>
 </tr>
 <tr>
-<td><a href="demo/looks/math-vector/video.mp4"><img src="demo/looks/math-vector/poster.jpg" alt="Math Vector demo"></a><br><b>Math Vector</b> · 41 s · a notebook walkthrough: a matrix shears the plane, then gradient descent slides into the minimum with live counters</td>
-<td><a href="demo/looks/whiteboard-saas/video.mp4"><img src="demo/looks/whiteboard-saas/poster.jpg" alt="Whiteboard SaaS demo"></a><br><b>Whiteboard SaaS</b> · 44 s · onboarding for a SaaS dashboard: pointer-hand clicks, a hand-drawn flow, annotated pricing cards, a ticked checklist</td>
+<td><a href="demo/looks/math-vector/video.mp4"><img src="docs/media/demos/math-vector.gif" alt="Math Vector demo"></a><br><b>Math Vector</b> · 41 s · a notebook walkthrough: a matrix shears the plane, then gradient descent slides into the minimum with live counters</td>
+<td><a href="demo/looks/whiteboard-saas/video.mp4"><img src="docs/media/demos/whiteboard-saas.gif" alt="Whiteboard SaaS demo"></a><br><b>Whiteboard SaaS</b> · 44 s · onboarding for a SaaS dashboard: pointer-hand clicks, a hand-drawn flow, annotated pricing cards, a ticked checklist</td>
 </tr>
 <tr>
-<td><a href="demo/looks/stickman-story/video.mp4"><img src="demo/looks/stickman-story/poster.jpg" alt="Stickman Story demo"></a><br><b>Stickman Story</b> · 38 s · "why I test before Friday deploys": hard-cut stickman scenes inside a macOS-framed CI walkthrough</td>
+<td><a href="demo/looks/stickman-story/video.mp4"><img src="docs/media/demos/stickman-story.gif" alt="Stickman Story demo"></a><br><b>Stickman Story</b> · 38 s · "why I test before Friday deploys": hard-cut stickman scenes inside a macOS-framed CI walkthrough</td>
 <td valign="top"><br>The narration, the screen page, the agent's <code>edl.json</code> and the self-check report for each one are in <a href="demo/looks"><code>demo/looks/&lt;look&gt;/source/</code></a>. The voices are an open-source TTS voice (Piper); the products, models and numbers are fictional.</td>
 </tr>
 </table>
