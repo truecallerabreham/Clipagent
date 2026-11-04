@@ -8,6 +8,7 @@
 
 **ClipAgent turns your coding agent into a video studio.** It records your screen, webcam and voice while you talk freely, with no script, no notes, and no fear of mistakes. Then it edits the whole thing for you: it cuts the flubs, zooms where you click, cleans your voice and webcam, and builds **animated explainers from your own repo, docs and the web**, synced to the exact words you say.
 
+[![Quick start](https://img.shields.io/badge/quick_start-3_steps-F43F5E?style=flat-square)](#-first-time-three-steps-under-a-minute)
 [![Claude Code plugin](https://img.shields.io/badge/Claude_Code-plugin-D97757?style=flat-square)](#install)
 [![Codex skill](https://img.shields.io/badge/Codex-skill-111111?style=flat-square)](#install)
 [![OpenCode skill](https://img.shields.io/badge/OpenCode-skill-F97316?style=flat-square)](#install)
@@ -25,6 +26,30 @@
 <sub>🎬 <a href="brag-output/brag.mp4"><b>20-second launch video</b></a>, made with the <a href="https://github.com/latent-spaces/brag"><code>/brag</code></a> skill from ClipAgent's own renders.</sub>
 
 </div>
+
+---
+
+## 🚀 First time? Three steps, under a minute
+
+**1. Install** (one line in your terminal, ~10 seconds):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/truecallerabreham/Clipagent/main/install.sh | bash
+```
+
+<sub>Windows PowerShell: `irm https://raw.githubusercontent.com/truecallerabreham/Clipagent/main/install.ps1 | iex` · Claude Code plugin instead: see [Install](#install)</sub>
+
+**2. Open your coding agent** (Claude Code, Codex, OpenCode or Antigravity) **and type:**
+
+```text
+/screen-record
+```
+
+**3. Tap three answers, then talk.** The agent asks one quick multiple-choice question at a time: *what you're making*, *camera*, *what the animations draw from*. Recording starts right after. Press **Ctrl+Alt+S** (⌘⌥S on macOS) when you're done, and your edited video arrives in `deliverables/`.
+
+That's all. No flags, no config files, no commands to learn: the agent runs everything for you. Next time it's a single tap: *"Record with your usual setup?"* → **Yes**.
+
+> **Only if the agent says ffmpeg is missing:** `sudo apt install ffmpeg` · `brew install ffmpeg` · `winget install ffmpeg`.
 
 ---
 
@@ -108,7 +133,9 @@ Each of these went through the full pipeline (raw take → transcript → the ag
 
 ## Install
 
-One line, about 10 seconds. It adds `/screen-record` to every coding agent it finds: **Claude Code, Codex, OpenCode and Antigravity**.
+The [three steps above](#-first-time-three-steps-under-a-minute) are all a first-time user needs. This section has the details.
+
+The one-line installer takes about 10 seconds. It adds `/screen-record` to every coding agent it finds: **Claude Code, Codex, OpenCode and Antigravity**.
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/truecallerabreham/Clipagent/main/install.sh | bash
