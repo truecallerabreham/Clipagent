@@ -11,12 +11,28 @@ if (-not (Get-Command uv -ErrorAction SilentlyContinue)) {
   powershell -NoProfile -ExecutionPolicy Bypass -c "irm https://astral.sh/uv/install.ps1 | iex" | Out-Null
   $env:Path = "$HOME\.local\bin;$env:Path"
 }
-if (Test-Path "$Dir\.git") { Say "updating ClipAgent"; git -C $Dir pull --ff-only --quiet }
-else {
+$Parts = @("skills", "engine", "looks", "recorder", "hooks", ".claude-plugin")
+function Fetch-Code {   # sparse checkout: only the code; retried because flaky networks drop big fetches
+  foreach ($i in 1..3) {
+    git -C $Dir sparse-checkout set @Parts 2>$null
+    if ($LASTEXITCODE -eq 0) { return $true }
+    Say "network hiccup, retrying ($i/3)"; Start-Sleep 2
+  }
+  return $false
+}
+if (Test-Path "$Dir\.git") {
+  Say "updating ClipAgent"; git -C $Dir pull --ff-only --quiet
+  if (-not (Fetch-Code)) { throw "could not download ClipAgent: check your connection and run this again" }
+} else {
   Say "downloading ClipAgent (code only, no demo videos)"
   New-Item -ItemType Directory -Force (Split-Path $Dir) | Out-Null
   git clone --quiet --depth 1 --filter=blob:none --sparse https://github.com/truecallerabreham/Clipagent.git $Dir
-  git -C $Dir sparse-checkout set skills engine looks recorder hooks .claude-plugin
+  if ($LASTEXITCODE -ne 0 -or -not (Fetch-Code)) {
+    Say "retrying with a plain download"
+    Remove-Item -Recurse -Force $Dir -ErrorAction SilentlyContinue
+    git clone --quiet --depth 1 https://github.com/truecallerabreham/Clipagent.git $Dir
+    if ($LASTEXITCODE -ne 0) { throw "could not download ClipAgent: check your connection and run this again" }
+  }
 }
 Say "adding /screen-record to your coding agents"
 $env:PYTHONPATH = "$Dir\engine"

@@ -16,13 +16,26 @@ if ! command -v uv >/dev/null; then
   export PATH="$HOME/.local/bin:$PATH"
 fi
 
+PARTS="skills engine looks recorder hooks .claude-plugin"
+fetch_code() {   # sparse checkout: fetch only the code; retried because flaky networks drop big fetches
+  for i in 1 2 3; do
+    git -C "$DIR" sparse-checkout set $PARTS 2>/dev/null && return 0
+    say "network hiccup, retrying ($i/3)"; sleep 2
+  done
+  return 1
+}
 if [ -d "$DIR/.git" ]; then
-  say "updating ClipAgent"; git -C "$DIR" pull --ff-only --quiet
+  say "updating ClipAgent"
+  git -C "$DIR" pull --ff-only --quiet || true
+  fetch_code || { echo "could not download ClipAgent: check your connection and run this again"; exit 1; }
 else
   say "downloading ClipAgent (code only, no demo videos)"
   mkdir -p "$(dirname "$DIR")"
-  git clone --quiet --depth 1 --filter=blob:none --sparse "$REPO" "$DIR"
-  git -C "$DIR" sparse-checkout set skills engine looks recorder hooks .claude-plugin
+  if ! { git clone --quiet --depth 1 --filter=blob:none --sparse "$REPO" "$DIR" && fetch_code; }; then
+    say "retrying with a plain download"
+    rm -rf "$DIR"
+    git clone --quiet --depth 1 "$REPO" "$DIR"
+  fi
 fi
 
 say "adding /screen-record to your coding agents"
