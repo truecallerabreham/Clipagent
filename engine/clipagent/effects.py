@@ -60,12 +60,21 @@ def macos_chrome(canvas, box, radius, dark=True):
     H = canvas.shape[0]
     bar = max(18, int(H * 0.032))
     color = (46, 42, 42) if dark else (236, 236, 236)
-    full = np.full((sh + bar, sw, 3), color, np.uint8)
-    blend_into(canvas, full, sx, sy - bar, rounded_mask(sw, sh + bar, int(radius)))
+    # the screen is pasted over the body right after, so only the bar and the strip
+    # behind the screen's rounded top corners can ever show: draw just that
+    ri = min(sh, int(math.ceil(radius)) + 1)
+    strip = _chrome_strip(sw, sh + bar, bar + ri, int(radius), color)
+    blend_into(canvas, strip[0], sx, sy - bar, strip[1])
     r = max(4, bar // 5)
     for i, c in enumerate(((95, 95, 255), (46, 189, 254), (64, 200, 40))):  # BGR red, yellow, green
         cv2.circle(canvas, (sx + int(bar * 0.6) + i * int(r * 3.2), sy - bar // 2), r, c, -1, cv2.LINE_AA)
     return bar
+
+
+@lru_cache(maxsize=16)
+def _chrome_strip(w, h, top, r, color):
+    """Top `top` rows of the rounded window slab: (pixels, mask)."""
+    return np.full((top, w, 3), color, np.uint8), rounded_mask(w, h, r)[:top]
 
 
 # ---------------------------------------------------------------- click effects

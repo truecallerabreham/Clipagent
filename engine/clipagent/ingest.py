@@ -39,25 +39,31 @@ def ingest_take(s: Session, fps: int = FPS) -> dict:
         cmd += [*_offset_args(mic.get("start_offset", 0)), "-i", str(s.take / mic["file"])]
     vf = f"fps={fps},scale=trunc(iw/2)*2:trunc(ih/2)*2,format=yuv420p"
     cmd += ["-map", "0:v:0"] + (["-map", "1:a:0", "-c:a", "aac", "-b:a", "256k", "-ar", "48000", "-ac", "1"] if mic else [])
-    cmd += ["-vf", vf, "-c:v", "libx264", "-preset", "veryfast", "-crf", "16", "-g", str(fps * 2)]
+    # intermediates: ultrafast at a low CRF is visually the same as veryfast and ~2.5x quicker
+    venc = ["-c:v", "libx264", "-preset", "ultrafast", "-crf", "15", "-g", str(fps * 2)]
+    cmd += ["-vf", vf, *venc]
     if dur:
         cmd += ["-t", f"{dur:.3f}"]
     cmd += [str(work / "screen.mp4")]
-    print("ingest: screen + mic -> work/screen.mp4", flush=True)
-    run(cmd)
+    jobs = [("screen + mic -> work/screen.mp4", cmd)]
     out["screen"] = str(work / "screen.mp4")
 
     cam = streams.get("camera")
     if cam and (s.take / cam["file"]).exists():
-        print("ingest: camera -> work/camera.mp4", flush=True)
         cmd = [FFMPEG, "-y", "-v", "error", *_offset_args(cam.get("start_offset", 0)), "-i", str(s.take / cam["file"]),
-               "-vf", f"fps={fps},scale=trunc(iw/2)*2:trunc(ih/2)*2,format=yuv420p", "-an",
-               "-c:v", "libx264", "-preset", "veryfast", "-crf", "16", "-g", str(fps * 2)]
+               "-vf", f"fps={fps},scale=trunc(iw/2)*2:trunc(ih/2)*2,format=yuv420p", "-an", *venc]
         if dur:
             cmd += ["-t", f"{dur:.3f}"]
-        run(cmd + [str(work / "camera.mp4")])
+        jobs.append(("camera -> work/camera.mp4", cmd + [str(work / "camera.mp4")]))
         out["camera"] = str(work / "camera.mp4")
         out["camera_offset"] = 0.0
+    # screen and camera are independent: convert them side by side
+    from concurrent.futures import ThreadPoolExecutor
+    for label, _ in jobs:
+        print(f"ingest: {label}", flush=True)
+    with ThreadPoolExecutor(len(jobs)) as ex:
+        for f in [ex.submit(run, c) for _, c in jobs]:
+            f.result()
 
     meta = s.meta()
     if meta.get("camera_file"):  # phone / DSLR file, synced by audio in analyze

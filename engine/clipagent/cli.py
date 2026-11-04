@@ -93,13 +93,69 @@ def cmd_stop(args):
 
 def cmd_wait(args):
     """Block until the Take is finished (run it in the background so the agent is told when the user stops)."""
+    import threading
+    import time as _t
     s = _session(args)
+    live = {"ok": False}
+    th = None
+    if not getattr(args, "no_live", False) and not (s.work / "transcript.json").exists():
+        th = threading.Thread(target=lambda: live.update(ok=_live_transcribe(s)))
+        th.start()
     st = S.wait_for(s, ("done",), timeout=0, poll=1.0)
     if st.get("status") == "error":
+        if th:
+            th.join()
         raise SystemExit(f"recorder error: {st.get('error')}")
     s.update(status="recorded")
     tk = S.take_manifest(s)
-    print(f"take finished: {tk.get('duration', 0):.1f}s recorded -> {s.path}")
+    stopped = _t.time()
+    ingested = False
+    if not getattr(args, "no_ingest", False) and not (s.work / "media.json").exists():
+        # convert the media now, while the last stretch of speech is still being
+        # transcribed, so `prepare` only has analysis + the draft left to do
+        from .ingest import ingest_take
+        try:
+            ingest_take(s)
+            ingested = True
+        except Exception as e:  # noqa: BLE001
+            print(f"ingest failed ({e}); prepare will retry", flush=True)
+    if th:
+        th.join()
+    extra = [x for x, ok in (("transcribed", live["ok"]), ("ingested", ingested)) if ok]
+    print(f"take finished: {tk.get('duration', 0):.1f}s recorded -> {s.path}"
+          + (f" (already {' + '.join(extra)}, {_t.time() - stopped:.0f}s after stop)" if extra else ""))
+
+
+def _live_transcribe(s) -> bool:
+    """Transcribe the mic while the user is still talking, so `prepare` finds the
+    transcript ready. Any failure just leaves the job to `prepare`."""
+    import time
+    from . import transcribe
+    done = lambda: s.take_state().get("status") in ("done", "error")
+    mic = s.take / "mic.webm"
+    while not mic.exists() and not done():
+        time.sleep(1.0)
+    if not mic.exists():
+        return False
+    try:
+        segs, lang, secs = transcribe.live(mic, done, vocab=_vocab_from_context(s.meta()),
+                                           model_name=os.environ.get("WHISPER_MODEL", "large-v3-turbo"),
+                                           log=lambda m: print(m, flush=True))
+        if secs <= 0:
+            return False
+        try:  # mic clock -> Take clock (the recorder writes the offsets when it stops)
+            off = float(S.take_manifest(s).get("streams", {}).get("mic", {}).get("start_offset", 0) or 0)
+        except SystemExit:
+            off = 0.0
+        s.work.mkdir(parents=True, exist_ok=True)
+        transcribe.write_outputs(s.work, transcribe.shift(segs, off), lang, secs + off,
+                                 os.environ.get("WHISPER_MODEL", "large-v3-turbo"), quiet=True)
+        return True
+    except Exception as e:  # noqa: BLE001
+        print(f"live transcription failed ({e}); prepare will transcribe the Take instead", flush=True)
+        for f in ("transcript.json", "transcript.txt", "words.txt"):
+            (s.work / f).unlink(missing_ok=True)
+        return False
 
 
 def cmd_status(args):
@@ -150,14 +206,37 @@ def cmd_prepare(args):
     s = _session(args)
     m = s.meta()
     media_f = s.work / "media.json"
+    work = str(s.work)
+    vocab = ", ".join(filter(None, [args.vocab, _vocab_from_context(m)]))
+    need_tr = not (s.work / "transcript.json").exists() or args.retranscribe
+    if not need_tr:
+        print("transcript: ready (transcribed live during the recording)", flush=True)
+    mic = s.take / "mic.webm"
+    tr_thread = None
+    if need_tr and mic.exists():
+        # no live transcript (e.g. `wait` wasn't running): transcribe the mic file
+        # while ingest converts the video, instead of one after the other
+        import threading
+        tr_err = []
+
+        def _tr():
+            try:
+                _transcribe_mic(s, mic, args, vocab)
+            except Exception as e:  # noqa: BLE001
+                tr_err.append(e)
+        print("transcribing the mic (local Whisper) while ingesting...", flush=True)
+        tr_thread = threading.Thread(target=_tr)
+        tr_thread.start()
     if not media_f.exists() or args.reingest:
         media = ingest_take(s)
     else:
         media = load_json(media_f)
-    work = str(s.work)
-    if not (s.work / "transcript.json").exists() or args.retranscribe:
+    if tr_thread:
+        tr_thread.join()
+        if tr_err:
+            raise tr_err[0]
+    elif need_tr:
         print("transcribing (local Whisper; first run downloads the model)...", flush=True)
-        vocab = ", ".join(filter(None, [args.vocab, _vocab_from_context(m)]))
         transcribe.main([media["screen"], work, "--model", args.model, "--language", args.language,
                          *(["--vocab", vocab] if vocab else [])])
     a = [work, "--screen", media["screen"]] + (["--camera", media["camera"]] if media.get("camera") else [])
@@ -176,6 +255,21 @@ def cmd_prepare(args):
     save_json(edl, edl_p)
     s.update(status="drafted")
     print(f"\nnext: read {s.work / 'transcript.txt'} and {s.work / 'words.txt'}, the Context Pack, then edit {edl_p}")
+
+
+def _transcribe_mic(s, mic, args, vocab):
+    """One-shot transcription of the Take's mic file, on the Take clock."""
+    from . import transcribe as T
+    s.work.mkdir(parents=True, exist_ok=True)
+    raw = T._decode_from(mic, 0.0)
+    model = T.load_model(args.model)
+    segs, lang = T.transcribe_chunk(model, T._filtered(raw), 0.0, T.BASE_VOCAB + (", " + vocab if vocab else ""),
+                                    args.language)
+    try:
+        off = float(S.take_manifest(s).get("streams", {}).get("mic", {}).get("start_offset", 0) or 0)
+    except SystemExit:
+        off = 0.0
+    T.write_outputs(s.work, T.shift(segs, off), lang, len(raw) / T.SR + off, args.model)
 
 
 def _vocab_from_context(meta) -> str:
@@ -251,6 +345,8 @@ def cmd_render(args):
         a += ["--range", *map(str, args.range)]
     if args.force_cut:
         a.append("--force-cut")
+    if getattr(args, "hq", False):
+        a.append("--hq")
     render.main(a)
     if not args.still and not args.preview and not args.range:
         s.update(status="rendered")
@@ -422,7 +518,9 @@ def build_parser():
 
     p = add("stop", cmd_stop, "stop the recording")
     p.add_argument("--timeout", type=float, default=120)
-    add("wait", cmd_wait, "block until the Take is finished")
+    p = add("wait", cmd_wait, "block until the Take is finished (transcribes the mic live meanwhile)")
+    p.add_argument("--no-live", action="store_true", help="don't transcribe during the recording")
+    p.add_argument("--no-ingest", action="store_true", help="don't convert the media right after the stop")
     add("status", cmd_status, "show the Session")
 
     p = add("context", cmd_context, "amend the Context Pack")
@@ -455,7 +553,7 @@ def build_parser():
     p = add("inserts", cmd_inserts, "render Inserts")
     p.add_argument("--only", nargs="*")
     p.add_argument("--force", action="store_true")
-    p.add_argument("--workers", type=int, default=3)
+    p.add_argument("--workers", type=int, default=0, help="browser processes (0 = auto, about half the cores)")
 
     p = add("qa", cmd_qa, "self-check")
     p.add_argument("--stills", action="store_true", help="also render composited stills at each Insert")
@@ -466,7 +564,8 @@ def build_parser():
     p.add_argument("--still", type=float, nargs="+")
     p.add_argument("--range", type=float, nargs=2)
     p.add_argument("--force-cut", action="store_true")
-    p.add_argument("--workers", type=int, default=4)
+    p.add_argument("--workers", type=int, default=0, help="compositor processes (0 = one per core)")
+    p.add_argument("--hq", action="store_true", help="slower, marginally cleaner encode")
 
     add("deliver", cmd_deliver, "write all Deliverables")
     p = add("snap", cmd_snap, "screenshot a web page into work/assets (web Context Packs only)")

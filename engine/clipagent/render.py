@@ -13,7 +13,6 @@ usage:
   uv run render.py EDL.json --force-cut           # redo pass 1 even if cached
 """
 import argparse
-import collections
 import hashlib
 import json
 import math
@@ -90,7 +89,9 @@ def voice_chain(cfg):
     strong = RNNoise neural denoiser at full mix + spectral cleanup + a soft
     gate that pushes leftover hiss down between words."""
     level = cfg.get("denoise", "normal")
-    parts = ["highpass=f=85", "adeclick=w=55:o=75"]
+    # adeclick's 55 ms/75% window cost ~30 s per 5 min of voice; a 20 ms/50% window
+    # still catches mouth clicks and plosive ticks at ~1/8 the cost (strong keeps the wide one)
+    parts = ["highpass=f=85", "adeclick=w=55:o=75" if level == "strong" else "adeclick=w=20:o=50"]
     if RNNOISE.exists() and level in ("normal", "strong"):
         model = str(RNNOISE).replace("\\", "/").replace(":", "\\:")
         parts.append(f"arnndn=m='{model}':mix={0.8 if level == 'normal' else 1.0}")
@@ -119,6 +120,7 @@ def build_cut_graph(edl, tl, fps, scr, cam, look):
     cam_cfg = edl.get("camera", {})
     n = len(tl.segments)
     off = float(inp.get("camera_offset") or 0.0)
+    parts = {}
     g = []
 
     # screen (an inline webcam baked into it is graded later, in compose)
@@ -126,6 +128,7 @@ def build_cut_graph(edl, tl, fps, scr, cam, look):
     for i, (a, b, sp) in enumerate(tl.segments):
         g.append(f"[s{i}]trim=start={a:.4f}:end={b:.4f},setpts=(PTS-STARTPTS)/{sp}[v{i}]")
     g.append("".join(f"[v{i}]" for i in range(n)) + f"concat=n={n}:v=1:a=0,fps={fps}[vout]")
+    parts["screen"], g = g, []
 
     # camera: align to the screen clock, denoise, cut identically
     if cam:
@@ -139,6 +142,7 @@ def build_cut_graph(edl, tl, fps, scr, cam, look):
         for i, (a, b, sp) in enumerate(tl.segments):
             g.append(f"[c{i}]trim=start={a:.4f}:end={b:.4f},setpts=(PTS-STARTPTS)/{sp}[cv{i}]")
         g.append("".join(f"[cv{i}]" for i in range(n)) + f"concat=n={n}:v=1:a=0,fps={fps}[cout]")
+        parts["camera"], g = g, []
 
     # audio: choose the mic track, cut with 6ms fades (no clicks), master
     src = inp.get("audio", "screen")
@@ -154,37 +158,35 @@ def build_cut_graph(edl, tl, fps, scr, cam, look):
             g.append(f"[a{i}]atrim=start={a:.4f}:end={b:.4f},asetpts=PTS-STARTPTS{tempo},"
                      f"afade=t=in:d=0.006,afade=t=out:st={max(0, d - 0.006):.4f}:d=0.006[A{i}]")
         g.append("".join(f"[A{i}]" for i in range(n)) + f"concat=n={n}:v=0:a=1,{voice_chain(edl.get('voice', {}))}[aout]")
-    return ";\n".join(g), bool(a_in)
+        parts["audio"] = g
+    return {k: ";\n".join(v) for k, v in parts.items()}, bool(a_in)
 
 
 def pass1(edl, tl, fps, rdir, look, force):
+    """Cut + clean + master the voice. (Video is no longer cut here: pass 2 reads the
+    ingested screen/camera directly and jumps over the cuts, which saved re-encoding
+    both streams on every render.)"""
     inp = edl["inputs"]
     scr = probe(inp["screen"])
     cam = probe(inp["camera"]) if inp.get("camera") else None
-    graph, has_audio = build_cut_graph(edl, tl, fps, scr, cam, look)
-    # the graph text encodes every cut/denoise/voice setting, so it is the cache key
-    key = hashlib.sha1(json.dumps([inp, graph], sort_keys=True, default=str).encode()).hexdigest()
+    parts, has_audio = build_cut_graph(edl, tl, fps, scr, cam, look)
+    audio_graph = parts.get("audio", "")
+    key = hashlib.sha1(json.dumps([inp, audio_graph], sort_keys=True, default=str).encode()).hexdigest()
     stamp = rdir / "cut.key"
-    outs = {"screen": rdir / "screen_cut.mp4", "camera": rdir / "camera_cut.mp4" if cam else None, "audio": rdir / "audio_cut.wav"}
-    if not force and stamp.exists() and stamp.read_text() == key and all(p.exists() for p in outs.values() if p):
-        print("pass 1: cached (cuts/denoise/audio unchanged)")
+    outs = {"audio": rdir / "audio_cut.wav"}
+    if not force and stamp.exists() and stamp.read_text() == key and outs["audio"].exists():
+        print("pass 1: cached (cuts/voice unchanged)")
         return outs
-    (rdir / "cut_graph.txt").write_text(graph)
-    venc = ["-c:v", "libx264", "-preset", "veryfast", "-crf", "13", "-g", str(int(fps)), "-pix_fmt", "yuv420p"]
-    cmd = [FFMPEG, "-y", "-v", "error", "-stats", "-stats_period", "15", "-i", inp["screen"]]
-    if cam:
-        cmd += ["-i", inp["camera"]]
-    ver = run([FFMPEG, "-hide_banner", "-version"]).stdout.split()[2]
-    graph_opt = "-filter_complex_script" if ver[:1].isdigit() and int(ver.split(".")[0]) < 7 else "-/filter_complex"
-    cmd += [graph_opt, str(rdir / "cut_graph.txt"), "-map", "[vout]", *venc, str(outs["screen"])]
-    if cam:
-        cmd += ["-map", "[cout]", *venc, str(outs["camera"])]
-    if has_audio:
-        cmd += ["-map", "[aout]", "-c:a", "pcm_s16le", str(outs["audio"])]
-    print(f"pass 1: cutting {len(tl.segments)} segments, grading camera, mastering audio...", flush=True)
     t0 = time.time()
-    subprocess.run(cmd, check=True)
-    if not has_audio:
+    if has_audio:
+        ver = run([FFMPEG, "-hide_banner", "-version"]).stdout.split()[2]
+        graph_opt = "-filter_complex_script" if ver[:1].isdigit() and int(ver.split(".")[0]) < 7 else "-/filter_complex"
+        gf = rdir / "cut_graph_audio.txt"
+        gf.write_text(audio_graph)
+        print(f"pass 1: cutting {len(tl.segments)} segments, mastering the voice...", flush=True)
+        run([FFMPEG, "-y", "-v", "error", "-i", inp["screen"], *(["-i", inp["camera"]] if cam else []),
+             graph_opt, str(gf), "-map", "[aout]", "-c:a", "pcm_s16le", str(outs["audio"])])
+    else:
         run([FFMPEG, "-y", "-v", "error", "-f", "lavfi", "-i", "anullsrc=r=48000:cl=stereo", "-t", f"{tl.duration:.3f}", str(outs["audio"])])
     stamp.write_text(key)
     (rdir / "audio_gain.txt").unlink(missing_ok=True)
@@ -231,6 +233,85 @@ class Reader:
 
     def close(self):
         self.p.kill()
+
+
+class SourceReader:
+    """Frames of a source file addressed by *screen-clock frame index*, so pass 2 can read
+    the ingested media directly: it decodes forward, steps through speed-ups, and re-seeks
+    when a cut jumps ahead (or back). camera_time = screen_time + offset; before the start
+    or past the end it repeats the first/last frame (like tpad clone)."""
+
+    JUMP = 3.0  # seconds: beyond this, seeking is cheaper than decoding through
+
+    def __init__(self, path, fps, out_w, out_h, vf="", offset=0.0):
+        info = probe(path)
+        self.path, self.fps, self.vf = str(path), fps, vf
+        self.w, self.h = out_w, out_h
+        self.size = out_w * out_h * 3
+        self.off = int(round(offset * fps))
+        self.n = max(1, int(info["duration"] * fps))
+        self.p, self.next = None, 0
+        self.last = np.zeros((out_h, out_w, 3), np.uint8)
+
+    def _open(self, k):
+        self.close()
+        vf = f"{self.vf}fps={self.fps},scale={self.w}:{self.h}:flags=lanczos"
+        # seek half a frame early so "-ss" rounding never lands just past frame k
+        self.p = subprocess.Popen([FFMPEG, "-v", "error", "-ss", f"{max(0.0, (k - 0.5) / self.fps):.4f}", "-i", self.path,
+                                   "-an", "-vf", vf, "-f", "rawvideo", "-pix_fmt", "bgr24", "-"],
+                                  stdout=subprocess.PIPE, bufsize=10 ** 8)
+        self.next = k
+
+    def get(self, k):
+        k = min(max(0, k + self.off), self.n - 1)
+        if self.p is None or k < self.next - 1 or k > self.next + self.JUMP * self.fps:
+            if self.p is not None and k == self.next - 1:
+                return self.last
+            self._open(k)
+        while self.next <= k:
+            buf = self.p.stdout.read(self.size)
+            if len(buf) == self.size:
+                self.last = np.frombuffer(buf, np.uint8).reshape(self.h, self.w, 3)
+            self.next += 1
+        return self.last
+
+    def close(self):
+        if self.p is not None:
+            self.p.kill()
+            self.p.wait()
+            self.p = None
+
+
+def src_frame(tl, j):
+    """Screen-clock source frame index shown at output frame j (None past the end)."""
+    fps = tl.fps
+    for (a, b, sp), off in zip(tl.segments, tl.offsets):
+        n = int(round((b - a) * fps)) // sp
+        o = int(round(off * fps))
+        if j < o + n:
+            return int(round(a * fps)) + (max(0, j - o)) * sp
+    return None
+
+
+def source_readers(edl, tl, fps, look, scr_w, cam_w=None):
+    """(screen reader, camera reader or None) on the ingested media."""
+    inp = edl["inputs"]
+    scr = probe(inp["screen"])["video"]
+    sw = min(scr["width"], scr_w)
+    sr = SourceReader(inp["screen"], fps, sw, int(round(scr["height"] * sw / scr["width"] / 2)) * 2)
+    cr = None
+    if inp.get("camera"):
+        cinfo = probe(inp["camera"])
+        cv = cinfo["video"]
+        cam_cfg = edl.get("camera", {})
+        ch = min(CAM_H, cv["height"])
+        cw = int(round(cv["width"] * ch / cv["height"] / 2)) * 2
+        if cam_w:
+            ch, cw = int(round(ch * cam_w / cw / 2)) * 2, cam_w
+        grade = grade_params(cam_cfg.get("grade", "auto"), look, cam_cfg.get("source", "phone"))
+        vf = hdr_to_sdr(cinfo) + ("hflip," if cam_cfg.get("mirror") else "") + denoise_filter(grade)
+        cr = SourceReader(inp["camera"], fps, cw, ch, vf=vf, offset=float(inp.get("camera_offset") or 0.0))
+    return sr, cr
 
 
 class Editor:
@@ -373,10 +454,16 @@ class Editor:
         sx, sy, sw, sh = g["screen"]
         cx, cy, cw, ch = g["cam"]
         cam_alpha = g["cam_alpha"] if self.has_cam else 0
-        canvas = self.background_with_shadows(g["screen"], g["cam"], cam_alpha, g["radius"]).copy()
+        # a full Insert that is all the way in replaces the whole canvas (draw_insert returns
+        # its own frame), so building the screen underneath would be thrown away
+        opaque_insert = ins is not None and ins["mode"] == "full" and pin >= 1 and pout <= 0
+        if opaque_insert:
+            canvas = np.zeros((H, W, 3), np.uint8)
+        else:
+            canvas = self.background_with_shadows(g["screen"], g["cam"], cam_alpha, g["radius"]).copy()
 
         # screen with zoom
-        covered = cam_alpha > 0.99 and cw >= W - 1 and ch >= H - 1
+        covered = opaque_insert or (cam_alpha > 0.99 and cw >= W - 1 and ch >= H - 1)
         z = self.zoom.at(t)
         if not covered:
             sh_, sw_ = scr.shape[:2]
@@ -432,9 +519,19 @@ class Editor:
             if p < 1.0:
                 crop_prev = C.cam_crop(cam.shape, asp, self.look, prev_g["cam_frame"])
                 crop = C.lerp(crop_prev, crop, p)
-            img = C.warp_crop(cam, crop, int(round(cw)), int(round(ch)))
-            if self.grade:
-                img = self.grade.apply(img)
+            ow, oh = int(round(cw)), int(round(ch))
+            if self.grade and crop[2] * crop[3] < ow * oh:
+                # upscaling (full-frame / side camera): grade the source pixels first;
+                # the grade is per pixel, so this is the same picture at a fraction of the cost
+                x0, y0 = max(0, int(crop[0])), max(0, int(crop[1]))
+                x1 = min(cam.shape[1], int(math.ceil(crop[0] + crop[2])) + 1)
+                y1 = min(cam.shape[0], int(math.ceil(crop[1] + crop[3])) + 1)
+                src = self.grade.apply(cam[y0:y1, x0:x1])
+                img = C.warp_crop(src, (crop[0] - x0, crop[1] - y0, crop[2], crop[3]), ow, oh)
+            else:
+                img = C.warp_crop(cam, crop, ow, oh)
+                if self.grade:
+                    img = self.grade.apply(img)
             r = g["radius"]
             ring = max(2, int(H / 270)) if r > 0 and cw < W * 0.9 else 0
             if ring:
@@ -544,13 +641,16 @@ class Editor:
             return canvas
         if ins["mode"] == "full":
             body = img[..., :3] if img.shape[2] == 4 else img
-            if body.shape[:2] != canvas.shape[:2]:
+            Hc, Wc = canvas.shape[:2]
+            if body.shape[:2] != (Hc, Wc):
                 # Insert laid out above the caption band: extend its own background down
-                full = np.empty_like(canvas)
-                full[:] = body[2, 2]
-                full[y:y + body.shape[0], x:x + body.shape[1]] = body[: canvas.shape[0] - y, : canvas.shape[1] - x]
+                # (one copyMakeBorder pass instead of fill + paste + copy)
+                body = np.ascontiguousarray(body[: Hc - y, : Wc - x])
+                bg = tuple(int(v) for v in body[2, 2])
+                full = cv2.copyMakeBorder(body, y, Hc - y - body.shape[0], x, Wc - x - body.shape[1],
+                                          cv2.BORDER_CONSTANT, value=bg)
             else:
-                full = body
+                full = np.ascontiguousarray(body)
             if pin < 1:
                 prev = ins.get("prev_adj")
                 if prev is not None:  # wipe from the previous Insert's last frame
@@ -558,7 +658,7 @@ class Editor:
                 return FX.transition(canvas, full, pin, ins["tkind"], self.trans_colors)
             if pout > 0:
                 return FX.transition(full, canvas, pout, ins["tkind"], self.trans_colors)
-            return full.copy()
+            return full  # freshly decoded (or built) for this frame: safe to hand over without a copy
         alpha = C.ease(pin) * (1 - C.ease(pout))
         if ins["mode"] == "split":
             body = img[..., :3] if img.shape[2] == 4 else img
@@ -626,8 +726,33 @@ def _worker_init():
     cv2.setNumThreads(1)  # one process per core already; nested OpenCV threads just thrash
 
 
-def _compose(t, scr, cam):
-    return _EDITOR.frame(t, scr, cam).tobytes()
+def _render_chunk(job):
+    """Composite + encode frames [j0, j1) to job['out']. Runs in a forked worker (uses _EDITOR)."""
+    cv2.setNumThreads(1)
+    fps, j0, j1 = job["fps"], job["j0"], job["j1"]
+    t_start = job["t0_out"] + j0 / fps
+    enc = [FFMPEG, "-y", "-v", "error", "-f", "rawvideo", "-pix_fmt", "bgr24", "-s", f"{job['W']}x{job['H']}",
+           "-r", str(fps), "-i", "-", "-vf", ass_filter(job["ass"], t_start), "-frames:v", str(j1 - j0),
+           *job["venc"], "-threads", "2", job["out"]]
+    encp = subprocess.Popen(enc, stdin=subprocess.PIPE)
+    sr, cr = source_readers(_EDITOR.edl, _EDITOR.tl, fps, job["look"], job["scr_w"], job["cam_w"])
+    blank = np.zeros((CAM_H, 1280, 3), np.uint8)
+    tl = _EDITOR.tl
+    final_k = int(round(tl.segments[-1][1] * fps)) - 1 if tl.segments else 0
+    try:
+        for j in range(j0, j1):
+            t = job["t0_out"] + j / fps
+            k = src_frame(tl, int(round(t * fps)))
+            k = final_k if k is None else k  # outro: hold the last kept frame
+            encp.stdin.write(_EDITOR.frame(t, sr.get(k), cr.get(k) if cr else blank).tobytes())
+    finally:
+        encp.stdin.close()
+        encp.wait()
+        sr.close()
+        cr and cr.close()
+    if encp.returncode:
+        raise RuntimeError(f"chunk {job['idx']}: encoder failed")
+    return j1 - j0
 
 
 def ass_filter(path, shift=0.0, scale=None):
@@ -693,7 +818,8 @@ def main(argv=None):
     ap.add_argument("--range", type=float, nargs=2, metavar=("SRC_START", "SRC_END"))
     ap.add_argument("--still", type=float, nargs="+", metavar="SRC_T")
     ap.add_argument("--force-cut", action="store_true")
-    ap.add_argument("--workers", type=int, default=4, help="compositor processes (1 = no parallelism)")
+    ap.add_argument("--hq", action="store_true", help="slower x264 preset (old default); same look, slightly cleaner")
+    ap.add_argument("--workers", type=int, default=0, help="compositor processes (0 = one per core, 1 = no parallelism)")
     args = ap.parse_args(argv)
 
     edl_path = Path(args.edl).resolve()
@@ -713,8 +839,24 @@ def main(argv=None):
         words = [w for s in load_json(work / "transcript.json")["segments"] for w in s["words"]]
 
     print(f"timeline: {len(tl.segments)} segments, {scr_info['duration']:.1f}s raw -> {tl.duration:.1f}s (+outro)")
-    cut = pass1(edl, tl, fps, rdir, look, args.force_cut)
-    has_cam = bool(cut["camera"])
+    # the voice master (pass 1) is only needed for the final mux: run it alongside the video
+    import threading
+    cut, p1_err = {}, []
+
+    def _p1():
+        try:
+            cut.update(pass1(edl, tl, fps, rdir, look, args.force_cut))
+        except BaseException as e:  # noqa: BLE001
+            p1_err.append(e)
+    p1 = threading.Thread(target=_p1)
+    p1.start()
+
+    def audio_ready():
+        p1.join()
+        if p1_err:
+            raise p1_err[0]
+        return cut
+    has_cam = bool(edl["inputs"].get("camera"))
 
     preview = args.preview or args.range is not None
     W, H = (1920, 1080) if fmt == "landscape" else (1080, 1920)
@@ -722,16 +864,19 @@ def main(argv=None):
         W, H = W // 2, H // 2
     if args.still:
         W, H = W * 2, H * 2  # stills at full res for crisp review
-    ed = Editor(edl, tl, W, H, fmt, look, has_cam, probe(cut["screen"])["video"], work=work)
+    ed = Editor(edl, tl, W, H, fmt, look, has_cam, scr_info["video"], work=work)
     ass = rdir / f"text_{W}x{H}.ass"
     ed.write_ass(ass, words)
-    scr_w = min(probe(cut["screen"])["video"]["width"], MAX_SCREEN_W if not preview else 1600)
+    scr_w = min(scr_info["video"]["width"], MAX_SCREEN_W if not preview else 1600)
 
     if args.still:
         for st in args.still:
             t = tl.to_out(st)
-            sr, cr = Reader(cut["screen"], t, scr_w), (Reader(cut["camera"], t) if has_cam else None)
-            img = ed.frame(t, sr.read(), cr.read() if cr else np.zeros((CAM_H, 1280, 3), np.uint8))
+            j = int(round(t * fps))
+            sr, cr = source_readers(edl, tl, fps, look, scr_w)
+            k = src_frame(tl, j)
+            k = int(round(st * fps)) if k is None else k
+            img = ed.frame(t, sr.get(k), cr.get(k) if cr else np.zeros((CAM_H, 1280, 3), np.uint8))
             sr.close(); cr and cr.close()
             raw = rdir / f"still_raw_{st:.2f}.png"
             out = work / "stills" / f"still_{st:08.2f}.png"
@@ -740,6 +885,7 @@ def main(argv=None):
             run([FFMPEG, "-y", "-v", "error", "-i", str(raw), "-vf", ass_filter(ass, t), "-frames:v", "1", str(out)])
             raw.unlink()
             print(out)
+        audio_ready()
         return
 
     t0_out, t1_out = 0.0, ed.total
@@ -751,52 +897,60 @@ def main(argv=None):
         final = final.with_name(final.stem + ("_preview" if not args.range else f"_{args.range[0]:.0f}-{args.range[1]:.0f}") + final.suffix)
     final.parent.mkdir(parents=True, exist_ok=True)
     fade_out = max(0.0, t1_out - t0_out - 0.6)
-    audio_in, afilter = sound_design(edl, tl, ed, work, rdir, t0_out, fade_out, loudness_gain(rdir, cut["audio"]), cut["audio"])
-    enc = [FFMPEG, "-y", "-v", "error", "-f", "rawvideo", "-pix_fmt", "bgr24", "-s", f"{W}x{H}", "-r", str(fps), "-i", "-",
-           *audio_in,
-           "-vf", ass_filter(ass, t0_out), "-filter_complex", afilter,
-           "-map", "0:v", "-map", "[aout]", "-t", f"{t1_out - t0_out:.3f}",
-           "-c:v", "libx264", "-preset", "veryfast" if preview else "faster", "-crf", "24" if preview else "17",
-           "-profile:v", "high", "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", str(final)]
-    encp = subprocess.Popen(enc, stdin=subprocess.PIPE)
-    sr = Reader(cut["screen"], t0_out, scr_w)
-    cr = Reader(cut["camera"], t0_out, None if not preview else 640) if has_cam else None
-    blank = np.zeros((CAM_H, 1280, 3), np.uint8)
-    print(f"pass 2: compositing {n_frames} frames at {W}x{H} -> {final}", flush=True)
+    if preview:
+        venc = ["-c:v", "libx264", "-preset", "veryfast", "-crf", "24"]
+    elif args.hq:
+        venc = ["-c:v", "libx264", "-preset", "faster", "-crf", "17"]
+    else:
+        # x264 was ~3/4 of pass 2's CPU at "faster" (126 ms/frame at 1080p). superfast with
+        # mbtree back on is ~3x cheaper at the same size, SSIM 0.997 vs the old setting:
+        # no visible difference, and YouTube/LinkedIn re-encode the upload anyway.
+        venc = ["-c:v", "libx264", "-preset", "superfast", "-x264-params", "mbtree=1:rc-lookahead=10", "-crf", "18"]
+    venc += ["-profile:v", "high", "-pix_fmt", "yuv420p"]
+    ncpu = os.cpu_count() or 2
+    workers = max(1, min(args.workers or max(1, ncpu // 2), ncpu))
+    # Split the timeline into chunks; each worker decodes, composites and encodes its own
+    # chunk end to end (no raw frames through the parent: ~18 MB/frame of pipe traffic was
+    # the old bottleneck), then the chunks are joined without re-encoding. More chunks than
+    # workers balances heavy (Insert) and light stretches. Never split inside the outro: its
+    # frames are built from the last real frame, which a chunk starting past the cut can't read.
+    n_chunks = max(1, min(workers * 3, n_frames // (fps * 4)))
+    last_split = max(1, min(n_frames, int((min(t1_out, tl.duration - 1.0) - t0_out) * fps)))
+    bounds = sorted({0, n_frames, *(min(last_split, round(k * n_frames / n_chunks)) for k in range(1, n_chunks))})
+    chunks = [(i, bounds[i], bounds[i + 1]) for i in range(len(bounds) - 1) if bounds[i + 1] > bounds[i]]
+    cdir = rdir / "chunks"
+    cdir.mkdir(exist_ok=True)
+    for f in cdir.glob("*.mp4"):
+        f.unlink()
+    jobs = [dict(idx=i, j0=j0, j1=j1, t0_out=t0_out, fps=fps, W=W, H=H, ass=str(ass), venc=venc,
+                 scr_w=scr_w, cam_w=None if not preview else 640, look=look, out=str(cdir / f"c{i:04d}.mp4")) for i, j0, j1 in chunks]
+    print(f"pass 2: compositing {n_frames} frames at {W}x{H} in {len(jobs)} chunks on {workers} workers -> {final}", flush=True)
     t0 = time.time()
-    # frames are independent: composite them on several cores, keep at most
-    # `depth` in flight so memory stays flat, write them back in order
     global _EDITOR
     _EDITOR = ed
-    workers = max(1, min(args.workers, (os.cpu_count() or 2) - 1))
-    depth = workers * 3
-    pool = mp.get_context("fork").Pool(workers, _worker_init) if workers > 1 else None
-    pending = collections.deque()
-
-    def emit(res):
-        encp.stdin.write(res.get() if pool else res)
-
-    try:
-        for i in range(n_frames):
-            t = t0_out + i / fps
-            job = (t, sr.read(), cr.read() if cr else blank)
-            pending.append(pool.apply_async(_compose, job) if pool else _compose(*job))
-            if len(pending) >= depth:
-                emit(pending.popleft())
-            if i and i % (fps * 10) == 0:
+    done_frames = 0
+    if workers > 1 and len(jobs) > 1:
+        with mp.get_context("fork").Pool(workers, _worker_init) as pool:
+            for n in pool.imap_unordered(_render_chunk, jobs):
+                done_frames += n
                 el = time.time() - t0
-                print(f"  {t:7.1f}s / {t1_out:.1f}s   {i / el:5.1f} fps   eta {el / i * (n_frames - i):5.0f}s", flush=True)
-        while pending:
-            emit(pending.popleft())
-    finally:
-        if pool:
-            pool.terminate()
-        encp.stdin.close()
-        encp.wait()
-        sr.close()
-        cr and cr.close()
-    if encp.returncode:
+                print(f"  {done_frames:6d}/{n_frames} frames   {done_frames / el:5.1f} fps   "
+                      f"eta {el / done_frames * (n_frames - done_frames):5.0f}s", flush=True)
+    else:
+        for j in jobs:
+            _render_chunk(j)
+    audio_ready()
+    audio_in, afilter = sound_design(edl, tl, ed, work, rdir, t0_out, fade_out, loudness_gain(rdir, cut["audio"]), cut["audio"])
+    # join the chunks (stream copy) and lay the mixed sound under them
+    lst = cdir / "list.txt"
+    lst.write_text("".join(f"file '{j['out']}'\n" for j in jobs))
+    mux = [FFMPEG, "-y", "-v", "error", "-f", "concat", "-safe", "0", "-i", str(lst), *audio_in,
+           "-filter_complex", afilter, "-map", "0:v", "-map", "[aout]", "-t", f"{t1_out - t0_out:.3f}",
+           "-c:v", "copy", "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", str(final)]
+    if subprocess.run(mux).returncode:
         sys.exit("encoder failed")
+    for j in jobs:
+        Path(j["out"]).unlink(missing_ok=True)
     print(f"done in {time.time() - t0:.0f}s -> {final}")
 
 

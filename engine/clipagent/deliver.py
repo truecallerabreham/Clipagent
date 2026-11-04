@@ -44,16 +44,22 @@ def _src_end(ref, words):
     return words[ref]["e"]
 
 
-def write_srt(words_list, tl: Timeline, path: Path, per=7):
+def write_srt(words_list, tl: Timeline, path: Path, per=7, edl=None):
     from .overlays import apply_caption_edits, apply_glossary
     lines, cur, n = [], [], 0
     mapped = []
+    if edl:  # same fixes as the burned-in captions
+        words_list = apply_glossary(apply_caption_edits(words_list, edl.get("caption_edits", [])), edl.get("glossary", {}))
     for w in words_list:
         if w.get("filler"):
             continue
+        mid = (w["s"] + w["e"]) / 2
+        if not any(a <= mid <= b for a, b, _ in tl.segments):
+            continue  # cut away
         s, e = tl.to_out(w["s"], "next"), tl.to_out(w["e"], "prev")
-        if e - s > 0.02:
-            mapped.append((s, e, w["w"].strip()))
+        if e - s <= 0.02:  # Whisper sometimes gives a kept word zero length: keep it
+            e = s + 0.08
+        mapped.append((s, e, w["w"].strip()))
     chunks = []
     for m in mapped:
         if cur and (len(cur) >= per or m[0] - cur[-1][1] > 0.7 or re.search(r"[.!?]$", cur[-1][2])):
@@ -75,14 +81,32 @@ def make_short(final: Path, a: float, b: float, title: str, out: Path):
     font = str(FONT_DIR / "Inter-ExtraBold.ttf").replace(":", "\\:")
     safe = title.replace("\\", "").replace("'", "’").replace(":", "\\:")
     vf = ("[0:v]split=2[bg][fg];"
-          "[bg]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,boxblur=28:2,eq=brightness=-0.18[bgb];"
+          # blur the fill at quarter size, then scale up: same look, ~4x cheaper than at 1080x1920
+          "[bg]scale=270:480:force_original_aspect_ratio=increase,crop=270:480,boxblur=7:2,"
+          "scale=1080:1920:flags=bilinear,eq=brightness=-0.18[bgb];"
           "[fg]scale=1080:-2[fgs];"
           "[bgb][fgs]overlay=(W-w)/2:(H-h)/2-80,"
           f"drawtext=fontfile='{font}':text='{safe}':fontcolor=white:fontsize=64:x=(w-text_w)/2:y=300:"
           "box=1:boxcolor=black@0.55:boxborderw=28[v]")
     run([FFMPEG, "-y", "-v", "error", "-ss", f"{a:.3f}", "-t", f"{b - a:.3f}", "-i", str(final),
-         "-filter_complex", vf, "-map", "[v]", "-map", "0:a?", "-c:v", "libx264", "-crf", "19", "-preset", "faster",
+         "-filter_complex", vf, "-map", "[v]", "-map", "0:a?", "-c:v", "libx264", "-crf", "19", "-preset", "superfast", "-x264-params", "mbtree=1:rc-lookahead=10",
          "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", str(out)])
+
+
+def _thumb_accent(style: dict) -> str:
+    """The headline's accent sits on a darkened frame: a near-black Look accent
+    (stickman-story is #111111) would vanish, so fall back to the caption highlight."""
+    def lum(h):
+        h = h.lstrip("#")
+        r, g, b = (int(h[i:i + 2], 16) for i in (0, 2, 4))
+        return 0.2126 * r + 0.7152 * g + 0.0722 * b
+    for c in (style.get("accent"), (style.get("captions") or {}).get("highlight"), "#FFE066"):
+        try:
+            if c and lum(c) >= 110:
+                return c
+        except ValueError:
+            continue
+    return "#FFE066"
 
 
 def make_thumbnail(final: Path, t: float, text: str, accent: str, out: Path):
@@ -134,11 +158,11 @@ def deliver(session, edl_path: Path) -> dict:
     tl = Timeline(edl["segments"], edl["output"].get("fps", 30), src_dur)
     res = {"final": str(final), "duration": probe(final)["duration"]}
 
-    res["captions"] = write_srt(all_words, tl, out / "captions.srt")
+    res["captions"] = write_srt(all_words, tl, out / "captions.srt", edl=edl)
     chap = ["0:00 Intro"] + [f"{ts_yt(tl.to_out(c['at']))} {c['text']}" for c in edl.get("chapters", []) if tl.to_out(c["at"]) > 5]
     (out / "chapters.txt").write_text("\n".join(chap) + "\n")
 
-    shorts = []
+    shorts, short_jobs = [], []
     for i, sh in enumerate(edl.get("shorts", []), 1):
         try:
             a, b = tl.to_out(_src(sh["start"], words), "next"), tl.to_out(_src_end(sh["end"], words), "prev")
@@ -149,14 +173,19 @@ def deliver(session, edl_path: Path) -> dict:
             continue
         p = out / "shorts" / f"short_{i:02d}_{re.sub(r'[^a-z0-9]+', '-', sh.get('title', 'clip').lower()).strip('-')[:30]}.mp4"
         print(f"short {i}: {b - a:.1f}s -> {p.name}", flush=True)
-        make_short(final, a, b, sh.get("title", ""), p)
+        short_jobs.append((final, a, b, sh.get("title", ""), p))
         shorts.append(str(p))
+    if short_jobs:  # independent encodes: run them side by side
+        from concurrent.futures import ThreadPoolExecutor
+        with ThreadPoolExecutor(len(short_jobs)) as ex:
+            for f in [ex.submit(make_short, *j) for j in short_jobs]:
+                f.result()
     res["shorts"] = shorts
 
     th = edl.get("thumbnail") or {}
     t = tl.to_out(_src(th["at"], words)) if th.get("at") is not None else res["duration"] * 0.3
     title = th.get("text") or (edl.get("titles") or [{}])[0].get("text") or session.meta().get("title") or "Watch this"
-    if make_thumbnail(final, t, title, edl.get("style", {}).get("accent", "#D97757"), out / "thumbnail.png"):
+    if make_thumbnail(final, t, title, _thumb_accent(edl.get("style", {})), out / "thumbnail.png"):
         res["thumbnail"] = str(out / "thumbnail.png")
 
     pub = edl.get("publish") or {}

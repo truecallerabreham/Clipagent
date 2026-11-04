@@ -5,7 +5,7 @@ and exposes ``window.clipagent = {ready, duration, seek(t)}``; ``seek`` is a pur
 This module serves the Look folder and the spec over a tiny localhost HTTP server (fetch() is
 blocked on file:// URLs), opens the player at ``spec.size`` with deviceScaleFactor 1, waits for
 ``ready``, then for each frame i calls ``seek(i / fps)`` and screenshots ``out_dir/{i+1:05d}.png``
-(1-based, 5 digits). Work is split across ``workers`` pages by contiguous frame ranges.
+(1-based, 5 digits). Work is split across ``workers`` browser processes by contiguous frame ranges.
 
 CLI::
 
@@ -197,6 +197,8 @@ def _chunks(n: int, k: int) -> list[range]:
 
 
 async def _render_async(spec: dict, url: str, jobs: list[tuple[float, Path]], workers: int) -> None:
+    import base64
+
     from playwright.async_api import async_playwright
 
     w, h = (int(v) for v in spec["size"])
@@ -215,9 +217,16 @@ async def _render_async(spec: dict, url: str, jobs: list[tuple[float, Path]], wo
                     await page.evaluate(_READY_JS)
                 except Exception as e:  # noqa: BLE001
                     raise _ready_error(e, logs) from e
+                # raw DevTools capture with optimizeForSpeed: ~2x quicker than page.screenshot()
+                # (lighter PNG compression, no extra round trips); same pixels
+                cdp = await page.context.new_cdp_session(page)
+                if transparent:
+                    await cdp.send("Emulation.setDefaultBackgroundColorOverride", {"color": {"r": 0, "g": 0, "b": 0, "a": 0}})
+                shot = {"format": "png", "optimizeForSpeed": True, "captureBeyondViewport": False}
                 for t, path in part:
                     await page.evaluate("t => window.clipagent.seek(t)", t)
-                    await page.screenshot(path=str(path), type="png", omit_background=transparent, animations="allow")
+                    res = await cdp.send("Page.captureScreenshot", shot)
+                    Path(path).write_bytes(base64.b64decode(res["data"]))
                 await page.close()
 
             parts = [[jobs[i] for i in r] for r in _chunks(len(jobs), workers)]
@@ -226,18 +235,41 @@ async def _render_async(spec: dict, url: str, jobs: list[tuple[float, Path]], wo
             await browser.close()
 
 
-def render_insert(spec_path: Path, out_dir: Path, workers: int = 2) -> Path:
+def _render_part(spec: dict, url: str, jobs: list[tuple[float, str]]) -> int:
+    """One browser process rendering a contiguous frame range (runs in a child process)."""
+    asyncio.run(_render_async(spec, url, [(t, Path(p)) for t, p in jobs], 1))
+    return len(jobs)
+
+
+def auto_workers(n_frames: int) -> int:
+    """Browser processes for n frames. Pages inside one Chromium share its compositor and
+    barely parallelize; separate processes do. ~half the cores, and >= 60 frames each so
+    the ~1-2 s browser start-up stays small."""
+    return max(1, min((os.cpu_count() or 2) // 2, n_frames // 60))
+
+
+def render_insert(spec_path: Path, out_dir: Path, workers: int = 0) -> Path:
     """Render every frame of an HTML Insert to ``out_dir/00001.png`` ... (frame i is at t=(i-1)/fps).
 
-    Returns out_dir."""
+    ``workers`` is the number of browser processes (0 = auto). Returns out_dir."""
+    from concurrent.futures import ProcessPoolExecutor
+    import multiprocessing as mp
+
     spec_path, out_dir = Path(spec_path), Path(out_dir)
     spec = load_spec(spec_path)
     out_dir.mkdir(parents=True, exist_ok=True)
     fps = float(spec["fps"])
     n = frame_count(spec)
-    jobs = [(i / fps, out_dir / f"{i + 1:05d}.png") for i in range(n)]
+    jobs = [(i / fps, str(out_dir / f"{i + 1:05d}.png")) for i in range(n)]
+    k = workers or auto_workers(n)
     with _serve(spec_path) as url:
-        asyncio.run(_render_async(spec, url, jobs, workers))
+        if k <= 1:
+            asyncio.run(_render_async(spec, url, [(t, Path(p)) for t, p in jobs], 1))
+        else:
+            parts = [[jobs[i] for i in r] for r in _chunks(n, k)]
+            with ProcessPoolExecutor(len(parts), mp_context=mp.get_context("spawn")) as ex:
+                for f in [ex.submit(_render_part, spec, url, p) for p in parts]:
+                    f.result()
     return out_dir
 
 
@@ -256,12 +288,12 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="python -m clipagent.inserts.html_render", description="Render an HTML Insert spec to PNG frames.")
     ap.add_argument("spec", type=Path, help="resolved Insert spec (.json)")
     ap.add_argument("out_dir", type=Path, help="output folder for frames (00001.png ...) or stills")
-    ap.add_argument("--workers", type=int, default=2, help="parallel pages (default 2)")
+    ap.add_argument("--workers", type=int, default=0, help="browser processes (0 = auto)")
     ap.add_argument("--still", type=float, nargs="+", metavar="T", help="render only stills at these times (seconds)")
     a = ap.parse_args(argv)
     t0 = time.time()
     if a.still:
-        paths = render_stills(a.spec, a.still, a.out_dir, workers=min(a.workers, len(a.still)))
+        paths = render_stills(a.spec, a.still, a.out_dir, workers=max(1, min(a.workers or 1, len(a.still))))
         for p in paths:
             print(p)
         n = len(paths)

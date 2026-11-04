@@ -74,14 +74,15 @@ ClipAgent does the second and third jobs for you. It knows what you're talking a
 | 🔊 **Broadcast audio** | Neural denoise (RNNoise), EQ, de-ess, compression, -14 LUFS loudness, synthesized sound effects, and an optional music bed that ducks under your voice. |
 | 🔍 **Self-checking** | No human review needed: every Insert is checked for clipped or overlapping text, blank frames and palette drift, and compared with the Look's reference frames. Anything that fails twice is dropped, never shipped. |
 | 📦 **Ready to publish** | The final video, plus 9:16 shorts, a thumbnail, captions (.srt), YouTube chapters, publishing copy (YouTube, LinkedIn, X) and a report. |
+| ⚡ **Fast turnaround** | Your speech is transcribed *while you talk*, the media is converted the moment you stop, and Inserts and the final render run in parallel. A 5-minute take becomes a finished, edited video in about 8 minutes on a 4-core laptop. |
 | 🔒 **Private by design** | Everything runs on your machine with no API keys. Keystrokes are never stored as text, and secrets on screen are hunted and redacted before render. |
 
 ## How it works
 
 ```mermaid
 flowchart LR
-    A["/screen-record<br/>3 quick taps, then talk"] --> B["🎥 Recorder<br/>screen · webcam · mic<br/>clicks · shortcuts"]
-    B -->|stop| C["clipagent prepare<br/>transcribe · analyze · draft cut"]
+    A["/screen-record<br/>3 quick taps, then talk"] --> B["🎥 Recorder<br/>screen · webcam · mic<br/>clicks · shortcuts<br/>(live transcription)"]
+    B -->|stop| C["clipagent prepare<br/>analyze · draft cut"]
     C --> D["🧠 Your coding agent<br/>reads transcript + Context Pack<br/>picks the Look · writes Inserts"]
     D --> E["clipagent inserts<br/>HTML / Manim scenes<br/>Beats → spoken words"]
     E --> F["clipagent qa<br/>self-check · retry ×2"]
@@ -193,7 +194,22 @@ It remembers your answers. **Every later time it's one tap:** *"Record with your
 
 Then just talk. Stop with the floating bar, **Ctrl+Alt+S** (**⌘⌥S** on macOS), or by asking your agent. Say **"cut that"** whenever you want to drop the last sentence.
 
-When you stop, the agent prepares, edits, self-checks and renders everything, then hands you `deliverables/`:
+When you stop, the agent prepares, edits, self-checks and renders everything, then hands you `deliverables/`. Most of the slow work is already done by then: your speech was transcribed while you talked and the media is converted right after the stop.
+
+How long it takes, measured on a 4:53 take (4:12 final video, 6 Inserts, webcam) on a 4-core i5 laptop:
+
+| After you press Stop | Time |
+|---|---|
+| Transcript + converted media ready | 1.5 min |
+| Draft cut (`prepare`) | 12 s |
+| 6 animated Inserts | 2 min |
+| Self-check with stills | 40 s |
+| Final render | 3.2 min |
+| Shorts, thumbnail, captions, copy | 20 s |
+| **Total** | **~8 min** (was ~27 min) |
+
+Add the agent's own editing time (reading the transcript, writing the Inserts); it renders Inserts in the background while it writes the titles and copy.
+
 
 ```text
 ~/ClipAgent/sessions/2026-11-02_231754_auth-walkthrough/deliverables/
@@ -217,14 +233,14 @@ The skill drives this for you, but every step is a plain command:
 | Command | What it does |
 |---|---|
 | `clipagent start [--context ./repo --web]` | Create a Session and start recording (the saved setup fills the flags) |
-| `clipagent stop` · `wait` · `status` | Control the Take |
+| `clipagent stop` · `wait` · `status` | Control the Take (`wait` transcribes live during the recording and converts the media right after the stop) |
 | `clipagent context add ./README.md` | Amend the Context Pack after recording |
 | `clipagent camera phone.mp4` | Use a phone/DSLR file as the camera (synced by audio) |
 | `clipagent import raw.mp4` | Start from an existing recording |
-| `clipagent prepare` | Ingest, transcribe (local Whisper), analyze, draft the cut |
+| `clipagent prepare` | Analyze and draft the cut (ingests and transcribes too, if `wait` didn't already) |
 | `clipagent inserts` | Resolve Beats to words and render every Insert |
 | `clipagent qa --stills` | Self-check: automatic checks plus comparison sheets |
-| `clipagent render` | Composite, grade, denoise, mix and encode |
+| `clipagent render [--hq]` | Composite, grade, denoise, mix and encode, in parallel chunks (`--hq`: slower, marginally cleaner encode) |
 | `clipagent deliver` | Shorts, thumbnail, captions, chapters, copy, report |
 | `clipagent snap <url>` | Screenshot a web page for telestration (web-enabled Sessions) |
 | `clipagent setup` · `prefs` · `link` | Install what's missing (parallel) · the saved setup · add the skill to every agent |

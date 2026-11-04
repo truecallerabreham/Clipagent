@@ -25,15 +25,15 @@ Goal: recording within a minute, with at most three quick taps from the user. No
    - Save the answers: `CA prefs --make tutorial|short|import --camera webcam|none|external --context repo|repo+web|none` (add `--look ID` only if they named a Look). Next time, step 2 is one tap.
 3. **Record:** `CA start`, adding only what the message gave: `--title "<topic>"`, `--context <extra paths or URLs>`, `--look ID`. The saved setup fills in the rest (the current repo, camera, 16:9 or 9:16, web). For "Edit a video I already have": ask for the file path if you don't have it, then `CA import <file> [--camera CAM.mp4]` and continue at section 2.
 4. Tell the user in two lines: recording has started; stop with the floating bar's Stop button, **Ctrl+Alt+S** (⌘⌥S on macOS), or by asking you; **Ctrl+Alt+X** or saying "cut that" throws away the sentence they just said. Then tell them to talk naturally: mistakes get cut.
-5. Run `CA wait` **in the background** so you are told when the Take ends. Don't poll. (The speech model downloads during the recording, so it's ready when they stop.)
+5. Run `CA wait` **in the background** so you are told when the Take ends. Don't poll. It also transcribes the mic *while they talk* (low priority, half the cores) and converts the media right after the stop, so when it returns the slow mechanical work is already done.
 
 The user changes their mind later ("use the web this time", "make it a short")? Pass the flag for this run (`--web`, `--no-web`, `--format vertical`, `--camera none`) and offer to save it with `CA prefs`.
 
-## 2. After stop: prepare (mechanical, takes minutes; run in the background)
+## 2. After stop: prepare (mechanical, ~15 s once `wait` has run)
 
 - If they recorded their face on a phone/DSLR: `CA camera /path/to/file.mp4` first (synced by audio).
 - Context added later ("also use this README"): `CA context add <path|url>`.
-- `CA prepare [--vocab "names, libraries, product terms"]`: ingest, local transcription (Whisper `large-v3-turbo`), analysis (voice SNR, screen activity, camera quality score), and a draft `work/edl.json` with dead air, fillers and Scratch Markers cut and zooms from clicks.
+- `CA prepare`: analysis (voice SNR, screen activity, camera quality score) and a draft `work/edl.json` with dead air, fillers and Scratch Markers cut and zooms from clicks. The transcript (Whisper `large-v3-turbo`) and the converted media normally already exist from `wait`; if not (imports, `wait` not run), it does both, side by side. Misheard names: fix them with `glossary`/`caption_edits`; `--vocab "..." --retranscribe` re-runs Whisper with hints (minutes).
 
 ## 3. The editorial pass (the actual work: take your time)
 
@@ -56,14 +56,14 @@ Then edit `work/edl.json`:
 
 ## 4. Render the Inserts and check your own work
 
-1. `CA inserts` renders every Insert (cached; only changed Inserts re-render). Read the warnings: Beats on cut words, overlaps.
+1. `CA inserts` renders every Insert (cached; only changed Inserts re-render; several browser processes, ~15-30 s per Insert). Start it **in the background** as soon as the Inserts are written and do the text work (titles, chapters, deliverables, copy) meanwhile. Read the warnings: Beats on cut words, overlaps.
 2. `CA qa --stills` runs the automatic checks (clipped/overlapping text, blank frames, palette drift, Inserts over typing, camera rules) and writes `work/qa/<insert>.png` sheets: the Look's reference frame beside three frames of each Insert. **Open and look at every sheet and still.** Ask: does this look like a studio motion-graphics explainer? Is every label readable, aligned, unclipped? Does it say what the speaker says at that moment?
 3. Fix and re-run `CA inserts --only <id>` and `CA qa`. **At most 2 retries per Insert**; if it still fails, delete it from `edl.json` and note it in the report. Never ship a broken Insert.
 4. Composited stills of tricky moments: `CA render --still <source seconds> ...`, then look at them.
 
 ## 5. Render and deliver
 
-- `CA render` (in the background; roughly 1–2× the video length on a laptop, plus Insert frames).
+- `CA render && CA deliver` together, in the background (roughly the video's length on a 4-core laptop; `--hq` for a slower, marginally cleaner encode).
 - `CA deliver`: `deliverables/final.mp4`, `shorts/`, `thumbnail.png`, `captions.srt`, `chapters.txt`, `copy.md`, `report.md`.
 - Look at the thumbnail and one frame of each short.
 

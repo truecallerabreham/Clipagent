@@ -165,7 +165,7 @@ def spec_hash(spec: dict) -> str:
     return h.hexdigest()[:16]
 
 
-def render_all(work: Path, edl: dict, transcript: dict, tl: Timeline, only=None, workers=2, force=False) -> dict:
+def render_all(work: Path, edl: dict, transcript: dict, tl: Timeline, only=None, workers=0, force=False) -> dict:
     """Resolve + render every Insert into work/inserts/<id>/frames/. Returns the manifest."""
     specs, warnings = resolve(edl, transcript, tl)
     root = work / "inserts"
