@@ -13,6 +13,9 @@
   clipagent deliver                                    shorts, thumbnail, captions, chapters, copy, report
   clipagent snap URL [--selector CSS]                  screenshot a web page for a telestration Insert
   clipagent looks                                      list Looks
+  clipagent setup                                      install what's missing, in parallel (instant once done)
+  clipagent prefs [--make --camera --context --look]   show / save the usual setup (start uses it)
+  clipagent link                                       add /screen-record to Claude Code, Codex, OpenCode, Antigravity
   clipagent doctor                                     check the machine
   clipagent install-recorder                           download the recorder app for this OS
 
@@ -35,7 +38,6 @@ from . import session as S
 from .common import FFMPEG, Timeline, load_json, probe, save_json
 
 VERSION = "0.1.0"
-RELEASES = "https://github.com/truecallerabreham/Clipagent/releases/latest/download"
 
 
 def _session(args) -> S.Session:
@@ -52,6 +54,13 @@ def _edl(s: S.Session) -> Path:
 # ---------------------------------------------------------------- recording
 
 def cmd_start(args):
+    from . import setup as SU
+    SU.apply_prefs(args)
+    if not args.no_record and not SU.recorder_ready():
+        SU.wait_for_other_setup()
+        if not SU.recorder_ready():
+            print("installing the recorder (first run only)...", flush=True)
+            SU.install_recorder(quiet=True)
     s = S.Session.create(title=args.title or "", context=args.context_paths, urls=args.context_urls, web=args.web,
                          look=args.look, camera=args.camera, fmt=args.format, root=args.root)
     print(f"session: {s.path}")
@@ -66,6 +75,10 @@ def cmd_start(args):
     else:
         print(f"recording (pid {pid}). Stop with the floating bar, Ctrl+Alt+S, or `clipagent stop`.")
     print("Scratch Marker: Ctrl+Alt+X (or say “cut that”) to drop the last sentence.")
+    items = SU.load_setup().get("items", {})
+    missing = [n for n in ("speech", "browser") if not items.get(n, {}).get("ok")]
+    if missing:   # fetch the speech model (and Chromium) while the user talks, so `prepare` doesn't wait
+        SU.spawn_background(["setup", "--only", *missing], "setup.log")
 
 
 def cmd_stop(args):
@@ -113,6 +126,12 @@ def cmd_camera(args):
 
 
 def cmd_import(args):
+    from . import setup as SU
+    p = SU.load_prefs()
+    args.format = args.format or ("vertical" if p.get("make") == "short" else "landscape")
+    if not args.context and p.get("context", "repo") in ("repo", "repo+web"):
+        args.context_paths = [os.getcwd()]
+    args.web = (args.web or p.get("context") == "repo+web") and not args.no_web
     s = S.Session.create(title=args.title or Path(args.screen).stem, context=args.context_paths, urls=args.context_urls,
                          web=args.web, look=args.look, camera="external" if args.camera else "none", fmt=args.format,
                          root=args.root)
@@ -316,7 +335,7 @@ def cmd_doctor(args):
             b.close()
         say("browser", "ok (headless Chromium for Inserts)")
     except Exception as e:
-        say("browser", f"{str(e)[:120]} -> run: uv run playwright install chromium", False)
+        say("browser", f"{str(e)[:120]} -> run: clipagent setup --only browser", False)
     if platform.system() == "Linux" and os.environ.get("XDG_SESSION_TYPE") == "wayland":
         import glob
         readable = any(os.access(p, os.R_OK) for p in glob.glob("/dev/input/event*"))
@@ -337,67 +356,37 @@ def cmd_doctor(args):
 
 
 def cmd_install_recorder(args):
-    """Download the prebuilt recorder for this OS from GitHub Releases into ~/ClipAgent/bin."""
-    sysname = {"Linux": "linux", "Darwin": "mac", "Windows": "win"}[platform.system()]
-    name = {"linux": "ClipAgent-Recorder-linux-x86_64.AppImage",
-            "mac": "ClipAgent-Recorder-mac-universal.dmg",
-            "win": "ClipAgent-Recorder-win-x64.zip"}[sysname]
-    dest = S.HOME / "bin"
-    dest.mkdir(parents=True, exist_ok=True)
-    url = f"{RELEASES}/{name}"
-    print(f"downloading {url}")
-    tmp = dest / name
-    try:
-        urllib.request.urlretrieve(url, tmp)
-    except Exception as e:  # no release published yet (or offline): build from the checkout instead
-        print(f"download failed ({e}); building the recorder from source instead")
-        return _build_recorder_from_source(dest)
-    if sysname == "linux":
-        target = dest / "clipagent-recorder"
-        tmp.chmod(0o755)
-        tmp.replace(target)
-        if not any(Path(p).exists() for p in ("/usr/lib/x86_64-linux-gnu/libfuse.so.2", "/lib/x86_64-linux-gnu/libfuse.so.2")):
-            print("note: AppImages need libfuse2 (sudo apt install libfuse2), or set APPIMAGE_EXTRACT_AND_RUN=1")
-    elif sysname == "mac":
-        mnt = Path(subprocess.run(["hdiutil", "attach", "-nobrowse", "-readonly", str(tmp)], capture_output=True,
-                                  text=True, check=True).stdout.strip().split("\t")[-1])
-        app = next(mnt.glob("*.app"))
-        shutil.rmtree(dest / app.name, ignore_errors=True)
-        shutil.copytree(app, dest / app.name, symlinks=True)
-        subprocess.run(["hdiutil", "detach", str(mnt)], capture_output=True)
-        tmp.unlink()
-        target = dest / "clipagent-recorder"
-        exe = next((dest / app.name / "Contents" / "MacOS").iterdir())
-        target.write_text(f'#!/bin/sh\nexec "{exe}" "$@"\n')
-        target.chmod(0o755)
-    else:
-        import zipfile
-        with zipfile.ZipFile(tmp) as z:
-            z.extractall(dest / "recorder-app")
-        tmp.unlink()
-        exe = next(p for p in (dest / "recorder-app").rglob("*.exe") if "uninstall" not in p.name.lower())
-        target = dest / "clipagent-recorder.cmd"
-        target.write_text(f'@"{exe}" %*\n')
-    print(f"installed: {target}")
+    from . import setup as SU
+    print(f"installed: {SU.install_recorder()}")
 
 
-def _build_recorder_from_source(dest: Path):
-    src = S.REPO_DIR / "recorder"
-    if not (src / "package.json").exists():
-        raise SystemExit("no recorder release and no recorder/ source folder: reinstall ClipAgent from git")
-    npm = shutil.which("npm")
-    if not npm:
-        raise SystemExit("building the recorder needs Node.js 20+ (npm): https://nodejs.org")
-    subprocess.run([npm, "install", "--no-audit", "--no-fund"], cwd=src, check=True)
-    if sys.platform == "win32":
-        target = dest / "clipagent-recorder.cmd"
-        target.write_text(f'@node "{src / "bin" / "clipagent-recorder"}" %*\n')
+def cmd_setup(args):
+    from . import setup as SU
+    if args.link:
+        for line in SU.link_agents():
+            print(f"linked  {line}")
+    ok = SU.setup(only=args.only, force=args.force)
+    if not ok and not args.only:
+        sys.exit(1)
+
+
+def cmd_prefs(args):
+    from . import setup as SU
+    if args.reset:
+        SU.PREFS_FILE.unlink(missing_ok=True)
+        print("saved setup cleared")
+        return
+    if any(v is not None for v in (args.make, args.camera, args.context, args.look)):
+        p = SU.save_prefs(make=args.make, camera=args.camera, context=args.context, look=args.look)
     else:
-        target = dest / "clipagent-recorder"
-        if target.exists() or target.is_symlink():
-            target.unlink()
-        target.symlink_to(src / "bin" / "clipagent-recorder")
-    print(f"installed (from source): {target}")
+        p = SU.load_prefs()
+    print(json.dumps({**p, "saved": bool(p), "summary": SU.describe_prefs(p)}, indent=2, ensure_ascii=False))
+
+
+def cmd_link(args):
+    from . import setup as SU
+    lines = SU.link_agents(only=args.agent or None)
+    print("\n".join(lines) if lines else "no supported coding agent found (Claude Code, Codex, OpenCode, Antigravity)")
 
 
 # ---------------------------------------------------------------- parser
@@ -416,14 +405,15 @@ def build_parser():
     def context_args(p):
         p.add_argument("--context", nargs="*", default=[], help="repo/doc paths or URLs for the Context Pack")
         p.add_argument("--web", action="store_true", help="allow web search for this Session")
-        p.add_argument("--look", help="force a Look (default: the agent picks)")
-        p.add_argument("--format", default="landscape", choices=["landscape", "vertical"])
+        p.add_argument("--no-web", action="store_true", help="no web search, even if the saved setup allows it")
+        p.add_argument("--look", help="force a Look (default: saved setup, else the agent picks)")
+        p.add_argument("--format", default=None, choices=["landscape", "vertical"])
         p.add_argument("--title", default="")
         p.add_argument("--root", help="where sessions live (default ~/ClipAgent/sessions)")
 
     p = add("start", cmd_start, "create a Session and start recording")
     context_args(p)
-    p.add_argument("--camera", default="webcam", choices=["webcam", "external", "none"])
+    p.add_argument("--camera", default=None, choices=["webcam", "external", "none"], help="default: saved setup")
     p.add_argument("--camera-device")
     p.add_argument("--display")
     p.add_argument("--no-mic", action="store_true")
@@ -488,13 +478,25 @@ def build_parser():
     add("looks", cmd_looks, "list Looks")
     add("doctor", cmd_doctor, "check the machine")
     add("install-recorder", cmd_install_recorder, "download the recorder app")
+    p = add("setup", cmd_setup, "install everything that's missing (parallel, instant once done)")
+    p.add_argument("--only", nargs="+", choices=["ffmpeg", "recorder", "browser", "speech"])
+    p.add_argument("--force", action="store_true")
+    p.add_argument("--link", action="store_true", help="also add the skill to every coding agent found")
+    p = add("prefs", cmd_prefs, "show or save the usual setup")
+    p.add_argument("--make", choices=["tutorial", "short", "import"])
+    p.add_argument("--camera", choices=["webcam", "none", "external"])
+    p.add_argument("--context", choices=["repo", "repo+web", "none"])
+    p.add_argument("--look", help="a Look id, or auto")
+    p.add_argument("--reset", action="store_true")
+    p = add("link", cmd_link, "add /screen-record to every coding agent on this machine")
+    p.add_argument("agent", nargs="*", help="claude, codex, opencode, antigravity (default: all found)")
     return ap
 
 
 def main(argv=None):
     ap = build_parser()
     args = ap.parse_args(argv)
-    if hasattr(args, "context"):
+    if args.cmd in ("start", "import"):
         items = args.context or []
         args.context_paths = [c for c in items if not c.startswith(("http://", "https://"))]
         args.context_urls = [c for c in items if c.startswith(("http://", "https://"))]

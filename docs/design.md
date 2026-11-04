@@ -1,6 +1,6 @@
 # ClipAgent: design and contracts
 
-ClipAgent is a coding-agent skill: the user types `/screen-record` in Claude Code (or Codex), talks freely while the screen, webcam, mic and input events are captured, hits stop, and gets a studio-quality edited video back, with Inserts (animated diagrams, code, docs, charts, math) generated from their own Context Pack. Vocabulary is in [`GLOSSARY.md`](../GLOSSARY.md); decisions are in [`adr/`](adr/).
+ClipAgent is a coding-agent skill: the user types `/screen-record` in Claude Code, Codex, OpenCode or Antigravity, talks freely while the screen, webcam, mic and input events are captured, hits stop, and gets a studio-quality edited video back, with Inserts (animated diagrams, code, docs, charts, math) generated from their own Context Pack. Vocabulary is in [`GLOSSARY.md`](../GLOSSARY.md); decisions are in [`adr/`](adr/).
 
 ## Pipeline
 
@@ -19,11 +19,18 @@ ClipAgent is a coding-agent skill: the user types `/screen-record` in Claude Cod
 
 The coding agent is the editor: the `clipagent` CLI does the mechanical work, the agent makes editorial calls by writing `edl.json` (see `skills/screen-record/SKILL.md`).
 
+## First run and the saved setup
+
+Install is one line (`install.sh` / `install.ps1`, or the Claude Code plugin). It does a sparse clone (code only, no demo media), links the skill into every agent it finds (`clipagent link`: `~/.claude/skills`, `~/.codex/skills`, `~/.config/opencode/skills` plus a `/screen-record` command, `~/.gemini/config/skills` for Antigravity), and starts `clipagent setup` in the background. The plugin does the same from a `SessionStart` hook.
+
+- `clipagent setup`: ffmpeg check, recorder (release download, else Electron + input hook only from npm, staged in `~/ClipAgent/recorder-runtime`), render browser, all in parallel. It writes `~/ClipAgent/setup.json`, guards against parallel runs with `setup.lock`, and is instant once `ready`. `start` fetches the speech model in the background while the user talks.
+- `~/ClipAgent/prefs.json` holds the user's answers to the skill's three first-run questions (`make`, `camera`, `context`, optional `look`). `start`/`import` take every flag the user didn't give from it, so later runs are one question ("Record with your usual setup?") and a bare `ca start`.
+
 ## Repository layout
 
 ```
 .claude-plugin/        Claude Code plugin manifest (+ marketplace.json)
-skills/screen-record/  SKILL.md (works for Claude Code and Codex) + reference/
+skills/screen-record/  SKILL.md (any agent) + reference/ + `ca` launcher
 engine/                Python package `clipagent` (uv project). CLI entry point: `clipagent`
 looks/                 one folder per Look + _runtime/ (shared HTML player)
 recorder/              Electron companion app

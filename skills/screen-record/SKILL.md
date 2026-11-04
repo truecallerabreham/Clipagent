@@ -7,19 +7,27 @@ description: Record the screen, webcam and mic while the user talks freely, then
 
 The user talks; you edit. The `clipagent` CLI does the mechanical work (capture, transcription, analysis, rendering). **You are the editor**: you read the transcript and the Context Pack, choose the Look, write the Inserts, and check your own output. The user never reviews anything in between, so the quality bar is yours to hold.
 
-`CA` below means `uv run --project <this skill's directory>/../../engine clipagent`. Vocabulary: [GLOSSARY.md](../../GLOSSARY.md) (Session, Take, Context Pack, Insert, Beat, Primitive, Look, Concept Color, Scratch Marker, Mismatch, Deliverables).
+`CA` below means the `ca` launcher in this skill's folder (`<this skill's directory>/ca`; on Windows `ca.cmd`). It finds the engine and installs what it needs on first use. **You run every command; never ask the user to type one or show them flags.** Vocabulary: [GLOSSARY.md](../../GLOSSARY.md) (Session, Take, Context Pack, Insert, Beat, Primitive, Look, Concept Color, Scratch Marker, Mismatch, Deliverables).
 
 Read before the editorial pass: [reference/edl.md](reference/edl.md) (the edit format), [reference/inserts.md](reference/inserts.md) (how to write Inserts), [reference/editing-guide.md](reference/editing-guide.md) (cuts, zooms, text, security). Each Look's scene vocabulary: `looks/<look>/PRIMITIVES.md` at the repo root.
 
 ## 1. Start (the user typed /screen-record)
 
-1. First run only: `CA doctor`. Fix what it marks FIX (`! sudo apt install ffmpeg`, `CA install-recorder`, `uv run --project ... playwright install chromium`). Input-group access on Wayland is optional.
-2. Work out the Context Pack from the user's message: paths (default: the current repo), URLs, and whether web search is allowed (only if they said so). Camera: `webcam` (default), `none` (screen only), or `external` (they'll add a phone/DSLR file afterwards). A Look only if they named one.
-3. `CA start --context <paths/urls> [--web] [--camera webcam|none|external] [--look ID] [--title "<topic>"]`.
-4. Tell the user in two lines: recording has started; stop with the floating bar's Stop button, **Ctrl+Alt+S** (⌘⌥S on macOS), or by asking you; **Ctrl+Alt+X** or saying "cut that" throws away the sentence they just said. Then tell them to talk naturally: mistakes get cut.
-5. Run `CA wait` **in the background** so you are told when the Take ends. Don't poll.
+Goal: recording within a minute, with at most three quick taps from the user. Nothing else.
 
-If the user hands you an existing video instead: `CA import SCREEN.mp4 [--camera CAM.mp4] --context ...` and continue at step 2.
+1. **Warm up in the background, right away:** run `CA setup` in the background (instant once set up; the first time it installs the recorder and the render browser in parallel). Don't wait for it, go straight to step 2. If it later prints `FIX` (e.g. ffmpeg missing), tell the user the one command it names.
+2. **Ask how they want it: multiple choice, one question per turn, nothing else in the message.** Use your question tool (Claude Code: `AskUserQuestion`; OpenCode: `question`); without one, send a short numbered list and accept a number. Skip any question the user's message already answers ("screen only", "make a short", "use the web", a file to edit).
+   - Run `CA prefs`. If `"saved": true`, ask only: **Record with your usual setup?** → `Yes: <summary>` (first, recommended) · `Change setup`. On yes go to step 3.
+   - Otherwise (first time, or "Change setup") ask, one at a time:
+     1. **What are you making?** `Tutorial video (16:9)` · `Short / reel (9:16)` · `Edit a video I already have`
+     2. **Camera?** `Webcam bubble` · `Screen only` · `Phone camera (I'll add the file after)`. Skip for "Edit a video".
+     3. **What should the animations draw from?** `This repo` · `This repo + web search` · `Nothing, just my voice`
+   - Save the answers: `CA prefs --make tutorial|short|import --camera webcam|none|external --context repo|repo+web|none` (add `--look ID` only if they named a Look). Next time, step 2 is one tap.
+3. **Record:** `CA start`, adding only what the message gave: `--title "<topic>"`, `--context <extra paths or URLs>`, `--look ID`. The saved setup fills in the rest (the current repo, camera, 16:9 or 9:16, web). For "Edit a video I already have": ask for the file path if you don't have it, then `CA import <file> [--camera CAM.mp4]` and continue at section 2.
+4. Tell the user in two lines: recording has started; stop with the floating bar's Stop button, **Ctrl+Alt+S** (⌘⌥S on macOS), or by asking you; **Ctrl+Alt+X** or saying "cut that" throws away the sentence they just said. Then tell them to talk naturally: mistakes get cut.
+5. Run `CA wait` **in the background** so you are told when the Take ends. Don't poll. (The speech model downloads during the recording, so it's ready when they stop.)
+
+The user changes their mind later ("use the web this time", "make it a short")? Pass the flag for this run (`--web`, `--no-web`, `--format vertical`, `--camera none`) and offer to save it with `CA prefs`.
 
 ## 2. After stop: prepare (mechanical, takes minutes; run in the background)
 

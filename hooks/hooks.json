@@ -1,0 +1,12 @@
+{
+  "description": "ClipAgent: finish setup quietly in the background so the first /screen-record starts instantly",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          { "type": "command", "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/warmup.sh\"", "timeout": 5 }
+        ]
+      }
+    ]
+  }
+}

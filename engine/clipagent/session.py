@@ -155,7 +155,7 @@ def recorder_command() -> list[str]:
     wrapper = dev / "bin" / "clipagent-recorder"
     if wrapper.exists() and (dev / "node_modules").exists():
         return [str(wrapper)]
-    raise SystemExit("recorder not installed: run `clipagent install-recorder` "
+    raise SystemExit("recorder not installed: run `clipagent setup` "
                      "(or `cd recorder && npm install` in a dev checkout)")
 
 

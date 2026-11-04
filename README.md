@@ -10,6 +10,8 @@
 
 [![Claude Code plugin](https://img.shields.io/badge/Claude_Code-plugin-D97757?style=flat-square)](#install)
 [![Codex skill](https://img.shields.io/badge/Codex-skill-111111?style=flat-square)](#install)
+[![OpenCode skill](https://img.shields.io/badge/OpenCode-skill-F97316?style=flat-square)](#install)
+[![Antigravity skill](https://img.shields.io/badge/Antigravity-skill-4285F4?style=flat-square)](#install)
 [![Local first](https://img.shields.io/badge/runs-100%25_local-22C55E?style=flat-square)](#privacy)
 [![Platforms](https://img.shields.io/badge/Linux_·_macOS_·_Windows-38BDF8?style=flat-square)](#install)
 [![License: MIT](https://img.shields.io/badge/license-MIT-A855F7?style=flat-square)](LICENSE)
@@ -53,7 +55,7 @@ ClipAgent does the second and third jobs for you. It knows what you're talking a
 
 ```mermaid
 flowchart LR
-    A["/screen-record<br/>--context ./repo ./docs --web"] --> B["🎥 Recorder<br/>screen · webcam · mic<br/>clicks · shortcuts"]
+    A["/screen-record<br/>3 quick taps, then talk"] --> B["🎥 Recorder<br/>screen · webcam · mic<br/>clicks · shortcuts"]
     B -->|stop| C["clipagent prepare<br/>transcribe · analyze · draft cut"]
     C --> D["🧠 Your coding agent<br/>reads transcript + Context Pack<br/>picks the Look · writes Inserts"]
     D --> E["clipagent inserts<br/>HTML / Manim scenes<br/>Beats → spoken words"]
@@ -62,7 +64,7 @@ flowchart LR
     G --> H["📦 Deliverables<br/>video · shorts · thumbnail<br/>captions · chapters · copy"]
 ```
 
-**The agent is the editor; the engine does the mechanical work.** The `clipagent` CLI captures, transcribes (local Whisper), analyzes and renders. Your coding agent (Claude Code or Codex) makes the editorial calls by writing a single `edl.json`: what to cut, where to zoom, which Look to use, and which Inserts to build from which Primitives, anchored to which words.
+**The agent is the editor; the engine does the mechanical work.** The `clipagent` CLI captures, transcribes (local Whisper), analyzes and renders. Your coding agent (Claude Code, Codex, OpenCode or Antigravity) makes the editorial calls by writing a single `edl.json`: what to cut, where to zoom, which Look to use, and which Inserts to build from which Primitives, anchored to which words.
 
 ## The five Looks
 
@@ -81,7 +83,7 @@ Each Look is one production style for the **whole** video: how Inserts look and 
 </tr>
 <tr>
 <td><img src="docs/media/look-stickman-story.png" alt="Stickman Story"><br><b>Stickman Story</b>: minimalist line-art stickman with blinking, typing, pointing and victory micro-animations, plus a clean macOS-framed UI walkthrough mode.</td>
-<td valign="top"><br><b>Pick one, or let the agent pick.</b><br><br><code>/screen-record --look neon-telestrator</code><br><br>The agent chooses from your topic and Context Pack: system design → Architecture Flow, AI news → Neon Telestrator, algorithms → Math Vector, product demos → Whiteboard SaaS, stories and "why" videos → Stickman Story.</td>
+<td valign="top"><br><b>Pick one, or let the agent pick.</b><br><br><code>/screen-record … in the neon telestrator look</code><br><br>The agent chooses from your topic and Context Pack: system design → Architecture Flow, AI news → Neon Telestrator, algorithms → Math Vector, product demos → Whiteboard SaaS, stories and "why" videos → Stickman Story.</td>
 </tr>
 </table>
 
@@ -106,22 +108,33 @@ Each of these went through the full pipeline (raw take → transcript → the ag
 
 ## Install
 
-**Requirements:** [ffmpeg](https://ffmpeg.org/download.html) ≥ 6 and [uv](https://docs.astral.sh/uv/). Linux, macOS or Windows.
+One line, about 10 seconds. It adds `/screen-record` to every coding agent it finds: **Claude Code, Codex, OpenCode and Antigravity**.
 
-**Claude Code (plugin):**
+```bash
+curl -fsSL https://raw.githubusercontent.com/truecallerabreham/Clipagent/main/install.sh | bash
+```
+
+<sub>Windows (PowerShell): `irm https://raw.githubusercontent.com/truecallerabreham/Clipagent/main/install.ps1 | iex`</sub>
+
+Then open your agent and type **`/screen-record`**. That's it. The recorder, the render browser and the speech model install themselves in the background, and the agent waits for them if you're quicker.
+
+**Prefer a Claude Code plugin?** Run these two commands inside Claude Code instead (setup also finishes in the background the next time you start a session):
 
 ```text
 /plugin marketplace add truecallerabreham/Clipagent
 /plugin install clipagent@clipagent
 ```
 
-**Claude Code or Codex (script)**, which links the skill into `~/.claude/skills` and `~/.codex/skills`:
+The only thing you may need to install yourself is **[ffmpeg](https://ffmpeg.org/download.html)** (`sudo apt install ffmpeg`, `brew install ffmpeg` or `winget install ffmpeg`). The agent tells you if it's missing. [uv](https://docs.astral.sh/uv/) is installed for you. Without a prebuilt recorder for your OS, the recorder is built from source with Node.js 20+.
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/truecallerabreham/Clipagent/main/install.sh | bash
-```
+| Agent | Where the skill goes | How you start it |
+|---|---|---|
+| Claude Code | `~/.claude/skills/screen-record` (or the plugin) | `/screen-record` |
+| Codex | `~/.codex/skills/screen-record` | `/screen-record` or "record my screen" |
+| OpenCode | `~/.config/opencode/skills/screen-record` plus a `/screen-record` command | `/screen-record` |
+| Antigravity | `~/.gemini/config/skills/screen-record` | `/screen-record` |
 
-On the first run, the agent runs `clipagent doctor` and installs the recorder app for your OS (`clipagent install-recorder`, from GitHub Releases).
+Installed an agent later? Ask it to run `clipagent link` (or run it yourself) and it gets `/screen-record` too.
 
 <details>
 <summary><b>Platform notes</b></summary>
@@ -135,14 +148,21 @@ On the first run, the agent runs `clipagent doctor` and installs the recorder ap
 
 ## Use it
 
-In Claude Code or Codex:
+Type `/screen-record`, optionally with what it's about:
 
 ```text
 /screen-record
-/screen-record walk through our auth service, use ./api and docs/auth.md
-/screen-record --look math-vector explain gradient descent, web search allowed
-/screen-record screen only, no camera, I'll add my phone video after
+/screen-record walk through our auth service, use docs/auth.md too
+/screen-record explain gradient descent in the math look
 ```
+
+**The first time**, the agent asks three quick multiple-choice questions, one at a time:
+
+1. **What are you making?** Tutorial video (16:9) · Short / reel (9:16) · Edit a video I already have
+2. **Camera?** Webcam bubble · Screen only · Phone camera (added after)
+3. **What should the animations draw from?** This repo · This repo + web search · Nothing, just my voice
+
+It remembers your answers. **Every later time it's one tap:** *"Record with your usual setup?"* → **Yes** (or **Change setup**). Anything you already said in your message ("screen only", "make a short") is never asked.
 
 Then just talk. Stop with the floating bar, **Ctrl+Alt+S** (**⌘⌥S** on macOS), or by asking your agent. Say **"cut that"** whenever you want to drop the last sentence.
 
@@ -169,7 +189,7 @@ The skill drives this for you, but every step is a plain command:
 
 | Command | What it does |
 |---|---|
-| `clipagent start --context ./repo --web` | Create a Session and start recording |
+| `clipagent start [--context ./repo --web]` | Create a Session and start recording (the saved setup fills the flags) |
 | `clipagent stop` · `wait` · `status` | Control the Take |
 | `clipagent context add ./README.md` | Amend the Context Pack after recording |
 | `clipagent camera phone.mp4` | Use a phone/DSLR file as the camera (synced by audio) |
@@ -180,6 +200,7 @@ The skill drives this for you, but every step is a plain command:
 | `clipagent render` | Composite, grade, denoise, mix and encode |
 | `clipagent deliver` | Shorts, thumbnail, captions, chapters, copy, report |
 | `clipagent snap <url>` | Screenshot a web page for telestration (web-enabled Sessions) |
+| `clipagent setup` · `prefs` · `link` | Install what's missing (parallel) · the saved setup · add the skill to every agent |
 | `clipagent looks` · `doctor` | List Looks · check the machine |
 
 ## Privacy
@@ -192,7 +213,7 @@ The skill drives this for you, but every step is a plain command:
 ## Repository layout
 
 ```text
-skills/screen-record/   the agent skill (SKILL.md + reference/), for Claude Code and Codex
+skills/screen-record/   the agent skill (SKILL.md, reference/, the `ca` launcher), for any agent
 engine/                 Python engine: the `clipagent` CLI (uv project)
 looks/                  the five Looks + the shared HTML animation runtime
 recorder/               Electron recorder: screen, webcam, mic, input events, floating bar

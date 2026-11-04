@@ -1,0 +1,14 @@
+#!/bin/sh
+# The ClipAgent CLI for the agent:  <this skill's folder>/ca <command> [args]
+# Finds the engine next to this skill (also through symlinked skill folders) and sets it up on first use.
+here=$(cd "$(dirname "$0")" && pwd -P)
+engine="$here/../../engine"
+[ -f "$engine/pyproject.toml" ] || engine="${CLIPAGENT_DIR:-$HOME/.clipagent/Clipagent}/engine"
+if ! command -v uv >/dev/null 2>&1; then
+  PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
+  if ! command -v uv >/dev/null 2>&1; then
+    echo "first run: installing uv (Python runner, ~10 s)..." >&2
+    curl -LsSf https://astral.sh/uv/install.sh | sh >/dev/null 2>&1 || { echo "could not install uv: see https://docs.astral.sh/uv/" >&2; exit 1; }
+  fi
+fi
+exec uv run --quiet --project "$engine" clipagent "$@"

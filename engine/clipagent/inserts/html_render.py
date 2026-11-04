@@ -46,7 +46,7 @@ CHROME_ARGS = [
 FILE_ROUTE_EXTS = {".png", ".jpg", ".jpeg", ".webp", ".gif", ".avif"}
 INSTALL_HINT = (
     "No usable Chromium for Playwright: Google Chrome is not installed and the bundled Chromium is "
-    "missing. Run `uv run playwright install chromium` (from engine/) and retry."
+    "missing. Run `clipagent setup --only browser` and retry."
 )
 
 

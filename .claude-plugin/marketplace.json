@@ -1,12 +1,16 @@
 {
   "name": "clipagent",
-  "owner": { "name": "Abreham", "url": "https://github.com/truecallerabreham" },
+  "owner": {
+    "name": "Abreham",
+    "url": "https://github.com/truecallerabreham"
+  },
+  "description": "ClipAgent: /screen-record turns your coding agent into a video studio.",
   "plugins": [
     {
       "name": "clipagent",
       "source": "./",
       "description": "/screen-record: talk freely, get a studio-edited video with animated Inserts from your own repo and docs.",
-      "version": "0.1.0"
+      "version": "0.2.0"
     }
   ]
 }
